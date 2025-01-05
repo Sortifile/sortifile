@@ -1,0 +1,75 @@
+{
+  "questions": [
+    {
+      "question_id": "file_types",
+      "question_text": "你的檔案中包含哪些類型的內容？",
+      "type": "multi-select",
+      "options": ["作業", "報告", "簡報", "圖片", "程式碼"],
+      "rule_mapping": "maps to spec.file_types as boolean flags",
+      "design_purpose": "用於了解使用者檔案的主要類型，為 AI 提供基礎分類方向。"
+    },
+    {
+      "question_id": "logic_habit",
+      "question_text": "當你需要整理工作檔案時，會傾向以下哪種分類?",
+      "type": "single-choice",
+      "options": [
+        "A. 按檔案類型或用途分類，例如「報告」、「調查」、「客戶資料」等。",
+        "B. 根據當下需求分類，例如「需要優先完成」、「稍後查看」等",
+        "C. 混合或無特定形式"
+      ],
+      "rule_mapping": "maps to index.sorting_entropy, with A is more Logical, B is more Intuitive, C is middle",
+      "design_purpose": "評估使用者分類邏輯的直覺性與規律性，決定分類方式的自由度。"
+    },
+    {
+      "question_id": "sort_struct",
+      "question_text": "你希望大概如何來建立你的檔案樹?",
+      "type": "drag-and-drop",
+      "options": [
+        "日期",
+        "格式（副檔名）",
+        "用途（例如：要上交的/參考資料/demo版/正式版）",
+        "檔案類型",
+        "科目",
+        "版本"
+      ],
+      "rule_mapping": "maps to spec.sort_struct with user-defined hierarchy",
+      "design_purpose": "了解用戶檔案分類的偏好，用於設計最符合需求的檔案樹結構。"
+    },
+    {
+      "question_id": "folder_depth",
+      "question_text": "你希望檔案層次最多幾層?",
+      "type": "slider",
+      "range": { "min": 3, "max": 10 },
+      "default": 5,
+      "rule_mapping": "maps to spec.folder_depth as an integer",
+      "design_purpose": "確定使用者對於檔案樹層次深度的接受程度，避免過於複雜的結構。"
+    },
+    {
+      "question_id": "capacity",
+      "question_text": "你希望一個資料夾最多裝多少資料之後，需要建立子資料夾來分類？",
+      "type": "slider",
+      "range": { "min": 10, "max": 100, "step": 10 },
+      "default": 30,
+      "rule_mapping": "maps to spec.capacity as an integer",
+      "design_purpose": "控制單一資料夾的容量，確保使用者在瀏覽檔案時的便利性。"
+    },
+    {
+      "question_id": "naming",
+      "question_text": "你習慣如何命名檔案?",
+      "type": "text-input",
+      "rule_mapping": "analyzes input to deduce naming patterns for spec.naming_style",
+      "design_purpose": "分析使用者的檔案命名偏好，作為未來自動命名的參考依據。"
+    },
+    {
+      "question_id": "access_priority",
+      "question_text": "下列何者較符合你的想法？",
+      "type": "single-choice",
+      "options": [
+        "1. 我重視長期存檔與保存，對文件的檔案結構更關心。",
+        "2. 我重視經常使用的檔案，並傾向於放在容易訪問的位置。"
+      ],
+      "rule_mapping": "maps to index.access_priority with 1=10, 2=0",
+      "design_purpose": "理解使用者的存檔優先級別，以設計更貼合需求的檔案結構與排序。"
+    }
+  ]
+}
