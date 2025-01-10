@@ -36,6 +36,8 @@ def sort_files(
         user_prompt, "\nrule: ", rule_json, "\nfile_summary: ", file_summarize
     ]
     response_text = start_chat_and_get_response(model, message_components)
+    if response_text == "ERROR":
+        return
     save_response(output_path, response_text)
 
 if __name__ == "__main__":

@@ -19,10 +19,12 @@ def configure_generation_model(system_prompt_path, model_name, generation_config
 def upload_files(*file_paths, mime_type="text/plain"):
     return [genai.upload_file(path=file_path, mime_type=mime_type) for file_path in file_paths]
 
-def start_chat_and_get_response(model, message_components):
-    chat_session = model.start_chat(history=[])
+
+def start_chat_and_get_response(model, message_components, history=[]):
+    chat_session = model.start_chat(history=history)
     response = chat_session.send_message(message_components)
     return response.text
+
 
 def save_response(output_path, response_text):
     print(f"回應：\n{response_text}")

@@ -31,6 +31,8 @@ def generate_rules(
         "form_question: ", uploaded_files[1], "\nform_respond: ", uploaded_files[0]
     ]
     response_text = start_chat_and_get_response(model, message_components)
+    if response_text == "ERROR":
+        return
     save_response(output_path, response_text)
 
 if __name__ == "__main__":
