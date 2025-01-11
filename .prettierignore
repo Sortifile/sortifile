@@ -4,3 +4,5 @@ node_modules
 coverage
 dist
 src-tauri/target
+ai/venv/
+__pycache__/
