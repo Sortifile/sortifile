@@ -1,4 +1,5 @@
 Please analyze the provided files and extract every file's key information to assist in file organization. Return the results in the following JSON format. If certain fields are not applicable or unavailable, return them with a null value. If a PDF file does not contain textual information, prioritize using OCR to extract the text. The extracted details should be useful for determining how the file should be categorized or stored:
+
 ```json
 [
     {
@@ -14,7 +15,7 @@ Please analyze the provided files and extract every file's key information to as
         "language": "Language of the document",
         "tags": ["Relevant tags for categorization, if identifiable"]
       }
-    }, 
+    },
     {
         ...
     }
