@@ -2,23 +2,28 @@ Please analyze the provided files and extract every file's key information to as
 
 ```json
 [
-    {
-      "title": "Document title or main heading, if available",
-      "author": "Author's name or attribution, if mentioned",
-      "summary": "A concise summary of the file's content",
-      "topics": ["List of main topics or themes"],
-      "intended_use": "The potential purpose or context of the file (e.g., homework, project, report, reference material)",
-      "section_range": "The range of sections covered, if applicable",
-      "metadata": {
-        "created_date": "Creation date, if available",
-        "file_type": "Type of the file (e.g., PDF, DOCX, TXT, etc.)",
-        "language": "Language of the document",
-        "tags": ["Relevant tags for categorization, if identifiable"]
-      }
-    },
-    {
-        ...
+  {
+    "title":"Document title or main heading, if available",
+    "author":"Author's name or attribution, if mentioned",
+    "summary":"A concise summary of the file's content, including key points or highlights",
+    "topics":[
+      "List of main topics or themes"
+    ],
+    "intended_use":"The potential purpose or context of the file (e.g., homework, project, report, reference material)",
+    "section_range":"The range of sections covered, if applicable",
+    "metadata":{
+      "created_date":"Creation date, if available",
+      "last_modified_date":"Last modification date, if applicable"
+      "file_type":"Type of the file (e.g., PDF, DOCX, TXT, etc.)",
+      "language":"Language of the document",
+      "tags":[
+        "Relevant tags for categorization, if identifiable"
+      ],
     }
+  },
+  {
+    "..."
+  }
 ]
 ```
 

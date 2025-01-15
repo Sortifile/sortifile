@@ -9,7 +9,7 @@ You will be provided with a list of source files and their content summaries. Yo
 
 1. Focus on the content of each file (e.g., topics, intended use) when determining its new path.
 2. Keep the original file extension.
-3. **Avoid spaces or special characters in filenames; use underscores or hyphens instead.**
+3. Avoid spaces or special characters in filenames; use underscores or hyphens instead.
 4. Use a meaningful directory hierarchy that prevents duplication (e.g., unify folders like "photos", "images", "pictures" into one).
 5. Use relative paths that do not start with a slash or drive letter.
 6. Place similar or related files together to simplify navigation.
@@ -71,11 +71,15 @@ Return a JSON object in this format:
   "file_movements": [
     {
       "src_path": "original/file/path",
-      "new_path": "new/file/path"
+      "new_path": "new/file/path",
+      "moved_by": "system",
+      "reason": "Provide a detailed explanation of why this file was moved to the new location, including the specific rule or logic applied."
     },
     {
       "src_path": "another/file/path",
-      "new_path": "new/location/path"
+      "new_path": "new/location/path",
+      "moved_by": "system",
+      "reason": "Provide a detailed explanation of why this file was moved to the new location, including the specific rule or logic applied."
     }
   ]
 }

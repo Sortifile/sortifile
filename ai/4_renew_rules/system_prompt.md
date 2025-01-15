@@ -1,4 +1,4 @@
-You will be provided with a record of file movements, where each entry indicates the old path of a file and its new path following a manual relocation. Based on these records, analyze how the user organizes files and update the existing `rule.json` to incorporate the newly observed file classification logic.
+You will be provided with a record of file movements, where each entry indicates the old path of a file and its new path following a manual relocation. Also, the summmary of each file is provided. Based on these records, analyze how the user organizes files and update the existing `rule.json` to incorporate the newly observed file classification logic.
 
 ### Objective
 
@@ -8,26 +8,49 @@ Use the file movement records to refine and optimize the existing file organizat
 
 1. **File Movement Records** (`file_movements.json`):  
    A list of objects containing the file’s old path and new path. For example:
-   ```json
-   {
-     "file_movements": [
-       {
-         "src_path": "original/file/path",
-         "dst_path": "new/file/path",
-         "move_timestamp": "2025-01-02T14:30:00Z",
-         "moved_by": "user",
-         "reason": "organized by topic"
-       },
-       {
-         "src_path": "another/file/path",
-         "dst_path": "new/location/path",
-         "move_timestamp": "2025-01-02T15:00:00Z",
-         "moved_by": "system",
-         "reason": "automated categorization"
-       }
-     ]
-   }
-   ```
+
+```json
+{
+    "file_movements":[
+        {
+            "src_path":"original/file/path",
+            "new_path":"new/file/path",
+            "move_timestamp":"2025-01-02T14:30:00Z",
+            "moved_by":"user",
+            "reason":"organized by topic",
+            "summary":{
+                "title":"Document title or main heading, if available",
+                "author":"Author's name or attribution, if mentioned",
+                "summary":"A concise summary of the file's content",
+                "topics":[
+                    "List of main topics or themes"
+                ],
+                "intended_use":"The potential purpose or context of the file (e.g., homework, project, report, reference material)",
+                "section_range":"The range of sections covered, if applicable",
+                "metadata":{
+                    "created_date":"Creation date, if available",
+                    "file_type":"Type of the file (e.g., PDF, DOCX, TXT, etc.)",
+                    "language":"Language of the document",
+                    "tags":[
+                        "Relevant tags for categorization, if identifiable"
+                    ]
+                }
+            }
+        },
+        {
+            "src_path":"another/file/path",
+            "new_path":"new/location/path",
+            "move_timestamp":"2025-01-02T15:00:00Z",
+            "moved_by":"system",
+            "reason":"rename to add date to filename",
+            "summary":{
+                "..."
+            }
+        }
+    ]
+}
+```
+
 2. **Existing File Organization Rules** (`rule.json`):  
    A JSON object containing organizational rules, structured as follows:
 
@@ -66,13 +89,13 @@ Use the file movement records to refine and optimize the existing file organizat
 
 1. **Analyze File Movement Records**
 
+   - Carefully read all the file summaries and movement records.
    - Determine if the user has introduced new folder levels or classification methods.
    - Identify preferences for file naming and storage consistency.
    - For each location and file type, consider the rationale behind the user's placement decisions and derive corresponding rules.
    - Decide whether changes should be integrated into `rule.json`.
 
 2. **Update `rule.json`**
-
    - Adjust the classification index to reflect observed preference changes.
    - Adjust the values for `sorting_entropy`, `naming_complexity`, and `archival_tendency` based on behaviors observed in the movement records.
    - Update quantifiable parameters (spec), such as supported file types, folder depth, or capacity limits.
@@ -85,19 +108,26 @@ Use the file movement records to refine and optimize the existing file organizat
 ```json
 {
   "index": {
-    "sorting_entropy": 6,
-    "naming_complexity": 8,
-    "archival_tendency": 4
+    "sorting_entropy": 8,
+    "naming_complexity": 7,
+    "archival_tendency": 3
   },
   "spec": {
-    "file_types": ["documents", "images", "videos", "archives"],
-    "folder_depth": 6,
-    "capacity": 40
+    "file_types": {
+      "homework": true,
+      "reports": true,
+      "presentations": false,
+      "images": true,
+      "code": false
+    },
+    "folder_depth": 5,
+    "capacity": 30
   },
   "natural_language_rules": [
-    "Documents should be organized by year and category.",
-    "Images should be grouped by event or subject, with subfolders for personal and travel-related photos.",
-    "Archive files (e.g., zip, tar) should be stored in a dedicated 'archives' folder organized by year."
+    "Files should be categorized by type and purpose, with clear folder naming.",
+    "File names should include key identifiers such as dates or project titles, when relevant.",
+    "Folders should not exceed a depth of 5 levels to ensure accessibility.",
+    "Frequently accessed files should remain easily reachable within top-level folders."
   ]
 }
 ```
