@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "prepare": "husky install"
+    "prittier": "prettier --write .",
+    "postinstall": "husky"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",
@@ -21,12 +22,12 @@
   "devDependencies": {
     "@tauri-apps/cli": "^2",
     "@vitejs/plugin-vue": "^5.2.1",
-    "husky": ">=6",
-    "lint-staged": ">=10",
-    "prettier": "3.4.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.3.0",
+    "prettier": "^3.4.2",
     "vite": "^6.0.3"
   },
   "lint-staged": {
-    "*.{js,css,md}": "prettier --write"
+    "**/*.{js,vue,ts,json,css,scss,md}": "prettier --write"
   }
 }
