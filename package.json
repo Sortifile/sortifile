@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "prittier": "prettier --write .",
+    "prettier": "prettier --write .",
     "postinstall": "husky"
   },
   "dependencies": {
