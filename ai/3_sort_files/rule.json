@@ -10,7 +10,8 @@
       "報告": true,
       "簡報": true,
       "圖片": false,
-      "程式碼": false
+      "程式碼": false,
+      "教材": true
     },
     "sort_struct": ["學期", "科目", "用途"],
     "folder_depth": 5,
