@@ -1,13 +1,13 @@
 <template>
-  <div id="app" class="common-layout">  
+  <div id="app" class="common-layout">
     <el-container>
       <el-header>
         <Navbar />
       </el-header>
-      <el-main>    
+      <el-main>
         <router-view />
       </el-main>
-      <el-footer>    
+      <el-footer>
         <Footer />
       </el-footer>
     </el-container>
@@ -19,5 +19,4 @@ import Navbar from "./components/Navbar.vue";
 import Footer from "./components/Footer.vue";
 </script>
 
-<style>
-</style>
+<style></style>
