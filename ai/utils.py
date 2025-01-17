@@ -26,7 +26,7 @@ def start_chat_and_get_response(model, message_components, history=[]):
     return response.text
 
 
-def save_response(output_path, response_text):
+def save_json(output_path, response_text):
     print(f"回應：\n{response_text}")
     try:
         parsed_json = json.loads(response_text)

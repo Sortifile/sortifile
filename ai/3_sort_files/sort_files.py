@@ -38,7 +38,7 @@ def sort_files(
     response_text = start_chat_and_get_response(model, message_components)
     if response_text == "ERROR":
         return
-    save_response(output_path, response_text)
+    save_json(output_path, response_text)
 
 if __name__ == "__main__":
     sort_files()
