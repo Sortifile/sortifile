@@ -90,6 +90,7 @@ Use the file movement records to refine and optimize the existing file organizat
 1. **Analyze File Movement Records**
 
    - Carefully read all the file summaries and movement records.
+   - Focus on movements that are moved by the user
    - Determine if the user has introduced new folder levels or classification methods.
    - Identify preferences for file naming and storage consistency.
    - For each location and file type, consider the rationale behind the user's placement decisions and derive corresponding rules.
