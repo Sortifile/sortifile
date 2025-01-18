@@ -1,10 +1,11 @@
 <script setup>
 import { useRouter } from "vue-router";
+import { ElButton } from "element-plus";
 
 const router = useRouter();
 
 function navigateTo(page) {
-  router.push(`/${page}`); // 根據你的 router 路徑生成規則
+  router.push(`/${page}`);
 }
 </script>
 
@@ -13,10 +14,30 @@ function navigateTo(page) {
     <h1>Welcome to Sortifile</h1>
 
     <div class="grid">
-      <div class="box" @click="navigateTo('create')">Create</div>
-      <div class="box" @click="navigateTo('select')">Select</div>
-      <div class="box" @click="navigateTo('settings')">Settings</div>
-      <div class="box" @click="navigateTo('help')">Help</div>
+      <el-button 
+        class="button" 
+        type="primary" 
+        @click="navigateTo('create')">
+        Create
+      </el-button>
+      <el-button 
+        class="button" 
+        type="primary" 
+        @click="navigateTo('select')">
+        Select
+      </el-button>
+      <el-button 
+        class="button" 
+        type="primary" 
+        @click="navigateTo('settings')">
+        Settings
+      </el-button>
+      <el-button 
+        class="button" 
+        type="primary" 
+        @click="navigateTo('help')">
+        Help
+      </el-button>
     </div>
   </main>
 </template>
@@ -39,31 +60,16 @@ function navigateTo(page) {
   width: 300px;
 }
 
-.box {
+.button {
+  font-size: 1.2em;
+  font-weight: bold;
+  width: 100%;
+  height: 100px;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100px;
-  background-color: #647eff;
-  color: white;
-  font-size: 1.2em;
-  font-weight: bold;
   border-radius: 8px;
-  cursor: pointer;
-  transition:
-    background-color 0.3s,
-    transform 0.2s;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.box:hover {
-  background-color: #535bf2;
-  transform: translateY(-5px);
-}
-
-.box:active {
-  background-color: #3a48a2;
-  transform: translateY(0);
+  margin: 0;
 }
 
 h1 {
