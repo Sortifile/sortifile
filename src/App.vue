@@ -19,4 +19,8 @@ import Navbar from "./components/Navbar.vue";
 import Footer from "./components/Footer.vue";
 </script>
 
-<style></style>
+<style>
+body {
+  font-family: "Noto Sans TC", Arial, sans-serif;
+}
+</style>
