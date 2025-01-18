@@ -5,15 +5,15 @@
   <div class="select-container">
     <!-- 左側滑桿欄 -->
     <div class="sidebar">
-      <h2>Browse Files</h2>
-      <el-scrollbar height="calc(100vh - 100px)" class="file-scrollbar">
-        <p v-for="file in files" :key="file" class="scrollbar-demo-item">{{ file }}</p>
+      <h2>Browse Zones</h2>
+      <el-scrollbar height="calc(100vh - 100px)" class="zone-scrollbar">
+        <p v-for="zone in zones" :key="zone" class="scrollbar-demo-item">{{ zone }}</p>
       </el-scrollbar>
     </div>
 
     <!-- 內容顯示區域 -->
     <div class="content-display">
-      <h2>File Details</h2>
+      <h2>Zone Details</h2>
       <el-skeleton :rows="5" animated />
     </div>
   </div>
@@ -23,7 +23,7 @@
 import { ref } from 'vue';
 
 // 模擬的檔案清單
-const files = ref(['File 1', 'File 2', 'File 3', 'File 4']);
+const zones = ref(['Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5']);
 </script>
 
 <style scoped>
@@ -43,7 +43,7 @@ const files = ref(['File 1', 'File 2', 'File 3', 'File 4']);
   top: 0;
 }
 
-.file-scrollbar {
+.zone-scrollbar {
   max-height: calc(100vh - 100px);
   overflow-y: auto;
 }
