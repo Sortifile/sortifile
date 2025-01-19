@@ -19,7 +19,7 @@ export default {
   display: flex;
   justify-content: flex-end; /* 內容靠右對齊 */
   padding: 10px 20px; /* 增加上下和左右內距 */
-  border-bottom: 2px solid #cfcfcf; /* 下方添加淺灰色線條 */
+  border-bottom: 1px solid #cfcfcf; /* 下方添加淺灰色線條 */
 }
 
 .navbar ul {
