@@ -13,11 +13,12 @@ You will be provided with a list of source files and their content summaries. Yo
 4. Use a meaningful directory hierarchy that prevents duplication (e.g., unify folders like "photos", "images", "pictures" into one).
 5. Use relative paths that do not start with a slash or drive letter.
 6. Place similar or related files together to simplify navigation.
-7. Read the entire `rule.json` thoroughly, then reflect on the user's habits and preferences. Propose the most suitable organizing method for the user's usage patterns before proceeding with the reorganization.
+7. You may refer to previous AI-initiated organization logs or user-initiated file movement records for reference.
+8. Read the entire `rule.json` thoroughly, then reflect on the user's habits and preferences. Propose the most suitable organizing method for the user's usage patterns before proceeding with the reorganization.
 
 ### Input Format:
 
-You will be provided with two input files:
+You will be provided with three input files:
 
 #### 1. `rule.json`
 
@@ -61,6 +62,10 @@ A list of files to be organized. Each entry includes:
 - **title**, **author**, **summary**: Short details about the file’s content.
 - **topics**, **intended_use**: Helps determine the folder/category.
 - **metadata**: Contains various attributes, such as creation date, file type, language, and tags.
+
+#### 3. `history_file_movements.json`
+
+Contains file movements as the same format as output. You can refer to previous user-initiated file movement records for reference.
 
 ### Output Format:
 
