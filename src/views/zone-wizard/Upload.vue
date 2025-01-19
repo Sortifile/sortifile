@@ -1,6 +1,7 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { ElButton, ElUpload } from "element-plus";
+import { ArrowRight, UploadFilled } from "@element-plus/icons-vue";
 
 const router = useRouter();
 
@@ -19,17 +20,23 @@ const uploadFiles = (file) => {
 
     <!-- Upload 功能 -->
     <el-upload
+      drag
       action="#"
       :auto-upload="false"
       directory
       :on-change="uploadFiles"
       class="upload-section"
     >
-      <el-button type="primary">Click to Upload Folder</el-button>
+      <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+      <div class="el-upload__text">
+        Drop file here or <em>click to upload</em>
+      </div>
     </el-upload>
 
     <!-- 跳轉介面的按鈕 -->
-    <el-button type="success" @click="navigateTo('survey')">Next</el-button>
+    <el-button type="primary" @click="navigateTo('survey')"
+      >Next<el-icon class="el-icon--right"><ArrowRight /></el-icon
+    ></el-button>
   </div>
 </template>
 
