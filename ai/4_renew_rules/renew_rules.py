@@ -23,7 +23,7 @@ def renew_rules(
             "temperature": 1,
             "top_p": 0.9,
             "top_k": 64,
-            "max_output_tokens": 32768,
+            "max_output_tokens": 65536,
             "response_mime_type": "application/json",
         }
 
@@ -44,6 +44,8 @@ def renew_rules(
         if (matching_movement is None):
             continue
         matching_movement["summary"] = summary
+        # matching_movement["summary"].pop("src_path")
+        # matching_movement["summary"].pop("allow_move")
         matched_data.append(matching_movement)
     
     with open(match_movements_path, "w", encoding="utf-8") as outfile:
@@ -59,4 +61,4 @@ def renew_rules(
     save_json(output_path, response_text)
 
 if __name__ == "__main__":
-    renew_rules()
+    renew_rules(system_prompt_path="4_renew_rules/refined_system_prompt.md")

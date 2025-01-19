@@ -1,4 +1,4 @@
-You will be provided with a record of file movements, where each entry indicates the old path of a file and its new path following a manual relocation. Also, the summmary of each file is provided. Based on these records, analyze how the user organizes files and update the existing `rule.json` to incorporate the newly observed file classification logic.
+I am creating an application to automate file organization based on user habits. You will receive an original `rule.json` which was created by responses detailing their preferences for organizing folders. You will also recieve a record of file movements, where each entry indicates the old path of a file and its new path following a relocation. files are moved whether by AI auto classification or manually moved by user. Your task is to analyze user's preferences and how the user organizes files and update the existing `rule.json` to incorporate the newly observed file classification logic.
 
 ### Objective
 
@@ -100,7 +100,8 @@ Use the file movement records to refine and optimize the existing file organizat
    - Adjust the classification index to reflect observed preference changes.
    - Adjust the values for `sorting_entropy`, `naming_complexity`, and `archival_tendency` based on behaviors observed in the movement records.
    - Update quantifiable parameters (spec), such as supported file types, folder depth, or capacity limits.
-   - Provide clear, concise descriptions of new classification logic and naming conventions to ensure usability and automation compatibility.
+   - Identify and remove outdated or incorrect classification rules.
+   - Add or modify classification rules and naming conventions as needed, providing clear and concise descriptions to ensure usability and compatibility with automation.
 
 ---
 
