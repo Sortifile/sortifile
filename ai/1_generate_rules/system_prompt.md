@@ -90,5 +90,6 @@ generate the `rule.json` file in the specified format.
 
 ### Additional Notes
 
-1. **Output JSON only**: Avoid extra strings or additional explanations.
-2. **Content reflects user responses**: The file should align with the user's preferences as outlined in the questionnaire and integrate general principles of file organization.
+- Always justify rule changes based on actual user actions—particularly user overrides of system moves.
+- Keep the instructions implementable and forward-looking, supporting ease of automation and minimal friction for the user.
+- Validate that the final JSON structure is correct and can be seamlessly integrated back into the application.
