@@ -14,28 +14,21 @@ function navigateTo(page) {
     <h1>Welcome to Sortifile</h1>
 
     <div class="grid">
-      <el-button 
-        class="button" 
-        type="primary" 
-        @click="navigateTo('create')">
-        Create
-      </el-button>
-      <el-button 
-        class="button" 
-        type="primary" 
-        @click="navigateTo('select')">
-        Select
-      </el-button>
-      <el-button 
-        class="button" 
-        type="primary" 
-        @click="navigateTo('settings')">
+      <el-tooltip content="New Zone..." placement="left-start">
+        <el-button class="button" type="primary" @click="navigateTo('create')">
+          Create
+        </el-button>
+      </el-tooltip>
+      <el-tooltip placement="right-start">
+        <template #content> Select Zone<br />and See Zone Details </template>
+        <el-button class="button" type="primary" @click="navigateTo('select')">
+          Select
+        </el-button>
+      </el-tooltip>
+      <el-button class="button" type="primary" @click="navigateTo('settings')">
         Settings
       </el-button>
-      <el-button 
-        class="button" 
-        type="primary" 
-        @click="navigateTo('help')">
+      <el-button class="button" type="primary" @click="navigateTo('help')">
         Help
       </el-button>
     </div>
