@@ -3,9 +3,11 @@ import json
 from dotenv import load_dotenv
 import google.generativeai as genai
 
+
 def load_environment():
     load_dotenv()
     genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+
 
 def configure_generation_model(system_prompt_path, model_name, generation_config):
     with open(system_prompt_path, "r", encoding="utf-8") as file:
@@ -16,8 +18,12 @@ def configure_generation_model(system_prompt_path, model_name, generation_config
         system_instruction=content,
     )
 
+
 def upload_files(*file_paths, mime_type="text/plain"):
-    return [genai.upload_file(path=file_path, mime_type=mime_type) for file_path in file_paths]
+    return [
+        genai.upload_file(path=file_path, mime_type=mime_type)
+        for file_path in file_paths
+    ]
 
 
 def start_chat_and_get_response(model, message_components, history=[]):
