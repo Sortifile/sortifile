@@ -26,6 +26,21 @@ routes.unshift(
     component: modules["../views/Home.vue"], // 指定 Home.vue 組件
   },
   {
+    path: "/create", // 指向 zone-wizard/Upload.vue
+    name: "Upload",
+    component: modules["../views/zone-wizard/Upload.vue"], // 修正目標組件
+  },
+  {
+    path: "/survey", // 指向 zone-wizard/Upload.vue
+    name: "Survey",
+    component: modules["../views/zone-wizard/Survey.vue"], // 修正目標組件
+  },
+  {
+    path: "/check", // 指向 zone-wizard/Upload.vue
+    name: "Check",
+    component: modules["../views/zone-wizard/CheckRule.vue"], // 修正目標組件
+  },
+  {
     path: "/:pathMatch(.*)*", // 通配符路徑
     name: "NotFound",
     component: modules["../views/NotFound.vue"], // 指定 NotFound.vue 組件
