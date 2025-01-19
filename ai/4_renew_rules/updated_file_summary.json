@@ -55,12 +55,7 @@
       "created_date": null,
       "file_type": "PDF",
       "language": "zh",
-      "tags": [
-        "B13901011",
-        "文學評論",
-        "中國古典小說",
-        "心理學分析"
-      ]
+      "tags": ["B13901011", "文學評論", "中國古典小說", "心理學分析"]
     }
   },
   {
@@ -86,13 +81,7 @@
       "created_date": null,
       "file_type": "PDF",
       "language": "zh",
-      "tags": [
-        "B13901011",
-        "電機一",
-        "資安教育",
-        "網路攻擊",
-        "國防建設"
-      ]
+      "tags": ["B13901011", "電機一", "資安教育", "網路攻擊", "國防建設"]
     }
   },
   {
@@ -118,13 +107,7 @@
       "created_date": null,
       "file_type": "PDF",
       "language": "zh",
-      "tags": [
-        "B13901011",
-        "電機一",
-        "網路安全",
-        "國防安全",
-        "資安教育"
-      ]
+      "tags": ["B13901011", "電機一", "網路安全", "國防安全", "資安教育"]
     }
   },
   {
@@ -150,13 +133,7 @@
       "created_date": null,
       "file_type": "PDF",
       "language": "zh",
-      "tags": [
-        "B13901011",
-        "電機一",
-        "資安教育",
-        "網路攻擊",
-        "國防建設"
-      ]
+      "tags": ["B13901011", "電機一", "資安教育", "網路攻擊", "國防建設"]
     }
   },
   {
@@ -178,13 +155,7 @@
       "created_date": "2024/11/02",
       "file_type": "PDF",
       "language": "English",
-      "tags": [
-        "Calculus",
-        "Homework",
-        "Mathematics",
-        "Limits",
-        "Integration"
-      ]
+      "tags": ["Calculus", "Homework", "Mathematics", "Limits", "Integration"]
     }
   },
   {
@@ -293,13 +264,7 @@
       "created_date": "2024/11/09",
       "file_type": "PDF",
       "language": "English",
-      "tags": [
-        "Calculus",
-        "Homework",
-        "Mathematics",
-        "Integration",
-        "Area"
-      ]
+      "tags": ["Calculus", "Homework", "Mathematics", "Integration", "Area"]
     }
   },
   {
