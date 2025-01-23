@@ -27,8 +27,8 @@ routes.unshift(
   },
   {
     path: "/create", // 指向 zone-wizard/Upload.vue
-    name: "Upload",
-    component: modules["../views/zone-wizard/Upload.vue"], // 修正目標組件
+    name: "Create",
+    component: modules["../views/zone-wizard/Create.vue"], // 修正目標組件
   },
   {
     path: "/survey", // 指向 zone-wizard/Upload.vue
