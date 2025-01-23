@@ -27,7 +27,7 @@
       <!-- 送出與重設按鈕 -->
       <el-form-item>
         <el-col :span="5">
-          <el-button>上一步</el-button>
+          <el-button @click="navigateTo('')">上一步</el-button>
         </el-col>
         <el-col :span="19" align="right">
           <el-button @click="resetForm">重設</el-button>
