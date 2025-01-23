@@ -14,9 +14,10 @@ function navigateTo(page) {
   <div>
     <h1>Survey</h1>
     <!-- 跳轉介面的按鈕 -->
-    <el-button type="primary" @click="navigateTo('check')"
-      >Next<el-icon class="el-icon--right"><ArrowRight /></el-icon
-    ></el-button>
+    <el-button type="primary" @click="navigateTo('check')">
+      Next
+      <el-icon class="el-icon--right"><ArrowRight /></el-icon>
+    </el-button>
   </div>
 </template>
 

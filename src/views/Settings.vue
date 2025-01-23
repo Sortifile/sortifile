@@ -26,10 +26,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref } from "vue";
 
 // Define reactive properties for the settings
-const apiKey = ref('');
+const apiKey = ref("");
 const isDarkMode = ref(false);
 </script>
 
@@ -45,4 +45,3 @@ const isDarkMode = ref(false);
   font-weight: bold;
 }
 </style>
-
