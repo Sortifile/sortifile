@@ -1,14 +1,112 @@
-<!-- About.vue -->
-<!-- This is the temporary template file for adding a new page. -->
+<!-- zone-wizard/Create.vue -->
 
 <template>
-  <div>
-    <h1>Create</h1>
+  <div style="max-width: 600px; margin: 0 auto">
+    <h1>Create New Zone</h1>
+    <el-form ref="formRef" :model="form" :rules="rules" label-width="auto">
+      <!-- Zone 名稱 -->
+      <el-form-item label="Zone Name" prop="zoneName" label-position="left">
+        <el-col :span="24">
+          <el-input v-model="form.zoneName" placeholder="請輸入 Zone 名稱" />
+        </el-col>
+      </el-form-item>
+
+      <!-- 路徑 -->
+      <el-form-item label="Root Folder Path" prop="path" label-position="left">
+        <el-col :span="19">
+          <el-input v-model="form.path" placeholder="請選擇路徑" readonly />
+        </el-col>
+        <el-col :span="5" align="right">
+          <el-button type="primary" @click="selectPath" plain>
+            選擇路徑
+          </el-button>
+        </el-col>
+      </el-form-item>
+      <el-divider />
+
+      <!-- 送出與重設按鈕 -->
+      <el-form-item>
+        <el-col :span="5">
+          <el-button>上一步</el-button>
+        </el-col>
+        <el-col :span="19" align="right">
+          <el-button @click="resetForm">重設</el-button>
+          <el-button type="primary" @click="submitForm">
+            建立
+            <el-icon class="el-icon--right"><ArrowRight /></el-icon>
+          </el-button>
+        </el-col>
+      </el-form-item>
+    </el-form>
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import { ref } from "vue";
+import { open } from "@tauri-apps/plugin-dialog";
+import {
+  ElForm,
+  ElFormItem,
+  ElInput,
+  ElButton,
+  ElCol,
+  ElDivider,
+} from "element-plus";
+import { ArrowRight } from "@element-plus/icons-vue";
 
-<style scoped>
-/* 當前頁面的樣式 */
-</style>
+import { useRouter } from "vue-router";
+const router = useRouter();
+const formRef = ref(null);
+
+function navigateTo(page) {
+  router.push(`/${page}`);
+}
+
+// 表單資料
+const form = ref({
+  zoneName: "",
+  path: "",
+});
+
+// 表單驗證規則
+const rules = {
+  // NOTE: 這裡的 required 設為 false，only for development
+  zoneName: [{ required: false, message: "請輸入 Zone 名稱", trigger: "blur" }],
+  path: [{ required: false, message: "請選擇路徑", trigger: "blur" }],
+};
+
+// 送出表單
+const submitForm = () => {
+  formRef.value.validate((valid) => {
+    if (valid) {
+      console.log("提交的資料：", form.value);
+      // TODO: 呼叫 API 建立新 Zone
+      navigateTo("survey");
+    }
+  });
+  navigateTo("survey");
+};
+
+// 重設表單
+const resetForm = () => {
+  formRef.value.resetFields();
+};
+
+// 呼叫 Tauri Plugin Dialog 選擇路徑
+const selectPath = async () => {
+  try {
+    const selected = await open({
+      directory: true,
+      multiple: false,
+    });
+    // open 回傳可能是 null、string 或 string[]
+    if (typeof selected === "string") {
+      form.value.path = selected;
+    } else if (Array.isArray(selected) && selected.length > 0) {
+      form.value.path = selected[0];
+    }
+  } catch (error) {
+    console.error("選擇路徑時發生錯誤：", error);
+  }
+};
+</script>
