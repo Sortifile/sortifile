@@ -7,7 +7,9 @@
     <div class="sidebar">
       <h2>Browse Zones</h2>
       <el-scrollbar height="calc(100vh - 100px)" class="zone-scrollbar">
-        <p v-for="zone in zones" :key="zone" class="scrollbar-demo-item">{{ zone }}</p>
+        <p v-for="zone in zones" :key="zone" class="scrollbar-demo-item">
+          {{ zone }}
+        </p>
       </el-scrollbar>
     </div>
 
@@ -20,10 +22,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref } from "vue";
 
 // 模擬的檔案清單
-const zones = ref(['Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5']);
+const zones = ref(["Zone 1", "Zone 2", "Zone 3", "Zone 4", "Zone 5"]);
 </script>
 
 <style scoped>

@@ -26,11 +26,11 @@ Please use the data below to generate a `rule.json` file for my automated file o
 Determine the user's preferences for the following three indicators and assign final quantifiable scores (0–10) in the `Index` section. Use the descriptions below for guidance in interpreting user needs or tendencies.
 
 1. **Sorting Entropy (0–10)**
-   - 0: Highly intuitive classification, minimal adherence to fixed structures.
-   - 1–3: Basic categorization only when necessary. Personal needs take precedence.
-   - 4–6: Balanced approach between intuition and structure.
-   - 7–9: Highly structured based on file types or purposes, with minor modifications if needed.
-   - 10: Completely systematic, no improvisation or ad-hoc changes allowed.
+   - 0: Classification is highly intuitive and casual, with no consideration for natural language rules, relying solely on personal instincts.
+   - 1–3: Basic categorization only when necessary, prioritizing personal needs over natural language rules, which are only referenced.
+   - 4–6: A balanced approach between intuitive and structured classification, where natural language rules are somewhat considered but not strictly followed.
+   - 7–9: Highly structured, relying primarily on natural language rules for classification. Clear categorization with minimal exceptions.
+   - 10: Fully systematic and strictly adheres to natural language rules, with no improvisation or exceptions allowed.
 2. **Naming Complexity (0–10)**
    - 0: Use only numbers or extremely brief names.
    - 1–3: Use short references or abbreviations for quick recognition.
