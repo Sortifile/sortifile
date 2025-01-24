@@ -55,7 +55,6 @@ Use the file movement records to refine and optimize the existing file organizat
    A JSON object containing organizational rules, structured as follows:
 
    - **Index**: Defines high-level parameters for file organization:
-
      1. **Sorting Entropy (0–10)**
         - 0: Classification is highly intuitive and casual, with no consideration for natural language rules, relying solely on personal instincts.
         - 1–3: Basic categorization only when necessary, prioritizing personal needs over natural language rules, which are only referenced.
@@ -74,13 +73,10 @@ Use the file movement records to refine and optimize the existing file organizat
         - 4–6: Balance file accessibility with basic archival needs.
         - 7–9: Systematically archive and maintain files for long-term stability.
         - 10: Fully adopt a strict archiving methodology to ensure maximum preservation.
-
    - **spec**: Specifies detailed organizational rules, including:
-
      - **file_types**: A list of recognized file categories (e.g., "homework", "reports", "presentations").
      - **folder_depth**: Maximum allowed folder hierarchy depth (e.g., 5).
      - **capacity**: Maximum number of files allowed per folder (e.g., 30).
-
    - **natural_language_rules**: Sorting guidelines expressed in natural language.
 
 ---
