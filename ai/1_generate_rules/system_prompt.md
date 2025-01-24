@@ -25,19 +25,19 @@ Please use the data below to generate a `rule.json` file for my automated file o
 
 Determine the user's preferences for the following three indicators and assign final quantifiable scores (0–10) in the `Index` section. Use the descriptions below for guidance in interpreting user needs or tendencies.
 
-1. **Sorting Entropy (0–10)**
-   - 0: Classification is highly intuitive and casual, with no consideration for natural language rules, relying solely on personal instincts.
-   - 1–3: Basic categorization only when necessary, prioritizing personal needs over natural language rules, which are only referenced.
-   - 4–6: A balanced approach between intuitive and structured classification, where natural language rules are somewhat considered but not strictly followed.
-   - 7–9: Highly structured, relying primarily on natural language rules for classification. Clear categorization with minimal exceptions.
-   - 10: Fully systematic and strictly adheres to natural language rules, with no improvisation or exceptions allowed.
-2. **Naming Complexity (0–10)**
+1. **Sorting Entropy (Intuitive(0) vs. Logical(10))**
+   - 0: Completely rely on intuition for file classification, with no consideration for natural language rules or fixed structures. Adjust freely based on usage needs.
+   - 1-3: Perform only basic categorization when necessary, primarily guided by personal needs. Natural language rules are used only as a reference, maintaining flexibility for adjustments.
+   - 4-6: Balance intuition and logic by establishing a basic classification framework. Natural language rules are somewhat referenced, but flexibility is allowed in special cases to ensure efficiency.
+   - 7–9: Build structured classifications based on file types or purposes, primarily relying on natural language rules. Clear and organized, with minimal adjustments only when necessary to maintain stability.
+   - 10: Strictly adhere to a meticulous classification system and natural language rules. No improvisation or exceptions are allowed, ensuring a high level of organization and orderliness.
+2. **Naming Complexity (Simple(0) vs. Detailed(10))**
    - 0: Use only numbers or extremely brief names.
    - 1–3: Use short references or abbreviations for quick recognition.
    - 4–6: Include essential details (e.g., short project names, dates).
    - 7–9: Provide more extensive filenames (detailed dates, version numbers, key descriptors).
    - 10: Fully detailed filenames including all possible relevant info.
-3. **Archival Tendency (0–10)**
+3. **Archival Tendency (Accessible(0) vs. Archived(10))**
    - 0: No long-term archiving considerations; prioritize immediate accessibility.
    - 1–3: Only limited archiving for important or frequently used files.
    - 4–6: Balance file accessibility with basic archival needs.
