@@ -83,7 +83,9 @@ generate the `rule.json` file in the specified format.
    - Populate quantifiable or specific details based on form responses, such as supported file types, folder depth, or capacity limits.
 3. **Natural Language Rules**
    - Include at least 5–10 rules.
-   - Derive these rules by thinking about how the user might categorize files and summarize those preferences into clear guidelines.
+   - Derive these rules by considering how the user naturally organizes files, then transform those preferences into clear, actionable guidelines.
+   - You may add rules for specific scenarios (e.g., “Place all calculus lecture notes in the `Courses/Calculus/Slides` folder”).
+   - Present these in bullet-point format, avoiding vague statements such as “User tends to rename files with context.” Instead, give concrete, directive-style rules.
    - Incorporate user preferences and general best practices (e.g., consistency, clarity, searchability).
 
 ---
