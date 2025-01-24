@@ -14,7 +14,7 @@ function navigateTo(page) {
   <div>
     <h1>Check</h1>
     <!-- 跳轉介面的按鈕 -->
-    <el-button type="primary" @click="navigateTo('select')"
+    <el-button type="primary" @click="navigateTo('zone')"
       >Next<el-icon class="el-icon--right"><ArrowRight /></el-icon
     ></el-button>
   </div>
