@@ -1,12 +1,23 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { ElButton } from "element-plus";
+import { invoke } from "@tauri-apps/api/core";
 
 const router = useRouter();
 
 function navigateTo(page) {
   router.push(`/${page}`);
 }
+
+async function greet() {
+  try {
+    const response = await invoke("greet", { name: "Tauri" });
+    console.log(response);
+  } catch (error) {
+    console.error("Error invoking greet:", error);
+  }
+}
+
 </script>
 
 <template>
@@ -30,6 +41,12 @@ function navigateTo(page) {
       </el-button>
       <el-button class="button" type="primary" @click="navigateTo('help')">
         Help
+      </el-button>
+      <el-button class="button" type="primary" @click="greet()">
+        invoke
+      </el-button>
+      <el-button class="button" type="primary" @click="invoke('call_api', {content: '祝烏鴉倫新年快樂'})">
+        greet
       </el-button>
     </div>
   </main>
