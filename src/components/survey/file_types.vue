@@ -58,5 +58,6 @@ const updateSelection = (value) => {
 
 .answer-area {
   margin-top: 8px;
+  margin-bottom: 8px;
 }
 </style>
