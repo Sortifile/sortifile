@@ -6,6 +6,6 @@
     "deep": 5,
     "capacity": 30,
     "naming": ["name", "version"],
-    "access_priority": "A"
+    "archival_tendency": "A"
   }
 }
