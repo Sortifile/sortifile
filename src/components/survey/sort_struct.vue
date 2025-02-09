@@ -16,7 +16,7 @@ const emit = defineEmits(["update:modelValue"]);
         <h4 class="question-title">3. 你希望大概如何來建立你的檔案樹？</h4>
       </div>
     </template>
-    <div class="answer-area">test</div>
+    <div class="answer-area">思諾這裡我要留著跟你討論一下要怎麼做</div>
   </el-card>
 </template>
 
