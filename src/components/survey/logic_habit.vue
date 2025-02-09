@@ -1,12 +1,31 @@
-<!-- Problem 2 -->
 <script setup>
 import { defineProps, defineEmits } from "vue";
 
 const props = defineProps({
-  modelValue: [String, Number, Array], // 綁定輸入值
+  modelValue: String, // 單選
 });
 
 const emit = defineEmits(["update:modelValue"]);
+
+const options = [
+  {
+    label:
+      "A. 按檔案類型或用途進行分類，例如「報告」、「調查」、「客戶資料」等。",
+    value: "A",
+  },
+  {
+    label: "B. 根據當下需求分類，例如「需要優先完成」、「稍後查看」等。",
+    value: "B",
+  },
+  {
+    label: "C. 混合或無特定形式",
+    value: "C",
+  },
+];
+
+const updateSelection = (value) => {
+  emit("update:modelValue", value);
+};
 </script>
 
 <template>
@@ -18,7 +37,18 @@ const emit = defineEmits(["update:modelValue"]);
         </h4>
       </div>
     </template>
-    <div class="answer-area">test</div>
+    <div class="answer-area">
+      <el-radio-group v-model="props.modelValue" class="radio-group">
+        <el-radio
+          v-for="(opt, index) in options"
+          :key="index"
+          :label="opt.value"
+          class="radio-item"
+        >
+          {{ opt.label }}
+        </el-radio>
+      </el-radio-group>
+    </div>
   </el-card>
 </template>
 
@@ -33,5 +63,16 @@ const emit = defineEmits(["update:modelValue"]);
 .question-card {
   margin-top: 16px;
   margin-bottom: 16px;
+}
+
+.answer-area {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 </style>
