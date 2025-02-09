@@ -1,12 +1,15 @@
-<!-- Problem 5 -->
 <script setup>
 import { defineProps, defineEmits } from "vue";
 
 const props = defineProps({
-  modelValue: [String, Number, Array], // 綁定輸入值
+  modelValue: Number, // 滑桿綁定數值
 });
 
 const emit = defineEmits(["update:modelValue"]);
+
+const updateSlider = (value) => {
+  emit("update:modelValue", value);
+};
 </script>
 
 <template>
@@ -18,7 +21,22 @@ const emit = defineEmits(["update:modelValue"]);
         </h4>
       </div>
     </template>
-    <div class="answer-area">test</div>
+    <div class="answer-area">
+      <el-slider
+        :model-value="props.modelValue"
+        @update:modelValue="updateSlider"
+        :min="10"
+        :max="150"
+        show-stops
+        show-tooltip
+        :step="10"
+        class="slider"
+      />
+      <div class="slider-labels">
+        <span>少量 (10 個檔案) </span>
+        <span>大量 (150 個檔案) </span>
+      </div>
+    </div>
   </el-card>
 </template>
 
@@ -33,5 +51,17 @@ const emit = defineEmits(["update:modelValue"]);
 .question-card {
   margin-top: 16px;
   margin-bottom: 16px;
+}
+
+.answer-area {
+  margin-top: 8px;
+  text-align: center;
+}
+
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-top: 4px;
 }
 </style>
