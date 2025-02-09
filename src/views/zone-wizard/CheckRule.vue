@@ -155,6 +155,7 @@ const handleSubmit = () => {
   }
   console.log("Index 部分:", formData.value.index);
   console.log("選擇的規則:", selectedRules.value);
+  navigateTo("zone");
 };
 </script>
 
