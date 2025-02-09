@@ -1,3 +1,4 @@
+<!-- deprecated -->
 <script setup>
 import { useRouter } from "vue-router";
 import { ElButton, ElUpload } from "element-plus";
