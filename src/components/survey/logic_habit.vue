@@ -38,7 +38,11 @@ const updateSelection = (value) => {
       </div>
     </template>
     <div class="answer-area">
-      <el-radio-group v-model="props.modelValue" class="radio-group">
+      <el-radio-group
+        v-model="props.modelValue"
+        class="radio-group"
+        @update:modelValue="updateSelection"
+      >
         <el-radio
           v-for="(opt, index) in options"
           :key="index"
