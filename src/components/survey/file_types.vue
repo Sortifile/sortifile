@@ -1,13 +1,26 @@
-<!-- Problem 1 -->
-
 <script setup>
-import { defineProps, defineEmits } from "vue";
+import { defineProps, defineEmits, ref } from "vue";
 
 const props = defineProps({
-  modelValue: [String, Number, Array], // 綁定輸入值
+  modelValue: Array, // 使用 Array 來存儲多選結果
 });
 
 const emit = defineEmits(["update:modelValue"]);
+
+const options = [
+  "圖片",
+  "影片",
+  "音訊",
+  "作業",
+  "簡報",
+  "報告",
+  "程式碼",
+  "TODO: 思諾再幫我加上其他的或調整選項",
+];
+
+const updateSelection = (value) => {
+  emit("update:modelValue", value);
+};
 </script>
 
 <template>
@@ -17,7 +30,16 @@ const emit = defineEmits(["update:modelValue"]);
         <h4 class="question-title">1. 你的檔案中包含哪些類型的內容？</h4>
       </div>
     </template>
-    <div class="answer-area">test</div>
+    <div class="answer-area">
+      <el-checkbox-group
+        :model-value="props.modelValue"
+        @update:modelValue="updateSelection"
+      >
+        <el-checkbox v-for="option in options" :key="option" :label="option">
+          {{ option }}
+        </el-checkbox>
+      </el-checkbox-group>
+    </div>
   </el-card>
 </template>
 
@@ -32,5 +54,9 @@ const emit = defineEmits(["update:modelValue"]);
 .question-card {
   margin-top: 16px;
   margin-bottom: 16px;
+}
+
+.answer-area {
+  margin-top: 8px;
 }
 </style>
