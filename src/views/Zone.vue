@@ -16,7 +16,20 @@
           :allow-drop="allowDrop"
           @node-drop="handleDrop"
           @node-click="handleNodeClick"
-        />
+        >
+          <!-- slot 自訂 Tree 節點 -->
+          <template #default="{ node, data }">
+            <!-- 若 data.ignored 為 true，代表被忽略（無論 explicit or inherited） -->
+            <span
+              :class="{
+                'ignored-file': data.ignored,
+                'inherited-file': data.ignoredType === 'inherited',
+              }"
+            >
+              {{ data.name }}
+            </span>
+          </template>
+        </el-tree>
       </el-scrollbar>
     </div>
 
@@ -25,6 +38,18 @@
       <h2>{{ selectedTitle }}</h2>
       <el-skeleton v-if="loading" :rows="5" animated />
       <div v-else>
+        <!-- 切換 ignore 狀態的開關 -->
+        <div class="ignore-toggle">
+          <!-- 根目錄不顯示 Switch -->
+          <el-switch
+            v-if="selectedKey !== '/'"
+            v-model="ignoreSwitch"
+            active-text="已忽略"
+            inactive-text="未忽略"
+            :disabled="isInheritedIgnore"
+          />
+        </div>
+
         <pre>{{ fileInfo }}</pre>
       </div>
     </div>
@@ -32,7 +57,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
+// import { invoke } from "@tauri-apps/api"; // 若需呼叫後端 API，可解除註解
 
 const projectName = "Sortifile";
 const fileTree = ref([]);
@@ -42,13 +68,22 @@ const fileInfo = ref("");
 const loading = ref(false);
 const treeRef = ref(null);
 
+/**
+ * 用來儲存要被「顯式忽略」的路徑。
+ * 若其中包含資料夾路徑，則該資料夾及其子項目會是 "繼承忽略"。
+ */
+const ignoredPaths = ref([]);
+
+/**
+ * Tree 設定
+ */
 const defaultProps = {
   children: "children",
   label: "name",
 };
 
 /**
- * Mock Data
+ * Mock Data (暫時先用假資料)
  */
 const mockFileTree = [
   {
@@ -127,6 +162,104 @@ function sortChildren(array) {
 }
 
 /**
+ * 以遞迴方式，將整棵樹的節點標記為：
+ *   node.ignored = true/false
+ *   node.ignoredType = 'explicit' | 'inherited' | ''
+ *
+ * parentIgnored 代表父層是否處於忽略狀態 (true = 繼承)
+ */
+function applyIgnoreStatusToTree(treeData) {
+  treeData.forEach((node) => {
+    applyIgnoreStatus(node, false);
+  });
+}
+
+function applyIgnoreStatus(node, parentIgnored) {
+  // 檢查此節點是否為顯式忽略
+  const isExplicit = ignoredPaths.value.includes(node.path);
+
+  // 本節點的忽略狀態 = 父層已忽略 或 自己顯式忽略
+  node.ignored = parentIgnored || isExplicit;
+
+  // 設定 ignoredType
+  if (node.ignored) {
+    node.ignoredType = parentIgnored ? "inherited" : "explicit";
+  } else {
+    node.ignoredType = "";
+  }
+
+  // 如果有子節點，遞迴下去
+  if (node.children) {
+    node.children.forEach((child) => {
+      applyIgnoreStatus(child, node.ignored);
+    });
+  }
+}
+
+/**
+ * 右側檔案內容的 Switch，受 selectedKey (點選檔案/資料夾) 控制
+ */
+const ignoreSwitch = computed({
+  get() {
+    const node = selectedNode.value;
+    return node ? !!node.ignored && node.ignoredType !== "" : false;
+  },
+  set(val) {
+    toggleIgnore(selectedKey.value, val);
+  },
+});
+
+/**
+ * 回傳目前選取的 node 物件 (若找不到則為 null)
+ */
+const selectedNode = computed(() => {
+  return findNodeByPath(fileTree.value, selectedKey.value);
+});
+
+/**
+ * 若是繼承忽略 (inherited)，就應該 disable 開關
+ */
+const isInheritedIgnore = computed(() => {
+  return selectedNode.value?.ignoredType === "inherited";
+});
+
+/**
+ * 切換某個 path 是否要被「顯式忽略」
+ */
+function toggleIgnore(path, shouldIgnore) {
+  // 如果想改成 "忽略 = true"
+  if (shouldIgnore) {
+    // 放進 ignoredPaths（但若已在內則跳過）
+    if (!ignoredPaths.value.includes(path)) {
+      ignoredPaths.value.push(path);
+    }
+  } else {
+    // 移除
+    const index = ignoredPaths.value.indexOf(path);
+    if (index !== -1) {
+      ignoredPaths.value.splice(index, 1);
+    }
+  }
+
+  // 重新套用 ignore 狀態
+  applyIgnoreStatusToTree(fileTree.value);
+
+  // TODO: 呼叫後端 API 更新 ignore 內容
+  /*
+  invoke("update_ignore_file", {
+    path,
+    ignore: shouldIgnore,
+  })
+    .then((res) => {
+      console.log("Ignore 更新成功", res);
+    })
+    .catch((err) => {
+      console.error("Ignore 更新失敗", err);
+    });
+  */
+}
+
+/**
  * Event Handlers
  */
 function handleNodeClick(node) {
@@ -164,7 +297,6 @@ async function handleDrop(draggingNode, dropNode, dropType, ev) {
       : `${destDirectoryPath}/${fileName}`;
 
   // TODO: 呼叫 Tauri API 進行檔案移動
-  // 假設 Tauri API 名為 move_file，接收 srcPath 與 newPath
   // -------------------------------------------------------------
   /*
   try {
@@ -172,7 +304,7 @@ async function handleDrop(draggingNode, dropNode, dropType, ev) {
       src: srcPath,
       dest: newPath,
     });
-    console.log("move_file result:", result); // 假設一定為 success
+    console.log("move_file result:", result);
   } catch (error) {
     console.error("move_file failed:", error);
     return;
@@ -197,6 +329,9 @@ async function handleDrop(draggingNode, dropNode, dropType, ev) {
   destNode.children.push(removedNode);
   sortChildren(destNode.children);
   destNode.children = [...destNode.children];
+
+  // 移動後，需要重新套用 ignore 狀態
+  applyIgnoreStatusToTree(fileTree.value);
 }
 
 /**
@@ -204,10 +339,12 @@ async function handleDrop(draggingNode, dropNode, dropType, ev) {
  */
 function allowDrag(node) {
   console.log("tree drag:", node.name);
+  // 根目錄 ("/") 不可被拖曳
   return node.data.path !== "/";
 }
 
 function allowDrop(draggingNode, dropNode, type) {
+  // 只允許拖曳到資料夾或根目錄，並且是放入 (inner)
   return (
     type === "inner" &&
     (dropNode.data.isDirectory || dropNode.data.path === "/")
@@ -217,8 +354,17 @@ function allowDrop(draggingNode, dropNode, type) {
 /**
  * Lifecycle
  */
-onMounted(() => {
-  // TODO: 獲取真實檔案結構
+onMounted(async () => {
+  // 先模擬讀取 ignore 檔案
+  // TODO: 改成呼叫 Tauri 後端 API 來拿真正的 ignore 設定
+  // ------------------------------------
+  // const ignoreContent = await invoke("get_ignore_file");
+  // ignoredPaths.value = parseIgnoreToArray(ignoreContent);
+  // ------------------------------------
+  // 暫用靜態範例：假設忽略清單包含資料夾與檔案
+  ignoredPaths.value = ["/src", "/README.md"];
+
+  // 初始化檔案樹
   fileTree.value = [
     {
       name: projectName,
@@ -228,6 +374,10 @@ onMounted(() => {
     },
   ];
 
+  // 將 ignore 狀態套用到檔案樹
+  applyIgnoreStatusToTree(fileTree.value);
+
+  // 預設顯示根目錄資訊
   fileInfo.value = `{ "project": "${projectName}", "version": "1.0.0", "description": "A file sorting app built with Vue and Rust." }`;
 });
 </script>
@@ -260,6 +410,10 @@ onMounted(() => {
   overflow: hidden;
 }
 
+.ignore-toggle {
+  margin-bottom: 10px;
+}
+
 pre {
   background: #f5f5f5;
   padding: 10px;
@@ -267,5 +421,17 @@ pre {
   overflow: auto;
   white-space: pre-wrap;
   word-wrap: break-word;
+}
+
+/* 被忽略的項目給予不同外觀 */
+.ignored-file {
+  color: #aaa; /* 偏灰 */
+  text-decoration: line-through;
+}
+
+/* 若是繼承而來的忽略，可再額外加底色或其他標示 (視需求) */
+.inherited-file {
+  /* 例如：加上一點淡色背景或特殊提示 */
+  background-color: rgba(0, 0, 0, 0.05);
 }
 </style>
