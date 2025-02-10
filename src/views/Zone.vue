@@ -7,9 +7,14 @@
         <el-tree
           :data="fileTree"
           :props="defaultProps"
-          @node-click="handleNodeClick"
+          node-key="path"
           highlight-current
           default-expand-all
+          draggable
+          :allow-drag="allowDrag"
+          :allow-drop="allowDrop"
+          @node-drop="handleDrop"
+          @node-click="handleNodeClick"
         />
       </el-scrollbar>
     </div>
@@ -108,6 +113,31 @@ const handleNodeClick = (node) => {
   }, 50);
 };
 
+// 模擬移動檔案的函數
+const handleDrop = (draggingNode, dropNode, dropType, ev) => {
+  console.log("tree drop:", dropNode.label, dropType);
+};
+
+const allowDrag = (node) => {
+  console.log("tree drag:", node.name);
+  return node.data.path !== "/";
+};
+
+const allowDrop = (draggingNode, dropNode, type) => {
+  // 如果丟到根目錄，僅允許放在裡面
+  if (dropNode.data.path === "/" && type !== "inner") {
+    return false;
+  }
+  // 其他情況：只允許放到資料夾內部
+  if (type === "inner") {
+    return dropNode.data.isDirectory;
+  } else {
+    // "before" 或 "after" 的時候
+    // 你可視需求決定要不要允許
+    return dropNode.data.path !== "/";
+  }
+};
+
 // 初始化獲取檔案結構並預設選擇根目錄
 onMounted(() => {
   // TODO: 獲取真實檔案結構
@@ -137,7 +167,7 @@ onMounted(() => {
   width: 250px;
   border-right: 1px solid #dcdcdc;
   padding: 10px;
-  overflow: none;
+  overflow: hidden;
   position: sticky;
   top: 0;
 }
