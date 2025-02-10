@@ -5,6 +5,7 @@
       <h2>檔案瀏覽</h2>
       <el-scrollbar class="zone-scrollbar">
         <el-tree
+          ref="treeRef"
           :data="fileTree"
           :props="defaultProps"
           node-key="path"
@@ -33,19 +34,22 @@
 <script setup>
 import { ref, onMounted } from "vue";
 
-const projectName = "Sortifile"; // 專案名稱
+const projectName = "Sortifile";
 const fileTree = ref([]);
+const selectedKey = ref("/");
+const selectedTitle = ref(projectName);
+const fileInfo = ref("");
+const loading = ref(false);
+const treeRef = ref(null);
+
 const defaultProps = {
   children: "children",
   label: "name",
 };
 
-const selectedKey = ref("/"); // 預設選中的 Key（根目錄）
-const selectedTitle = ref(projectName); // 預設顯示專案名稱
-const fileInfo = ref(""); // 存放檔案內容
-const loading = ref(false);
-
-// 模擬的檔案結構（子目錄）
+/**
+ * Mock Data
+ */
 const mockFileTree = [
   {
     name: "src",
@@ -73,19 +77,10 @@ const mockFileTree = [
       },
     ],
   },
-  {
-    name: "package.json",
-    path: "/package.json",
-    isDirectory: false,
-  },
-  {
-    name: "README.md",
-    path: "/README.md",
-    isDirectory: false,
-  },
+  { name: "package.json", path: "/package.json", isDirectory: false },
+  { name: "README.md", path: "/README.md", isDirectory: false },
 ];
 
-// 模擬的檔案資訊
 const mockFileData = {
   "/src/main.js": `{ "type": "JavaScript", "size": "2KB", "modified": "2025-02-10" }`,
   "/src/App.vue": `{ "type": "Vue Component", "size": "3KB", "modified": "2025-02-09" }`,
@@ -95,8 +90,46 @@ const mockFileData = {
   "/README.md": `# Sortifile\n\nA file sorting app built with Vue and Rust.`,
 };
 
-// 處理節點點擊事件
-const handleNodeClick = (node) => {
+/**
+ * Utility Functions
+ */
+function findNodeByPath(treeData, path) {
+  for (const node of treeData) {
+    if (node.path === path) return node;
+    if (node.children && node.children.length) {
+      const childResult = findNodeByPath(node.children, path);
+      if (childResult) return childResult;
+    }
+  }
+  return null;
+}
+
+function removeNodeByPath(treeData, path) {
+  for (let i = 0; i < treeData.length; i++) {
+    const node = treeData[i];
+    if (node.path === path) {
+      return treeData.splice(i, 1)[0];
+    }
+    if (node.children && node.children.length) {
+      const removed = removeNodeByPath(node.children, path);
+      if (removed) return removed;
+    }
+  }
+  return null;
+}
+
+function sortChildren(array) {
+  array.sort((a, b) => {
+    if (a.isDirectory && !b.isDirectory) return -1;
+    if (!a.isDirectory && b.isDirectory) return 1;
+    return a.name.localeCompare(b.name);
+  });
+}
+
+/**
+ * Event Handlers
+ */
+function handleNodeClick(node) {
   selectedKey.value = node.path;
   selectedTitle.value = node.name;
   loading.value = true;
@@ -111,34 +144,79 @@ const handleNodeClick = (node) => {
     }
     loading.value = false;
   }, 50);
-};
+}
 
-// 模擬移動檔案的函數
-const handleDrop = (draggingNode, dropNode, dropType, ev) => {
-  console.log("tree drop:", dropNode.label, dropType);
-};
+async function handleDrop(draggingNode, dropNode, dropType, ev) {
+  console.log("tree drop:", {
+    dragging: draggingNode.data.path,
+    droppingOn: dropNode.data.path,
+    dropType,
+  });
 
-const allowDrag = (node) => {
+  const srcPath = draggingNode.data.path;
+  const destDirectoryPath = dropNode.data.path;
+  const fileName = draggingNode.data.name;
+
+  // Construct new path
+  const newPath =
+    destDirectoryPath === "/"
+      ? `/${fileName}`
+      : `${destDirectoryPath}/${fileName}`;
+
+  // TODO: 呼叫 Tauri API 進行檔案移動
+  // 假設 Tauri API 名為 move_file，接收 srcPath 與 newPath
+  // -------------------------------------------------------------
+  /*
+  try {
+    const result = await invoke("move_file", {
+      src: srcPath,
+      dest: newPath,
+    });
+    console.log("move_file result:", result); // 假設一定為 success
+  } catch (error) {
+    console.error("move_file failed:", error);
+    return;
+  }
+  */
+  // -------------------------------------------------------------
+
+  console.log("模擬移動檔案成功:", srcPath, "=>", newPath);
+
+  // 前端即時更新檔案樹
+  const removedNode = removeNodeByPath(fileTree.value, srcPath);
+  if (!removedNode) return;
+  removedNode.path = newPath;
+
+  const destNode = findNodeByPath(fileTree.value, destDirectoryPath);
+  if (!destNode) {
+    console.warn("未找到目標節點:", destDirectoryPath);
+    return;
+  }
+
+  if (!destNode.children) destNode.children = [];
+  destNode.children.push(removedNode);
+  sortChildren(destNode.children);
+  destNode.children = [...destNode.children];
+}
+
+/**
+ * Drag / Drop Rules
+ */
+function allowDrag(node) {
   console.log("tree drag:", node.name);
   return node.data.path !== "/";
-};
+}
 
-const allowDrop = (draggingNode, dropNode, type) => {
-  // 如果丟到根目錄，僅允許放在裡面
-  if (dropNode.data.path === "/" && type !== "inner") {
-    return false;
-  }
-  // 其他情況：只允許放到資料夾內部
-  if (type === "inner") {
-    return dropNode.data.isDirectory;
-  } else {
-    // "before" 或 "after" 的時候
-    // 你可視需求決定要不要允許
-    return dropNode.data.path !== "/";
-  }
-};
+function allowDrop(draggingNode, dropNode, type) {
+  return (
+    type === "inner" &&
+    (dropNode.data.isDirectory || dropNode.data.path === "/")
+  );
+}
 
-// 初始化獲取檔案結構並預設選擇根目錄
+/**
+ * Lifecycle
+ */
 onMounted(() => {
   // TODO: 獲取真實檔案結構
   fileTree.value = [
@@ -150,7 +228,6 @@ onMounted(() => {
     },
   ];
 
-  // 預設載入根目錄資訊（避免右側沒資料）
   fileInfo.value = `{ "project": "${projectName}", "version": "1.0.0", "description": "A file sorting app built with Vue and Rust." }`;
 });
 </script>
