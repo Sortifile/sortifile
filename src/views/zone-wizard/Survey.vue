@@ -18,7 +18,7 @@ function navigateTo(page) {
   router.push(`/${page}`);
 }
 
-const formResponce = ref({
+const initialFormState = {
   file_types: [],
   logic_habit: "",
   sort_struct: [],
@@ -26,7 +26,14 @@ const formResponce = ref({
   capacity: 30,
   naming: [],
   archival_tendency: "",
-});
+};
+
+const formResponce = ref({ ...initialFormState });
+
+const resetForm = () => {
+  formResponce.value = { ...initialFormState };
+  console.log("表單已重置:", formResponce.value);
+};
 
 const submitForm = () => {
   console.log("提交的表單資料:", formResponce.value);
@@ -36,12 +43,12 @@ const submitForm = () => {
 
 <template>
   <div class="container">
-    <el-row justify="space-between" align="middle" :gutter="20">
-      <el-col :span="22">
+    <el-row justify="space-between" align="middle" :gutter="35">
+      <el-col :span="21">
         <h1>Survey</h1>
       </el-col>
-      <el-col :span="2">
-        <el-button plain @click=""> Reset </el-button>
+      <el-col :span="3">
+        <el-button plain @click="resetForm"> Reset </el-button>
       </el-col>
     </el-row>
     <el-text class="mx-1" type="info">Some description</el-text>
@@ -55,10 +62,22 @@ const submitForm = () => {
     <archival_tendency v-model="formResponce.archival_tendency" />
 
     <!-- 跳轉介面的按鈕 -->
-    <el-button type="primary" @click="submitForm">
-      Submit
-      <el-icon class="el-icon--right"><ArrowRight /></el-icon>
-    </el-button>
+    <div style="margin-top: 20px">
+      <el-row :gutter="20" justify="space-between">
+        <el-col :span="3">
+          <el-button type="default" @click="navigateTo('upload')">
+            <el-icon class="el-icon--left"><ArrowLeft /></el-icon>
+            Back
+          </el-button>
+        </el-col>
+        <el-col :span="3">
+          <el-button type="primary" @click="submitForm">
+            Submit
+            <el-icon class="el-icon--right"><ArrowRight /></el-icon>
+          </el-button>
+        </el-col>
+      </el-row>
+    </div>
   </div>
 </template>
 
