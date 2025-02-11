@@ -60,7 +60,24 @@
 import { ref, computed, onMounted } from "vue";
 // import { invoke } from "@tauri-apps/api"; // 若需呼叫後端 API，可解除註解
 
+/**
+ * 若您使用 Pinia / Vuex / 或自訂 state，請在此引入並取得 zonePath
+ * 以下僅示意，請依您實際使用的狀況調整
+ */
+// import { useZoneStore } from "@/stores/zone";
+// import { storeToRefs } from "pinia";
+
 const projectName = "Sortifile";
+
+/**
+ * 這裡模擬透過 store 取得 zonePath，也可以直接在此定義一個 ref，
+ * 在 onMounted 中做 API 呼叫前先設定其值
+ */
+const zonePath = ref("");
+// 假設您使用 Pinia，可以這樣做：
+// const zoneStore = useZoneStore();
+// const { zonePath } = storeToRefs(zoneStore);
+
 const fileTree = ref([]);
 const selectedKey = ref("/");
 const selectedTitle = ref(projectName);
@@ -227,9 +244,11 @@ const isInheritedIgnore = computed(() => {
  * 切換某個 path 是否要被「顯式忽略」
  */
 function toggleIgnore(path, shouldIgnore) {
-  // 如果想改成 "忽略 = true"
+  // 暫存舊的 ignoredPaths，用於發生錯誤時回復
+  const oldIgnoredPaths = [...ignoredPaths.value];
+
   if (shouldIgnore) {
-    // 放進 ignoredPaths（但若已在內則跳過）
+    // 加入到 ignoredPaths
     if (!ignoredPaths.value.includes(path)) {
       ignoredPaths.value.push(path);
     }
@@ -244,17 +263,21 @@ function toggleIgnore(path, shouldIgnore) {
   // 重新套用 ignore 狀態
   applyIgnoreStatusToTree(fileTree.value);
 
-  // TODO: 呼叫後端 API 更新 ignore 內容
+  // TODO: 呼叫後端 API，改成「傳整個 ignoredPaths」
   /*
   invoke("update_ignore_file", {
-    path,
-    ignore: shouldIgnore,
+    zone: zonePath.value,
+    // 每次都傳完整清單
+    ignoredPaths: ignoredPaths.value,
   })
     .then((res) => {
       console.log("Ignore 更新成功", res);
     })
     .catch((err) => {
       console.error("Ignore 更新失敗", err);
+      // 回復舊狀態
+      ignoredPaths.value = oldIgnoredPaths;
+      applyIgnoreStatusToTree(fileTree.value);
     });
   */
 }
@@ -267,12 +290,27 @@ function handleNodeClick(node) {
   selectedTitle.value = node.name;
   loading.value = true;
 
-  setTimeout(() => {
+  setTimeout(async () => {
     if (node.path === "/") {
       fileInfo.value = `{ "project": "${projectName}", "version": "1.0.0", "description": "A file sorting app built with Vue and Rust." }`;
     } else if (node.isDirectory) {
       fileInfo.value = "這是資料夾，請選擇一個檔案來查看內容";
     } else {
+      // TODO: 呼叫後端 API 來取得檔案資訊
+      /*
+      try {
+        const info = await invoke("get_file_info", {
+          zone: zonePath.value,
+          filePath: node.path,
+        });
+        fileInfo.value = JSON.stringify(info, null, 2);
+      } catch (error) {
+        console.error("取得檔案資訊失敗:", error);
+        fileInfo.value = "無法獲取檔案資訊";
+      }
+      */
+
+      // 目前先用 mock 資料
       fileInfo.value = mockFileData[node.path] || "無法獲取檔案資訊";
     }
     loading.value = false;
@@ -296,11 +334,12 @@ async function handleDrop(draggingNode, dropNode, dropType, ev) {
       ? `/${fileName}`
       : `${destDirectoryPath}/${fileName}`;
 
-  // TODO: 呼叫 Tauri API 進行檔案移動
   // -------------------------------------------------------------
+  // TODO: 呼叫後端 API 進行檔案移動
   /*
   try {
     const result = await invoke("move_file", {
+      zone: zonePath.value,
       src: srcPath,
       dest: newPath,
     });
@@ -355,16 +394,19 @@ function allowDrop(draggingNode, dropNode, type) {
  * Lifecycle
  */
 onMounted(async () => {
-  // 先模擬讀取 ignore 檔案
-  // TODO: 改成呼叫 Tauri 後端 API 來拿真正的 ignore 設定
-  // ------------------------------------
-  // const ignoreContent = await invoke("get_ignore_file");
-  // ignoredPaths.value = parseIgnoreToArray(ignoreContent);
-  // ------------------------------------
-  // 暫用靜態範例：假設忽略清單包含資料夾與檔案
-  ignoredPaths.value = ["/src", "/README.md"];
+  /**
+   * 1. 從 store 或其他 state 取得 zonePath
+   *    （這裡示意，您可自行依專案需求來設定）
+   */
+  zonePath.value = "/Users/exampleZone"; // 假設讀到這個 zone 路徑
 
-  // 初始化檔案樹
+  /**
+   * 2. 呼叫後端 API，根據 zonePath 取得檔案樹資料
+   *    （暫時用 Mock 資料作示範）
+   */
+  // TODO:
+  // const treeData = await invoke("get_file_tree", { zone: zonePath.value });
+  // fileTree.value = treeData;
   fileTree.value = [
     {
       name: projectName,
@@ -374,10 +416,19 @@ onMounted(async () => {
     },
   ];
 
-  // 將 ignore 狀態套用到檔案樹
+  /**
+   * 3. 呼叫後端 API，取得該 zone 下的 ignore 清單
+   *    （暫時用靜態範例）
+   */
+  // TODO:
+  // const ignoreList = await invoke("get_ignore_list", { zone: zonePath.value });
+  // ignoredPaths.value = ignoreList;
+  ignoredPaths.value = ["/src", "/README.md"];
+
+  // 4. 將 ignore 狀態套用到檔案樹
   applyIgnoreStatusToTree(fileTree.value);
 
-  // 預設顯示根目錄資訊
+  // 5. 預設顯示根目錄資訊
   fileInfo.value = `{ "project": "${projectName}", "version": "1.0.0", "description": "A file sorting app built with Vue and Rust." }`;
 });
 </script>
@@ -431,7 +482,6 @@ pre {
 
 /* 若是繼承而來的忽略，可再額外加底色或其他標示 (視需求) */
 .inherited-file {
-  /* 例如：加上一點淡色背景或特殊提示 */
   background-color: rgba(0, 0, 0, 0.05);
 }
 </style>
