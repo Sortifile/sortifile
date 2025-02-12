@@ -1,8 +1,8 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { ElButton, ElUpload } from "element-plus";
-import { ArrowRight } from "@element-plus/icons-vue";
+import { ElButton } from "element-plus";
+import { ArrowRight, ArrowLeft } from "@element-plus/icons-vue";
 
 import file_types from "../../components/survey/file_types.vue";
 import logic_habit from "../../components/survey/logic_habit.vue";
@@ -25,18 +25,20 @@ const initialFormState = {
   folder_depth: 5,
   capacity: 30,
   naming: [],
+  date_format: "YYYYMMDD",
+  filename_letter_rule: "",
   archival_tendency: "",
 };
 
-const formResponce = ref({ ...initialFormState });
+const formResponse = ref({ ...initialFormState });
 
 const resetForm = () => {
-  formResponce.value = { ...initialFormState };
-  console.log("表單已重置:", formResponce.value);
+  formResponse.value = { ...initialFormState };
+  console.log("表單已重置:", formResponse.value);
 };
 
 const submitForm = () => {
-  console.log("提交的表單資料:", formResponce.value);
+  console.log("提交的表單資料:", formResponse.value);
   navigateTo("zone-wizard/CheckRule");
 };
 </script>
@@ -53,13 +55,17 @@ const submitForm = () => {
     </el-row>
     <el-text class="mx-1" type="info">Some description</el-text>
 
-    <file_types v-model="formResponce.file_types" />
-    <logic_habit v-model="formResponce.logic_habit" />
-    <sort_struct v-model="formResponce.sort_struct" />
-    <folder_depth v-model="formResponce.folder_depth" />
-    <capacity v-model="formResponce.capacity" />
-    <naming_style v-model="formResponce.naming" />
-    <archival_tendency v-model="formResponce.archival_tendency" />
+    <file_types v-model="formResponse.file_types" />
+    <logic_habit v-model="formResponse.logic_habit" />
+    <sort_struct v-model="formResponse.sort_struct" />
+    <folder_depth v-model="formResponse.folder_depth" />
+    <capacity v-model="formResponse.capacity" />
+    <naming_style
+      v-model:naming="formResponse.naming"
+      v-model:dateFormat="formResponse.date_format"
+      v-model:fileNameRule="formResponse.filename_letter_rule"
+    />
+    <archival_tendency v-model="formResponse.archival_tendency" />
 
     <!-- 跳轉介面的按鈕 -->
     <div style="margin-top: 20px">

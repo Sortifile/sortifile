@@ -868,6 +868,11 @@ sass@^1.83.4:
   optionalDependencies:
     "@parcel/watcher" "^2.4.1"
 
+sortablejs@1.14.0:
+  version "1.14.0"
+  resolved "https://registry.yarnpkg.com/sortablejs/-/sortablejs-1.14.0.tgz#6d2e17ccbdb25f464734df621d4f35d4ab35b3d8"
+  integrity sha512-pBXvQCs5/33fdN1/39pPL0NZF20LeRbLQ5jtnheIPN9JQAaufGjKdWduZn4U7wCtVuzKhmRkI0DFYHYRbB2H1w==
+
 "source-map-js@>=0.6.2 <2.0.0", source-map-js@^1.2.0, source-map-js@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/source-map-js/-/source-map-js-1.2.1.tgz#1ce5650fddd87abc099eda37dcff024c2667ae46"
@@ -885,7 +890,7 @@ vite@^6.0.3:
   resolved "https://registry.yarnpkg.com/vite/-/vite-6.0.5.tgz#1d0fbdb3ffe61e944089abeddb7d2c509420acfd"
   integrity sha512-akD5IAH/ID5imgue2DYhzsEwCi0/4VKY31uhMLEYJwPP4TiUp8pL5PIK+Wo7H8qT8JY9i+pVfPydcFPYD1EL7g==
   dependencies:
-    esbuild "^0.24.2"
+    esbuild "0.24.0"
     postcss "^8.4.49"
     rollup "^4.23.0"
   optionalDependencies:
@@ -913,3 +918,10 @@ vue@^3.5.13:
     "@vue/runtime-dom" "3.5.13"
     "@vue/server-renderer" "3.5.13"
     "@vue/shared" "3.5.13"
+
+vuedraggable@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/vuedraggable/-/vuedraggable-4.1.0.tgz#edece68adb8a4d9e06accff9dfc9040e66852270"
+  integrity sha512-FU5HCWBmsf20GpP3eudURW3WdWTKIbEIQxh9/8GE806hydR9qZqRRxRE3RjqX7PkuLuMQG/A7n3cfj9rCEchww==
+  dependencies:
+    sortablejs "1.14.0"
