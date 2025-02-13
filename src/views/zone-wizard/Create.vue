@@ -3,18 +3,25 @@
 <template>
   <div style="max-width: 600px; margin: 0 auto">
     <h1>Create New Zone</h1>
-    <el-form ref="formRef" :model="form" :rules="rules" label-width="auto">
+    <el-form ref="formRef" :model="zoneStore" :rules="rules" label-width="auto">
       <!-- Zone 名稱 -->
       <el-form-item label="Zone Name" prop="zoneName" label-position="left">
         <el-col :span="24">
-          <el-input v-model="form.zoneName" placeholder="請輸入 Zone 名稱" />
+          <el-input
+            v-model="zoneStore.zoneName"
+            placeholder="請輸入 Zone 名稱"
+          />
         </el-col>
       </el-form-item>
 
       <!-- 路徑 -->
       <el-form-item label="Root Folder Path" prop="path" label-position="left">
         <el-col :span="19">
-          <el-input v-model="form.path" placeholder="請選擇路徑" readonly />
+          <el-input
+            v-model="zoneStore.path"
+            placeholder="請選擇路徑"
+            readonly
+          />
         </el-col>
         <el-col :span="5" align="right">
           <el-button type="primary" @click="selectPath" plain>
@@ -52,9 +59,10 @@ import {
   ElCol,
   ElDivider,
 } from "element-plus";
+import { useRouter } from "vue-router";
+import { useZoneStore } from "../../store/zone";
 import { ArrowRight } from "@element-plus/icons-vue";
 
-import { useRouter } from "vue-router";
 const router = useRouter();
 const formRef = ref(null);
 
@@ -62,11 +70,7 @@ function navigateTo(page) {
   router.push(`/${page}`);
 }
 
-// 表單資料
-const form = ref({
-  zoneName: "",
-  path: "",
-});
+const zoneStore = useZoneStore();
 
 // 表單驗證規則
 const rules = {
@@ -79,8 +83,7 @@ const rules = {
 const submitForm = () => {
   formRef.value.validate((valid) => {
     if (valid) {
-      console.log("提交的資料：", form.value);
-      // TODO: 呼叫 API 建立新 Zone
+      console.log("提交的資料：", zoneStore.zoneName, zoneStore.path);
       navigateTo("survey");
     }
   });
@@ -89,6 +92,7 @@ const submitForm = () => {
 
 // 重設表單
 const resetForm = () => {
+  zoneStore.resetZone();
   formRef.value.resetFields();
 };
 
@@ -99,11 +103,10 @@ const selectPath = async () => {
       directory: true,
       multiple: false,
     });
-    // open 回傳可能是 null、string 或 string[]
     if (typeof selected === "string") {
-      form.value.path = selected;
+      zoneStore.setPath(selected);
     } else if (Array.isArray(selected) && selected.length > 0) {
-      form.value.path = selected[0];
+      zoneStore.setPath(selected[0]);
     }
   } catch (error) {
     console.error("選擇路徑時發生錯誤：", error);
