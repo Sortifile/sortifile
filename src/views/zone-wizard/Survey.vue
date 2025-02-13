@@ -71,7 +71,7 @@ const submitForm = () => {
     <div style="margin-top: 20px">
       <el-row :gutter="20" justify="space-between">
         <el-col :span="3">
-          <el-button type="default" @click="navigateTo('upload')">
+          <el-button type="default" @click="navigateTo('create')">
             <el-icon class="el-icon--left"><ArrowLeft /></el-icon>
             Back
           </el-button>
