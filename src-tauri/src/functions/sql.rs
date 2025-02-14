@@ -1,4 +1,4 @@
-use sqlx::{Error, SqlitePool, Sqlite, Row, Column, sqlx_macros, sqlite::SqliteRow};
+use sqlx::{sqlite::{SqliteQueryResult, SqliteRow}, sqlx_macros, Column, Error, Row, Sqlite, SqlitePool};
 use std::sync::Arc;
 use tauri::State;
 use tokio::time::{self, Duration};
@@ -7,7 +7,7 @@ pub struct Database {
     pub pool: sqlx::SqlitePool,
 }
 
-fn get_value_as_string(row: &SqliteRow, index: usize) -> String {
+pub fn get_value_as_string(row: &SqliteRow, index: usize) -> String {
     // Try to get the column as an Option<String>.
     if let Ok(opt) = row.try_get::<Option<String>, _>(index) {
         if let Some(val) = opt {
@@ -98,4 +98,36 @@ impl Database {
             }
         }
     }
+
+    pub async fn get_file_summary(
+        &self,
+        zone_name: &str,
+        file_path: &str,
+    ) -> Result<String, Error> {
+        let table_name = format!("zone_{}", zone_name);
+        let query = format!("SELECT summary FROM {} WHERE file_path = ?;", table_name);
+        let row = sqlx::query(&query)
+            .bind(file_path)
+            .fetch_one(&self.pool)
+            .await?;
+        let summary: String = row.get(0);
+        Ok(summary)
+    }
+
+    pub async fn exec_select(&self, input: &str) -> Result<Vec<SqliteRow>, Error> {
+        let rows = sqlx::query(&input).fetch_all(&self.pool).await;
+        Ok(rows.unwrap())
+    }
+
+    pub async fn exec(&self, input: &str) -> Result<SqliteQueryResult, Error> {
+        let changes = sqlx::query(&input).execute(&self.pool).await;
+        Ok(changes.unwrap())
+    }
+
+}
+
+pub async fn get_db() -> Database {
+    let db_url = "sqlite://my_database.db";
+    let pool = Database::new(db_url).await;
+    pool
 }
