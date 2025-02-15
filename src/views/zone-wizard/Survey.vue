@@ -1,3 +1,47 @@
+<template>
+  <div class="container">
+    <el-row justify="space-between" align="middle" :gutter="35">
+      <el-col :span="21">
+        <h1>Survey</h1>
+      </el-col>
+      <el-col :span="3">
+        <el-button plain @click="resetForm"> Reset </el-button>
+      </el-col>
+    </el-row>
+    <el-text class="mx-1" type="info">Some description</el-text>
+
+    <file_types v-model="formResponse.file_types" />
+    <logic_habit v-model="formResponse.logic_habit" />
+    <sort_struct v-model="formResponse.sort_struct" />
+    <folder_depth v-model="formResponse.folder_depth" />
+    <capacity v-model="formResponse.capacity" />
+    <naming_style
+      v-model:naming="formResponse.naming"
+      v-model:dateFormat="formResponse.date_format"
+      v-model:fileNameRule="formResponse.filename_letter_rule"
+    />
+    <archival_tendency v-model="formResponse.archival_tendency" />
+
+    <!-- 跳轉介面的按鈕 -->
+    <div style="margin-top: 20px">
+      <el-row :gutter="20" justify="space-between">
+        <el-col :span="3">
+          <el-button type="default" @click="navigateTo('create')">
+            <el-icon class="el-icon--left"><ArrowLeft /></el-icon>
+            Back
+          </el-button>
+        </el-col>
+        <el-col :span="3">
+          <el-button type="primary" @click="submitForm">
+            Submit
+            <el-icon class="el-icon--right"><ArrowRight /></el-icon>
+          </el-button>
+        </el-col>
+      </el-row>
+    </div>
+  </div>
+</template>
+
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
@@ -42,50 +86,6 @@ const submitForm = () => {
   navigateTo("zone-wizard/CheckRule");
 };
 </script>
-
-<template>
-  <div class="container">
-    <el-row justify="space-between" align="middle" :gutter="35">
-      <el-col :span="21">
-        <h1>Survey</h1>
-      </el-col>
-      <el-col :span="3">
-        <el-button plain @click="resetForm"> Reset </el-button>
-      </el-col>
-    </el-row>
-    <el-text class="mx-1" type="info">Some description</el-text>
-
-    <file_types v-model="formResponse.file_types" />
-    <logic_habit v-model="formResponse.logic_habit" />
-    <sort_struct v-model="formResponse.sort_struct" />
-    <folder_depth v-model="formResponse.folder_depth" />
-    <capacity v-model="formResponse.capacity" />
-    <naming_style
-      v-model:naming="formResponse.naming"
-      v-model:dateFormat="formResponse.date_format"
-      v-model:fileNameRule="formResponse.filename_letter_rule"
-    />
-    <archival_tendency v-model="formResponse.archival_tendency" />
-
-    <!-- 跳轉介面的按鈕 -->
-    <div style="margin-top: 20px">
-      <el-row :gutter="20" justify="space-between">
-        <el-col :span="3">
-          <el-button type="default" @click="navigateTo('create')">
-            <el-icon class="el-icon--left"><ArrowLeft /></el-icon>
-            Back
-          </el-button>
-        </el-col>
-        <el-col :span="3">
-          <el-button type="primary" @click="submitForm">
-            Submit
-            <el-icon class="el-icon--right"><ArrowRight /></el-icon>
-          </el-button>
-        </el-col>
-      </el-row>
-    </div>
-  </div>
-</template>
 
 <style scoped>
 .container {
