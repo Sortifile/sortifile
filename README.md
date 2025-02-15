@@ -2,6 +2,11 @@
 
 Sortifile 是一款跨平台的檔案整理工具，透過 AI 輔助使用者自動分類與管理檔案，並提供客製化的整理規則。
 
+## 文件與指南
+- HackMD 目錄頁：[Sortifile 文件](https://hackmd.io/@YTP-2024-Mining/sortifile)
+- [期中報告投影片](https://docs.google.com/presentation/d/1h2Ih9h0tkLi1BnFowZ6qX1B0yNWUTPq4N31j9LRhu8Q/edit?usp=sharing)
+- [期末報告投影片]()(under construction)
+
 ## 技術架構
 
 - **前端**：使用 Vue 3 與 Element Plus
@@ -43,11 +48,6 @@ yarn tauri dev
 ```sh
 yarn tauri build
 ```
-
-## 文件與指南
-- 週報 HackMD 文件：[Sortifile 文件](https://hackmd.io/@YTP-2024-Mining/sortifile)
-- [期中報告投影片](https://docs.google.com/presentation/d/1h2Ih9h0tkLi1BnFowZ6qX1B0yNWUTPq4N31j9LRhu8Q/edit?usp=sharing)
-- [期末報告投影片]()(under construction)
 
 ## 貢獻方式
 
