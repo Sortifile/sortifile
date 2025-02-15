@@ -1,4 +1,5 @@
-<img src="public/sorti.png" width="200" height="200"> 
+<img src="public/sorti.png" width="250" height="250">
+
 # Sortifile
 
 Sortifile 是一款跨平台的檔案整理工具，透過 AI 輔助使用者自動分類與管理檔案，並提供客製化的整理規則。
