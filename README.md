@@ -44,6 +44,9 @@ yarn tauri dev
 yarn tauri build
 ```
 
+## 文件與指南
+週報與簡報的內容可參考 HackMD 文件：[Sortifile 開發文件](https://hackmd.io/@YTP-2024-Mining/sortifile)
+
 ## 貢獻方式
 
 歡迎貢獻程式碼或提出建議，可透過以下方式參與開發：
