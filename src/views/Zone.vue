@@ -37,21 +37,16 @@
     <div class="content-display">
       <h2>{{ selectedTitle }}</h2>
       <el-skeleton v-if="loading" :rows="5" animated />
-      <div v-else>
-        <!-- 切換 ignore 狀態的開關 -->
-        <div class="ignore-toggle">
-          <!-- 根目錄不顯示 Switch -->
-          <el-switch
-            v-if="selectedKey !== '/'"
-            v-model="ignoreSwitch"
-            active-text="已忽略"
-            inactive-text="未忽略"
-            :disabled="isInheritedIgnore"
-          />
-        </div>
 
-        <pre>{{ fileInfo }}</pre>
-      </div>
+      <!-- 依據選擇的節點類型，動態切換不同的顯示元件 -->
+      <component
+        :is="currentComponent"
+        :file-info="fileSummary"
+        :selected-key="selectedKey"
+        :ignore-switch="ignoreSwitch"
+        :is-inherited-ignore="isInheritedIgnore"
+        @toggle-ignore="onToggleIgnore"
+      />
     </div>
   </div>
 </template>
@@ -59,6 +54,11 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 // import { invoke } from "@tauri-apps/api"; // 若需呼叫後端 API，可解除註解
+
+// 引入不同類型顯示用的子元件
+import RootDisplay from "../components/zone/RootDisplay.vue";
+import FolderDisplay from "../components/zone/FolderDisplay.vue";
+import FileDisplay from "../components/zone/FileDisplay.vue";
 
 /**
  * 若您使用 Pinia / Vuex / 或自訂 state，請在此引入並取得 zonePath
@@ -81,7 +81,7 @@ const zonePath = ref("");
 const fileTree = ref([]);
 const selectedKey = ref("/");
 const selectedTitle = ref(projectName);
-const fileInfo = ref("");
+const fileSummary = ref("");
 const loading = ref(false);
 const treeRef = ref(null);
 
@@ -205,7 +205,7 @@ function applyIgnoreStatus(node, parentIgnored) {
     node.ignoredType = "";
   }
 
-  // 如果有子節點，遞迴下去
+  // 遞迴處理子節點
   if (node.children) {
     node.children.forEach((child) => {
       applyIgnoreStatus(child, node.ignored);
@@ -214,7 +214,21 @@ function applyIgnoreStatus(node, parentIgnored) {
 }
 
 /**
- * 右側檔案內容的 Switch，受 selectedKey (點選檔案/資料夾) 控制
+ * 取得目前選取的 node 物件 (若找不到則為 null)
+ */
+const selectedNode = computed(() => {
+  return findNodeByPath(fileTree.value, selectedKey.value);
+});
+
+/**
+ * 若是繼承忽略 (inherited)，就應該 disable Switch
+ */
+const isInheritedIgnore = computed(() => {
+  return selectedNode.value?.ignoredType === "inherited";
+});
+
+/**
+ * 右側檔案內容的 Switch 綁定
  */
 const ignoreSwitch = computed({
   get() {
@@ -224,20 +238,6 @@ const ignoreSwitch = computed({
   set(val) {
     toggleIgnore(selectedKey.value, val);
   },
-});
-
-/**
- * 回傳目前選取的 node 物件 (若找不到則為 null)
- */
-const selectedNode = computed(() => {
-  return findNodeByPath(fileTree.value, selectedKey.value);
-});
-
-/**
- * 若是繼承忽略 (inherited)，就應該 disable 開關
- */
-const isInheritedIgnore = computed(() => {
-  return selectedNode.value?.ignoredType === "inherited";
 });
 
 /**
@@ -263,60 +263,68 @@ function toggleIgnore(path, shouldIgnore) {
   // 重新套用 ignore 狀態
   applyIgnoreStatusToTree(fileTree.value);
 
-  // TODO: 呼叫後端 API，改成「傳整個 ignoredPaths」
+  // TODO: 呼叫後端 API 更新後端 ignore 狀態
   /*
-  invoke("update_ignore_file", {
+  invoke("update_ignore_list", {
     zone: zonePath.value,
-    // 每次都傳完整清單
     ignoredPaths: ignoredPaths.value,
-  })
-    .then((res) => {
-      console.log("Ignore 更新成功", res);
-    })
-    .catch((err) => {
-      console.error("Ignore 更新失敗", err);
-      // 回復舊狀態
-      ignoredPaths.value = oldIgnoredPaths;
-      applyIgnoreStatusToTree(fileTree.value);
-    });
+  }).catch((err) => {
+    console.error("Ignore 更新失敗", err);
+    // 回復舊狀態
+    ignoredPaths.value = oldIgnoredPaths;
+    applyIgnoreStatusToTree(fileTree.value);
+  });
   */
 }
 
 /**
- * Event Handlers
+ * 動態決定要顯示哪個子元件
+ */
+const currentComponent = computed(() => {
+  if (selectedKey.value === "/") {
+    return RootDisplay;
+  } else if (selectedNode.value?.isDirectory) {
+    return FolderDisplay;
+  } else {
+    return FileDisplay;
+  }
+});
+
+/**
+ * 右側元件 emit 出 toggle-ignore 時，實際呼叫父層的邏輯
+ */
+function onToggleIgnore({ path, shouldIgnore }) {
+  toggleIgnore(path, shouldIgnore);
+}
+
+/**
+ * 點擊樹狀節點
  */
 function handleNodeClick(node) {
   selectedKey.value = node.path;
   selectedTitle.value = node.name;
   loading.value = true;
 
-  setTimeout(async () => {
+  setTimeout(() => {
     if (node.path === "/") {
-      fileInfo.value = `{ "project": "${projectName}", "version": "1.0.0", "description": "A file sorting app built with Vue and Rust." }`;
+      fileSummary.value = `{ "project": "${projectName}", "version": "1.0.0", "description": "A file sorting app built with Vue and Rust." }`;
     } else if (node.isDirectory) {
-      fileInfo.value = "這是資料夾，請選擇一個檔案來查看內容";
+      fileSummary.value = "這是資料夾，請選擇一個檔案來查看內容";
     } else {
-      // TODO: 呼叫後端 API 來取得檔案資訊
-      /*
-      try {
-        const info = await invoke("get_file_info", {
-          zone: zonePath.value,
-          filePath: node.path,
-        });
-        fileInfo.value = JSON.stringify(info, null, 2);
-      } catch (error) {
-        console.error("取得檔案資訊失敗:", error);
-        fileInfo.value = "無法獲取檔案資訊";
-      }
-      */
+      // TODO: 呼叫後端 API 取得檔案資訊
+      // const info = await invoke("get_file_info", { zone: zonePath.value, filePath: node.path });
+      // fileSummary.value = JSON.stringify(info, null, 2);
 
-      // 目前先用 mock 資料
-      fileInfo.value = mockFileData[node.path] || "無法獲取檔案資訊";
+      // 暫時先使用 mock
+      fileSummary.value = mockFileData[node.path] || "無法獲取檔案資訊";
     }
     loading.value = false;
   }, 50);
 }
 
+/**
+ * 拖曳/放下檔案或資料夾
+ */
 async function handleDrop(draggingNode, dropNode, dropType, ev) {
   console.log("tree drop:", {
     dragging: draggingNode.data.path,
@@ -328,7 +336,7 @@ async function handleDrop(draggingNode, dropNode, dropType, ev) {
   const destDirectoryPath = dropNode.data.path;
   const fileName = draggingNode.data.name;
 
-  // Construct new path
+  // 新路徑
   const newPath =
     destDirectoryPath === "/"
       ? `/${fileName}`
@@ -343,7 +351,6 @@ async function handleDrop(draggingNode, dropNode, dropType, ev) {
       src: srcPath,
       dest: newPath,
     });
-    console.log("move_file result:", result);
   } catch (error) {
     console.error("move_file failed:", error);
     return;
@@ -377,7 +384,6 @@ async function handleDrop(draggingNode, dropNode, dropType, ev) {
  * Drag / Drop Rules
  */
 function allowDrag(node) {
-  console.log("tree drag:", node.name);
   // 根目錄 ("/") 不可被拖曳
   return node.data.path !== "/";
 }
@@ -429,7 +435,7 @@ onMounted(async () => {
   applyIgnoreStatusToTree(fileTree.value);
 
   // 5. 預設顯示根目錄資訊
-  fileInfo.value = `{ "project": "${projectName}", "version": "1.0.0", "description": "A file sorting app built with Vue and Rust." }`;
+  fileSummary.value = `{ "project": "${projectName}", "version": "1.0.0", "description": "A file sorting app built with Vue and Rust." }`;
 });
 </script>
 
