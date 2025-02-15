@@ -32,7 +32,7 @@
           </el-button>
         </el-col>
         <el-col :span="3">
-          <el-button type="primary" @click="submitForm">
+          <el-button type="primary" :loading="loading" @click="submitForm">
             Submit
             <el-icon class="el-icon--right"><ArrowRight /></el-icon>
           </el-button>
@@ -45,8 +45,12 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { ElButton } from "element-plus";
+import { ElButton, ElMessage } from "element-plus";
 import { ArrowRight, ArrowLeft } from "@element-plus/icons-vue";
+// import { invoke } from "@tauri-apps/api/tauri";
+import { useFormStore } from "../../store/form";
+import { useRuleStore } from "../../store/rule";
+import { useZoneStore } from "../../store/zone";
 
 import file_types from "../../components/survey/file_types.vue";
 import logic_habit from "../../components/survey/logic_habit.vue";
@@ -57,10 +61,10 @@ import naming_style from "../../components/survey/naming_style.vue";
 import archival_tendency from "../../components/survey/archival_tendency.vue";
 
 const router = useRouter();
-
-function navigateTo(page) {
-  router.push(`/${page}`);
-}
+const formStore = useFormStore();
+const ruleStore = useRuleStore();
+const zoneStore = useZoneStore();
+const loading = ref(false);
 
 const initialFormState = {
   file_types: [],
@@ -81,9 +85,38 @@ const resetForm = () => {
   console.log("表單已重置:", formResponse.value);
 };
 
-const submitForm = () => {
-  console.log("提交的表單資料:", formResponse.value);
-  navigateTo("zone-wizard/CheckRule");
+const submitForm = async () => {
+  loading.value = true;
+  try {
+    // 1. 存入 Pinia 的 surveyData
+    formStore.setFormResponse(formResponse.value);
+
+    // 2. 呼叫 Tauri API 生成 rule.json
+    const ruleJson = await invoke("ai_create_rule", {
+      zone_name: zoneStore.zoneName,
+      zone_path: zoneStore.path,
+      create_from_structure: false,
+      form_question: formStore.formQuestion,
+      form_response: formResponse.value,
+    });
+    const ruleJson = {};
+
+    // 3. 存入 Pinia 的 ruleData
+    ruleStore.setRule(ruleJson);
+
+    // 4. 顯示成功訊息並跳轉
+    ElMessage.success("AI 生成規則成功！");
+    router.push("/zone-wizard/CheckRule");
+  } catch (error) {
+    console.error("API 調用失敗:", error);
+    ElMessage.error("生成規則時發生錯誤");
+  } finally {
+    loading.value = false;
+  }
+};
+
+const navigateTo = (page) => {
+  router.push(`/${page}`);
 };
 </script>
 
