@@ -26,8 +26,3 @@ dist-ssr
 .env
 ai/*/respond.json
 src/views/Test.vue
-
-watcher/*.o
-watcher/*.exe
-watcher/*.db
-watcher/test/*
