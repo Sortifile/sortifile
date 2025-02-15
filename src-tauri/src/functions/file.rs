@@ -80,6 +80,6 @@ pub async fn move_file(zone_path: &str, src_path: &str, new_path: &str, moved_by
             zone_path, src_path, new_path, moved_by, reason
         )
         .as_str(),
-    );
+    ).await.unwrap();
     Ok(())
 }
