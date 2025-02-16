@@ -44,6 +44,6 @@ export default {
 }
 
 .navbar a:hover {
-  color: #007bff; /* 滑鼠懸停變為藍色 */
+  color: #54b9ac; /* 滑鼠懸停變為藍色 */
 }
 </style>

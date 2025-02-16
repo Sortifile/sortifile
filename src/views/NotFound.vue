@@ -30,7 +30,7 @@ export default {
 
 .not-found a {
   font-size: 18px;
-  color: #42b983;
+  color: #54b9ac;
   text-decoration: none;
 }
 </style>
