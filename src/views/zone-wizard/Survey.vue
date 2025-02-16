@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <el-row justify="space-between" :align="middle" :gutter="35">
+    <el-row justify="space-between" align="middle" :gutter="35">
       <el-col :span="21">
         <h1>Survey</h1>
       </el-col>
