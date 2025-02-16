@@ -15,10 +15,14 @@
       </el-form-item>
 
       <!-- 路徑 -->
-      <el-form-item label="Root Folder Path" prop="path" label-position="left">
+      <el-form-item
+        label="Root Folder Path"
+        prop="rootPath"
+        label-position="left"
+      >
         <el-col :span="19">
           <el-input
-            v-model="zoneStore.path"
+            v-model="zoneStore.rootPath"
             placeholder="請選擇路徑"
             readonly
           />
@@ -76,14 +80,14 @@ const zoneStore = useZoneStore();
 const rules = {
   // NOTE: 這裡的 required 設為 false，only for development
   zoneName: [{ required: false, message: "請輸入 Zone 名稱", trigger: "blur" }],
-  path: [{ required: false, message: "請選擇路徑", trigger: "blur" }],
+  rootPath: [{ required: false, message: "請選擇路徑", trigger: "blur" }],
 };
 
 // 送出表單
 const submitForm = () => {
   formRef.value.validate((valid) => {
     if (valid) {
-      console.log("提交的資料：", zoneStore.zoneName, zoneStore.path);
+      console.log("提交的資料：", zoneStore.zoneName, zoneStore.rootPath);
       navigateTo("survey");
     }
   });

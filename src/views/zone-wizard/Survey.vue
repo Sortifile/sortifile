@@ -94,7 +94,7 @@ const submitForm = async () => {
     // 2. 呼叫 Tauri API 生成 rule.json
     // const ruleJson = await invoke("ai_create_rule", {
     //   zone_name: zoneStore.zoneName,
-    //   zone_path: zoneStore.path,
+    //   zone_path: zoneStore.rootPath,
     //   create_from_structure: false,
     //   form_question: formStore.formQuestion,
     //   form_response: formResponse.value,

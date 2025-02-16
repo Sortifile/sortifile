@@ -3,18 +3,22 @@ import { defineStore } from "pinia";
 export const useZoneStore = defineStore("zone", {
   state: () => ({
     zoneName: "",
-    path: "",
+    rootPath: "",
   }),
   actions: {
+    setZone(zoneName, path) {
+      this.zoneName = zoneName;
+      this.rootPath = path;
+    },
     setZoneName(name) {
       this.zoneName = name;
     },
     setPath(path) {
-      this.path = path;
+      this.rootPath = path;
     },
     resetZone() {
       this.zoneName = "";
-      this.path = "";
+      this.rootPath = "";
     },
   },
 });
