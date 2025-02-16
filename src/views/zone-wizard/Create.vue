@@ -27,7 +27,7 @@
             readonly
           />
         </el-col>
-        <el-col :span="5" align="right">
+        <el-col :span="5" :align="right">
           <el-button type="primary" @click="selectPath" plain>
             選擇路徑
           </el-button>
@@ -40,7 +40,7 @@
         <el-col :span="5">
           <el-button @click="navigateTo('')">上一步</el-button>
         </el-col>
-        <el-col :span="19" align="right">
+        <el-col :span="19" :align="right">
           <el-button @click="resetForm">重設</el-button>
           <el-button type="primary" @click="submitForm">
             建立

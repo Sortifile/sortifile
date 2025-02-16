@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <el-row justify="space-between" align="middle" :gutter="20">
+    <el-row justify="space-between" :align="middle" :gutter="20">
       <el-col :span="16">
         <h1>Confirming Zone Rules</h1>
       </el-col>
