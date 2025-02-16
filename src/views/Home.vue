@@ -17,7 +17,6 @@ async function greet() {
     console.error("Error invoking greet:", error);
   }
 }
-
 </script>
 
 <template>
@@ -42,10 +41,18 @@ async function greet() {
       <el-button class="button" type="primary" @click="navigateTo('help')">
         Help
       </el-button>
-      <el-button class="button" type="primary" @click="greet()">
+      <el-button
+        class="button"
+        type="primary"
+        @click="navigateTo('invoketesting')"
+      >
         invoke
       </el-button>
-      <el-button class="button" type="primary" @click="invoke('call_api', {content: '祝烏鴉倫新年快樂'})">
+      <el-button
+        class="button"
+        type="primary"
+        @click="invoke('call_api', { content: '祝烏鴉倫新年快樂' })"
+      >
         greet
       </el-button>
     </div>
