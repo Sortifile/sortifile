@@ -2,6 +2,7 @@ use crate::functions::sql;
 use serde_json::ser;
 use sqlx::{any, sqlite::{SqliteQueryResult, SqliteRow}, sqlx_macros, Column, Error, Row, Sqlite, SqlitePool};
 use serde::{Serialize, Deserialize};
+use tauri::utils::config;
 use super::sql::get_value_as_string;
 #[derive(Debug, Serialize, Deserialize)]
 struct Zone {
@@ -9,7 +10,7 @@ struct Zone {
     root_path: String,
 }
 #[tauri::command]
-pub async fn create_zone(zone_name: &str, root_path: &str) -> Result<(), sqlx::Error> {
+pub async fn create_zone(zone_name: &str, root_path: &str, config: String, ignore: String, rules: &str) -> Result<(), sqlx::Error> {
     let db=sql::get_db().await;
     db.exec(format!("CREATE TABLE IF NOT EXISTS zone_{} (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -18,7 +19,9 @@ pub async fn create_zone(zone_name: &str, root_path: &str) -> Result<(), sqlx::E
         last_modified_date TEXT,
         last_summary_date TEXT
     );", zone_name).as_str()).await.unwrap();
-    db.exec(format!("INSERT INTO zone_list (zone_name, root_path) VALUES ('{}', '{}');", zone_name, root_path).as_str()).await.unwrap();
+    db.exec(format!("INSERT INTO zone_list (zone_name, root_path, zone_rules) VALUES ('{}', '{}', '{}');", zone_name, root_path, rules).as_str()).await.unwrap();
+    std::fs::write(format!("{}/.sortifile.conf", root_path), config).unwrap();
+    std::fs::write(format!("{}/.sortifile-ignore", root_path), ignore).unwrap();
     // dfs and add all files to the database
     Ok(())
 }
@@ -54,5 +57,17 @@ pub async fn get_zone_rules(zone_name: &str) -> Result<String, Error> {
 pub async fn set_zone_rules(zone_name: &str, rules: &str) -> Result<(), Error> {
     let db = sql::get_db().await;
     db.exec(format!("UPDATE zone_list SET zone_rules='{}' WHERE zone_name='{}';", rules, zone_name).as_str()).await.unwrap();
+    Ok(())
+}
+
+
+#[tauri::command]
+pub async fn delete_zone(zone_name: &str) -> Result<(), Error> {
+    let db = sql::get_db().await;
+    db.exec(format!("DROP TABLE zone_{};", zone_name).as_str()).await.unwrap();
+    db.exec(format!("DELETE FROM zone_list WHERE zone_name='{}';", zone_name).as_str()).await.unwrap();
+    let zone_list = db.exec_select(format!("SELECT root_path FROM zone_list WHERE zone_name='{}';", zone_name).as_str()).await.unwrap();
+    let root_path = get_value_as_string(&zone_list[0], 0);
+    std::fs::remove_file(format!("{}/.sortifile.conf", root_path)).unwrap();
     Ok(())
 }

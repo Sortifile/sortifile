@@ -1,6 +1,9 @@
 use tauri::async_runtime;
 use std::fs;
+use std::io;
+use std::path::{Path, PathBuf};
 use serde::{Serialize, Deserialize};
+use serde_json;
 use crate::functions::sql;
 use sqlx::{any, sqlite::{SqliteQueryResult, SqliteRow}, sqlx_macros, Column, Error, Row, Sqlite, SqlitePool};
 #[derive(Debug, Serialize, Deserialize)]
@@ -82,4 +85,93 @@ pub async fn move_file(zone_path: &str, src_path: &str, new_path: &str, moved_by
         .as_str(),
     ).await.unwrap();
     Ok(())
+}
+
+#[tauri::command]
+pub fn get_igonore_list(zone_path: &str) -> Result<String, std::io::Error> {
+    let ignore_list = fs::read_to_string(format!("{}/.sortifile-ignore", zone_path));
+    match ignore_list {
+        Ok(list) => Ok(list),
+        Err(e) => Err(e),
+    }
+}
+
+#[tauri::command]
+pub fn set_ignore_list(zone_path: &str, ignore_list: &str) -> Result<(), std::io::Error> {
+    fs::write(format!("{}/.sortifile-ignore", zone_path), ignore_list)?;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn get_project_file(zone_path: &str) -> Result<String, std::io::Error> {
+    let project_file = fs::read_to_string(format!("{}/.sortifile.conf", zone_path));
+    match project_file {
+        Ok(file) => Ok(file),
+        Err(e) => Err(e),
+    }
+}
+
+#[tauri::command]
+pub fn set_project_file(zone_path: &str, project_file: &str) -> Result<(), std::io::Error> {
+    fs::write(format!("{}/.sortifile.conf", zone_path), project_file)?;
+    Ok(())
+}
+
+#[derive(Debug, serde::Serialize)]
+struct FileNode {
+    name: String,
+    path: String,
+    is_directory: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    children: Option<Vec<FileNode>>,
+}
+
+/// Recursively builds a `FileNode` for the given path.
+fn build_file_node(path: &Path) -> io::Result<FileNode> {
+    let metadata = fs::metadata(path)?;
+    let is_directory = metadata.is_dir();
+    let name = path
+        .file_name()
+        .map(|os_str| os_str.to_string_lossy().into_owned())
+        // For the root path, use the whole path string.
+        .unwrap_or_else(|| path.to_string_lossy().into_owned());
+
+    let path_str = path.to_string_lossy().into_owned();
+
+    let children = if is_directory {
+        // Read the directory entries and recursively build child nodes.
+        let mut nodes = Vec::new();
+        for entry in fs::read_dir(path)? {
+            let entry = entry?;
+            let child_path = entry.path();
+            nodes.push(build_file_node(&child_path)?);
+        }
+        Some(nodes)
+    } else {
+        None
+    };
+
+    Ok(FileNode {
+        name,
+        path: path_str,
+        is_directory,
+        children,
+    })
+}
+
+fn gen_file_tree(root: &Path) -> io::Result<Vec<FileNode>> {
+    let mut nodes = Vec::new();
+    for entry in fs::read_dir(root)? {
+        let entry = entry?;
+        nodes.push(build_file_node(&entry.path())?);
+    }
+    Ok(nodes)
+}
+
+#[tauri::command]
+pub fn get_file_tree(root_path: String) -> Result<String, io::Error> {
+    let path = PathBuf::from(root_path);
+    let file_tree = gen_file_tree(&path).unwrap();
+    let json = serde_json::to_string_pretty(&file_tree).expect("Failed to serialize file tree to JSON");
+    Ok(json)
 }
