@@ -3,6 +3,8 @@ use sqlx::{SqlitePool, Error};
 use tauri::State;
 use std::sync::Arc;
 use dirs::data_dir;
+use std::env;
+
 use std::path::PathBuf;
 use functions::sql::Database;
 use tokio::runtime::Runtime; // Import tokio runtime
@@ -26,9 +28,12 @@ pub fn run() {
         let db = Database::new(&db_url).await; // Await the async new function
         db.get_pool(); // Call the synchronous get_pool function
         db.create_zone_table("test").await.unwrap(); // Await the async create_zone_table function
-        db.listen_for_changes().await; // Await the async listen_for_changes function
+        //db.listen_for_changes().await; // Await the async listen_for_changes function
     });
-
+    match env::var("APPDATA") {
+        Ok(appdata) => println!("APPDATA is: {}", appdata),
+        Err(e) => println!("Couldn't read APPDATA: {}", e),
+    }
     // Tauri application initialization
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
