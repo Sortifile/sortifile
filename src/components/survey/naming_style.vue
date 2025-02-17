@@ -97,7 +97,6 @@
 <script setup>
 import { ref, watch } from "vue";
 import draggable from "vuedraggable";
-import { defineProps, defineEmits } from "vue";
 
 const props = defineProps(["namingFormat", "dateFormat", "fileNameRule"]);
 const emit = defineEmits([

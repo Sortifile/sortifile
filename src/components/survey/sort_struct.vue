@@ -70,7 +70,6 @@
 <script setup>
 import { ref, watch } from "vue";
 import draggable from "vuedraggable";
-import { defineProps, defineEmits } from "vue";
 
 const props = defineProps({ modelValue: Array });
 const emit = defineEmits(["update:modelValue"]);

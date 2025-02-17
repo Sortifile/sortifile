@@ -1,6 +1,4 @@
 <script setup>
-import { defineProps, defineEmits, ref } from "vue";
-
 const props = defineProps({
   modelValue: Array, // 使用 Array 來存儲多選結果
 });

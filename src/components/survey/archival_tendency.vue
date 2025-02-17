@@ -1,8 +1,6 @@
 <!-- Problem 7 -->
 
 <script setup>
-import { defineProps, defineEmits } from "vue";
-
 const props = defineProps({
   modelValue: String, // 單選
 });
