@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     :model-value="modelValue"
-    title="File Movement History"
+    title="History File Movements"
     width="95%"
     @update:modelValue="updateVisible"
   >
