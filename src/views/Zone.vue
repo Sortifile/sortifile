@@ -407,7 +407,7 @@ function handleNodeClick(node) {
     if (node.path === "/") {
       fileSummary.value = `{ "project": "${zoneName}", "version": "1.0.0", "description": "A file sorting app built with Vue and Rust." }`;
     } else if (node.isDirectory) {
-      fileSummary.value = "這是資料夾，請選擇一個檔案來查看內容";
+      fileSummary.value = { message: "這是資料夾，請選擇一個檔案來查看內容" };
     } else {
       // TODO: 呼叫後端 API 取得檔案資訊
       // const info = await invoke("get_file_info", { zone: zonePath.value, filePath: node.path });
