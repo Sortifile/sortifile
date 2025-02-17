@@ -9,14 +9,15 @@
     <el-table
       ref="tableRef"
       :data="sortResult.file_movements"
-      border
       style="width: 100%"
       @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="35" />
-      <el-table-column prop="src_path" label="Original File" />
-      <el-table-column prop="new_path" label="New Path" />
-      <el-table-column prop="reason" label="Reason" />
+      <el-table-column>
+        <template #default="scope">
+          <FileMoveItem :movement="scope.row" />
+        </template>
+      </el-table-column>
     </el-table>
 
     <template #footer>
@@ -30,7 +31,8 @@
 
 <script setup>
 import { defineProps, defineEmits, ref, onMounted, watch } from "vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+import { ElMessage, ElMessageBox, SCOPE } from "element-plus";
+import FileMoveItem from "./FileMoveItem.vue";
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -76,9 +78,7 @@ function handleClose() {
       ElMessage({ message: "Moving Files Canceled.", type: "warning" });
       updateVisible(false);
     })
-    .catch(() => {
-      ElMessage.error("Error occurred while canceling sorting process.");
-    });
+    .catch(() => {});
 }
 
 function handleConfirm() {
