@@ -69,6 +69,7 @@
     :sortResult="sortResult"
     @confirm-selection="handleConfirmedMoves"
   />
+  <History v-model="isHistoryDialogVisible" />
 </template>
 
 <script setup>
@@ -84,6 +85,7 @@ import FolderDisplay from "../components/zone/FolderDisplay.vue";
 import FileDisplay from "../components/zone/FileDisplay.vue";
 
 import SortConfirm from "../components/zone/SortConfirm.vue";
+import History from "../components/zone/History.vue";
 
 // Store
 import { useZoneStore } from "../store/zone";
@@ -161,8 +163,10 @@ const mockFileData = {
 /**
  * 右上方按鈕
  */
+const isHistoryDialogVisible = ref(false);
 function handleShowHistory() {
   console.log("Show History");
+  isHistoryDialogVisible.value = true;
 }
 
 function handleSummarizeAll() {

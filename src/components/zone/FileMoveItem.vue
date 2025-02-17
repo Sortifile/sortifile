@@ -20,7 +20,7 @@
         </el-tag>
         <pre>{{ movement.new_path }}</pre>
       </div>
-      <div class="row">
+      <div class="row" v-if="movement.moved_by === 'system'">
         <el-tag type="danger" effect="plain" class="no-border-tag">
           移動原因：
         </el-tag>
@@ -51,7 +51,7 @@ const moveType = computed(() => {
 <style scoped>
 .file-move-item {
   width: 100%;
-  margin: 10px 0;
+  margin: 0;
   position: relative;
   padding: 0;
 }
