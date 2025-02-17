@@ -25,13 +25,12 @@ const props = defineProps({
   summary: { type: JSON, default: {} },
   ignoreSwitch: { type: Boolean, default: false },
   isInheritedIgnore: { type: Boolean, default: false },
-  selectedKey: { type: String, default: "" },
 });
 
 const emits = defineEmits(["toggle-ignore"]);
 
 function onSwitchChange(val) {
-  emits("toggle-ignore", { path: props.filePath, shouldIgnore: val });
+  emits("toggle-ignore", { path: props.path, shouldIgnore: val });
 }
 </script>
 
