@@ -34,11 +34,14 @@
 
     <!-- 右側資訊顯示 -->
     <div class="content-display">
-      <el-row align="middle" :gutter="10">
+      <el-row :gutter="20" align="middle" justify="end" style="max-width: 100%">
         <el-col :span="9">
           <h2>{{ zoneName }}</h2>
         </el-col>
-        <el-col :span="15">
+        <el-col
+          :span="15"
+          style="display: flex; justify-content: flex-end; padding-right: 20px"
+        >
           <el-button type="danger" plain>
             <el-icon><DeleteFilled /></el-icon>
           </el-button>
@@ -50,18 +53,30 @@
           </el-button>
         </el-col>
       </el-row>
-      <el-skeleton v-if="loading" :rows="5" animated />
 
       <!-- 依據選擇的節點類型，動態切換不同的顯示元件 -->
-      <component
-        :is="currentComponent"
-        :name="selectedTitle"
-        :path="selectedPath"
-        :summary="fileSummary"
-        :ignore-switch="ignoreSwitch"
-        :is-inherited-ignore="isInheritedIgnore"
-        @toggle-ignore="onToggleIgnore"
-      />
+      <div class="right-content">
+        <el-skeleton v-if="loading" :rows="5" animated />
+        <ZoneDisplay v-else-if="selectedPath === '/'" />
+        <FolderDisplay
+          v-else-if="selectedNode && selectedNode.isDirectory"
+          :name="selectedTitle"
+          :path="selectedPath"
+          :ignore-switch="ignoreSwitch"
+          :is-inherited-ignore="isInheritedIgnore"
+          @toggle-ignore="toggleIgnore"
+          @sort-folder="handleSortFolder"
+        />
+        <FileDisplay
+          v-else
+          :name="selectedTitle"
+          :path="selectedPath"
+          :summary="fileSummary"
+          :ignore-switch="ignoreSwitch"
+          :is-inherited-ignore="isInheritedIgnore"
+          @toggle-ignore="toggleIgnore"
+        />
+      </div>
     </div>
   </div>
   <SortConfirm
@@ -80,7 +95,7 @@ import { ElMessageBox, ElMessage, ElLoading } from "element-plus";
 // import { invoke } from "@tauri-apps/api"; // 若需呼叫後端 API，可解除註解
 
 // 右側區塊大元件
-import RootDisplay from "../components/zone/ZoneDisplay.vue";
+import ZoneDisplay from "../components/zone/ZoneDisplay.vue";
 import FolderDisplay from "../components/zone/FolderDisplay.vue";
 import FileDisplay from "../components/zone/FileDisplay.vue";
 
@@ -92,6 +107,7 @@ import { useZoneStore } from "../store/zone";
 import { useRuleStore } from "../store/rule";
 import { useFormStore } from "../store/form";
 import { storeToRefs } from "pinia";
+import { el } from "element-plus/es/locales.mjs";
 
 const zoneStore = useZoneStore();
 const ruleStore = useRuleStore();
@@ -150,7 +166,6 @@ const mockFileTree = [
   { name: "package.json", path: "/package.json", isDirectory: false },
   { name: "README.md", path: "/README.md", isDirectory: false },
 ];
-
 const mockFileData = {
   "/src/main.js": `{ "type": "JavaScript", "size": "2KB", "modified": "2025-02-10" }`,
   "/src/App.vue": `{ "type": "Vue Component", "size": "3KB", "modified": "2025-02-09" }`,
@@ -217,6 +232,69 @@ async function handleSortAll() {
           },
         ],
       }; // TODO: await invoke("sort_all");
+
+      if (typeof result === "object" && result !== null) {
+        sortResult.value = result; // 確保 Vue 直接接收物件
+      } else {
+        console.error("Unexpected API response:", result);
+        throw new Error("Invalid response format from backend");
+      }
+      isSortResultDialogVisible.value = true;
+    } catch (error) {
+      console.error("API call failed:", error);
+      ElMessage({
+        type: "error",
+        message: error?.toString() || "Sorting failed.",
+      });
+    } finally {
+      if (loadingInstance) loadingInstance.close();
+    }
+  } catch {
+    ElMessage({
+      type: "info",
+      message: "Sort canceled",
+    });
+  }
+}
+
+async function handleSortFolder(folderPath, folderName) {
+  console.log("Sort Folder:", folderPath, folderName);
+  try {
+    await ElMessageBox.confirm(
+      "This will sort folder " + folderPath + ". Continue?",
+      {
+        confirmButtonText: "OK",
+        cancelButtonText: "Cancel",
+        type: "info",
+      },
+    );
+
+    let loadingInstance;
+    try {
+      loadingInstance = ElLoading.service({
+        lock: true,
+        text: "Sorting...",
+        background: "rgba(0, 0, 0, 0.7)",
+      });
+
+      // 呼叫 Rust API
+      const result = {
+        file_movements: [
+          {
+            src_path: "報告_改.pdf",
+            new_path: "113-1/國文/報告/聊齋.pdf",
+            moved_by: "system",
+            reason: "blablabla",
+          },
+          {
+            src_path: "ffffff報告_改.pdf",
+            new_path:
+              "113-1/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/aaaaaaa.pdf",
+            moved_by: "system",
+            reason: "blablabla",
+          },
+        ],
+      }; // TODO: await invoke("sort_folder", { folderPath });
 
       if (typeof result === "object" && result !== null) {
         sortResult.value = result; // 確保 Vue 直接接收物件
@@ -379,24 +457,6 @@ function toggleIgnore(path, shouldIgnore) {
   */
 }
 
-/**
- * 右側區塊
- */
-const currentComponent = computed(() => {
-  if (selectedPath.value === "/") {
-    return RootDisplay;
-  } else if (selectedNode.value?.isDirectory) {
-    return FolderDisplay;
-  } else {
-    return FileDisplay;
-  }
-});
-
-// 右側元件 emit 出 toggle-ignore 時，轉為非 json 格式呼叫
-function onToggleIgnore({ path, shouldIgnore }) {
-  toggleIgnore(path, shouldIgnore);
-}
-
 // 點擊樹狀節點
 function handleNodeClick(node) {
   selectedPath.value = node.path;
@@ -405,9 +465,9 @@ function handleNodeClick(node) {
 
   setTimeout(() => {
     if (node.path === "/") {
-      fileSummary.value = `{ "project": "${zoneName}", "version": "1.0.0", "description": "A file sorting app built with Vue and Rust." }`;
+      fileSummary.value = {};
     } else if (node.isDirectory) {
-      fileSummary.value = { message: "這是資料夾，請選擇一個檔案來查看內容" };
+      fileSummary.value = {};
     } else {
       // TODO: 呼叫後端 API 取得檔案資訊
       // const info = await invoke("get_file_info", { zone: zonePath.value, filePath: node.path });
@@ -560,10 +620,6 @@ onMounted(async () => {
   overflow: hidden;
 }
 
-.ignore-toggle {
-  margin-bottom: 10px;
-}
-
 pre {
   background: #f5f5f5;
   padding: 10px;
@@ -582,5 +638,10 @@ pre {
 /* 若是繼承而來的忽略，可再額外加底色或其他標示 (視需求) */
 .inherited-file {
   background-color: rgba(0, 0, 0, 0.05);
+}
+
+.right-content {
+  margin-top: 20px;
+  width: 100%;
 }
 </style>

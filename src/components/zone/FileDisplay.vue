@@ -30,10 +30,12 @@ const props = defineProps({
 const emits = defineEmits(["toggle-ignore"]);
 
 function onSwitchChange(val) {
-  emits("toggle-ignore", { path: props.path, shouldIgnore: val });
+  emits("toggle-ignore", props.path, val);
 }
 </script>
 
 <style scoped>
-/* 依需要調整樣式 */
+.ignore-toggle {
+  margin-bottom: 10px;
+}
 </style>
