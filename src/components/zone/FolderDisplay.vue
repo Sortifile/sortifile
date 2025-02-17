@@ -1,5 +1,7 @@
 <template>
   <div>
+    <h3>{{ name }}</h3>
+
     <!-- 資料夾專屬畫面 -->
     <div class="ignore-toggle">
       <!-- 使用 :model-value + @change，而不是 v-model -->
@@ -11,14 +13,16 @@
         @change="onSwitchChange"
       />
     </div>
-    <p>這是資料夾，rrrr請選擇一個檔案查看內容：</p>
-    <pre>{{ fileInfo }}</pre>
+    <p>這是資料夾，請選擇一個檔案查看內容。</p>
+    <pre>{{ summary }}</pre>
   </div>
 </template>
 
 <script setup>
 const props = defineProps({
-  fileInfo: { type: String, default: "" },
+  name: { type: String, default: "" },
+  path: { type: String, default: "" },
+  summary: { type: JSON, default: {} },
   ignoreSwitch: { type: Boolean, default: false },
   isInheritedIgnore: { type: Boolean, default: false },
   selectedKey: { type: String, default: "" },

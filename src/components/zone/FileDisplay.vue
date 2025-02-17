@@ -1,5 +1,7 @@
 <template>
   <div>
+    <h3>{{ name }}</h3>
+
     <!-- 檔案專屬畫面 -->
     <div class="ignore-toggle">
       <!-- 一樣使用 :model-value + @change -->
@@ -12,13 +14,15 @@
       />
     </div>
     <p>這是檔案內容：</p>
-    <pre>{{ fileInfo }}</pre>
+    <pre>{{ summary }}</pre>
   </div>
 </template>
 
 <script setup>
 const props = defineProps({
-  fileInfo: { type: String, default: "" },
+  name: { type: String, default: "" },
+  path: { type: String, default: "" },
+  summary: { type: JSON, default: {} },
   ignoreSwitch: { type: Boolean, default: false },
   isInheritedIgnore: { type: Boolean, default: false },
   selectedKey: { type: String, default: "" },
@@ -27,7 +31,7 @@ const props = defineProps({
 const emits = defineEmits(["toggle-ignore"]);
 
 function onSwitchChange(val) {
-  emits("toggle-ignore", { path: props.selectedKey, shouldIgnore: val });
+  emits("toggle-ignore", { path: props.filePath, shouldIgnore: val });
 }
 </script>
 

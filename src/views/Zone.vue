@@ -17,7 +17,6 @@
           @node-drop="handleDrop"
           @node-click="handleNodeClick"
         >
-          <!-- slot 自訂 Tree 節點 -->
           <template #default="{ node, data }">
             <!-- 若 data.ignored 為 true，代表被忽略（無論 explicit or inherited） -->
             <span
@@ -35,65 +34,82 @@
 
     <!-- 右側資訊顯示 -->
     <div class="content-display">
-      <h2>{{ selectedTitle }}</h2>
+      <el-row align="middle" :gutter="10">
+        <el-col :span="9">
+          <h2>{{ zoneName }}</h2>
+        </el-col>
+        <el-col :span="15">
+          <el-button type="danger" plain>
+            <el-icon><DeleteFilled /></el-icon>
+          </el-button>
+          <el-button @click="handleShowHistory">Show History</el-button>
+          <el-button @click="handleSummarizeAll">Summarize All</el-button>
+          <el-button @click="handleRenewRules">Renew Rules</el-button>
+          <el-button type="primary" @click="handleSortAll">
+            Sort All
+          </el-button>
+        </el-col>
+      </el-row>
       <el-skeleton v-if="loading" :rows="5" animated />
 
       <!-- 依據選擇的節點類型，動態切換不同的顯示元件 -->
       <component
         :is="currentComponent"
-        :file-info="fileSummary"
-        :selected-key="selectedKey"
+        :name="selectedTitle"
+        :path="selectedPath"
+        :summary="fileSummary"
         :ignore-switch="ignoreSwitch"
         :is-inherited-ignore="isInheritedIgnore"
         @toggle-ignore="onToggleIgnore"
       />
     </div>
   </div>
+  <SortConfirm
+    v-model="isSortResultDialogVisible"
+    :sortResult="sortResult"
+    @confirm-selection="handleConfirmedMoves"
+  />
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
+import { DeleteFilled } from "@element-plus/icons-vue";
+import { ElMessageBox, ElMessage, ElLoading } from "element-plus";
+
 // import { invoke } from "@tauri-apps/api"; // 若需呼叫後端 API，可解除註解
 
-// 引入不同類型顯示用的子元件
-import RootDisplay from "../components/zone/RootDisplay.vue";
+// 右側區塊大元件
+import RootDisplay from "../components/zone/ZoneDisplay.vue";
 import FolderDisplay from "../components/zone/FolderDisplay.vue";
 import FileDisplay from "../components/zone/FileDisplay.vue";
 
-/**
- * 若您使用 Pinia / Vuex / 或自訂 state，請在此引入並取得 zonePath
- * 以下僅示意，請依您實際使用的狀況調整
- */
-// import { useZoneStore } from "@/stores/zone";
-// import { storeToRefs } from "pinia";
+import SortConfirm from "../components/zone/SortConfirm.vue";
 
-const projectName = "Sortifile";
+// Store
+import { useZoneStore } from "../store/zone";
+import { useRuleStore } from "../store/rule";
+import { useFormStore } from "../store/form";
+import { storeToRefs } from "pinia";
 
-/**
- * 這裡模擬透過 store 取得 zonePath，也可以直接在此定義一個 ref，
- * 在 onMounted 中做 API 呼叫前先設定其值
- */
-const zonePath = ref("");
-// 假設您使用 Pinia，可以這樣做：
-// const zoneStore = useZoneStore();
-// const { zonePath } = storeToRefs(zoneStore);
+const zoneStore = useZoneStore();
+const ruleStore = useRuleStore();
+const formStore = useFormStore();
+const { zoneName, zonePath } = storeToRefs(zoneStore);
 
 const fileTree = ref([]);
-const selectedKey = ref("/");
-const selectedTitle = ref(projectName);
 const fileSummary = ref("");
+
+const selectedPath = ref("/");
+const selectedTitle = ref(zoneName.value);
+
 const loading = ref(false);
 const treeRef = ref(null);
 
-/**
- * 用來儲存要被「顯式忽略」的路徑。
- * 若其中包含資料夾路徑，則該資料夾及其子項目會是 "繼承忽略"。
- */
+// 用來儲存要被「顯式忽略」的路徑。
+// 若其中包含資料夾路徑，則該資料夾及其子項目會是 "繼承忽略"。
 const ignoredPaths = ref([]);
 
-/**
- * Tree 設定
- */
+// Tree 設定
 const defaultProps = {
   children: "children",
   label: "name",
@@ -143,7 +159,101 @@ const mockFileData = {
 };
 
 /**
- * Utility Functions
+ * 右上方按鈕
+ */
+function handleShowHistory() {
+  console.log("Show History");
+}
+
+function handleSummarizeAll() {
+  console.log("Summarize All");
+}
+
+function handleRenewRules() {
+  console.log("Renew Rules");
+}
+
+const sortResult = ref({});
+const isSortResultDialogVisible = ref(false);
+
+async function handleSortAll() {
+  try {
+    await ElMessageBox.confirm(
+      "This will sort the entire zone folder. Continue?",
+      {
+        confirmButtonText: "OK",
+        cancelButtonText: "Cancel",
+        type: "info",
+      },
+    );
+
+    let loadingInstance;
+    try {
+      loadingInstance = ElLoading.service({
+        lock: true,
+        text: "Sorting...",
+        background: "rgba(0, 0, 0, 0.7)",
+      });
+
+      // 呼叫 Rust API
+      const result = {
+        file_movements: [
+          {
+            src_path: "報告_改.pdf",
+            new_path: "113-1/國文/報告/聊齋.pdf",
+            moved_by: "system",
+            reason: "blablabla",
+          },
+          {
+            src_path: "ffffff報告_改.pdf",
+            new_path:
+              "113-1/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/aaaaaaa.pdf",
+            moved_by: "system",
+            reason: "blablabla",
+          },
+        ],
+      }; // TODO: await invoke("sort_all");
+
+      if (typeof result === "object" && result !== null) {
+        sortResult.value = result; // 確保 Vue 直接接收物件
+      } else {
+        console.error("Unexpected API response:", result);
+        throw new Error("Invalid response format from backend");
+      }
+      isSortResultDialogVisible.value = true;
+    } catch (error) {
+      console.error("API call failed:", error);
+      ElMessage({
+        type: "error",
+        message: error?.toString() || "Sorting failed.",
+      });
+    } finally {
+      if (loadingInstance) loadingInstance.close();
+    }
+  } catch {
+    ElMessage({
+      type: "info",
+      message: "Sort canceled",
+    });
+  }
+}
+
+const handleConfirmedMoves = (selectedMoves) => {
+  console.log("Confirmed Moves:", selectedMoves);
+  // TODO: call API to move the files
+  // invoke("move_files", { moves: selectedMoves })
+  //   .then(() => {
+  //     ElMessage.success("Files moved successfully.");
+  //     // TODO: refresh the file tree
+  //   })
+  //   .catch((err) => {
+  //     console.error("move_files failed:", err);
+  //     ElMessage.error("Error occurred while moving files.");
+  //   });
+};
+
+/**
+ * 左側檔案樹
  */
 function findNodeByPath(treeData, path) {
   for (const node of treeData) {
@@ -178,13 +288,10 @@ function sortChildren(array) {
   });
 }
 
-/**
- * 以遞迴方式，將整棵樹的節點標記為：
- *   node.ignored = true/false
- *   node.ignoredType = 'explicit' | 'inherited' | ''
- *
- * parentIgnored 代表父層是否處於忽略狀態 (true = 繼承)
- */
+// 以遞迴方式，將整棵樹的節點標記為：
+//   node.ignored = true/false
+//   node.ignoredType = 'explicit' | 'inherited' | ''
+// parentIgnored 代表父層是否處於忽略狀態 (true = 繼承)
 function applyIgnoreStatusToTree(treeData) {
   treeData.forEach((node) => {
     applyIgnoreStatus(node, false);
@@ -198,7 +305,6 @@ function applyIgnoreStatus(node, parentIgnored) {
   // 本節點的忽略狀態 = 父層已忽略 或 自己顯式忽略
   node.ignored = parentIgnored || isExplicit;
 
-  // 設定 ignoredType
   if (node.ignored) {
     node.ignoredType = parentIgnored ? "inherited" : "explicit";
   } else {
@@ -213,36 +319,28 @@ function applyIgnoreStatus(node, parentIgnored) {
   }
 }
 
-/**
- * 取得目前選取的 node 物件 (若找不到則為 null)
- */
+// 取得目前選取的 node 物件 (若找不到則為 null)
 const selectedNode = computed(() => {
-  return findNodeByPath(fileTree.value, selectedKey.value);
+  return findNodeByPath(fileTree.value, selectedPath.value);
 });
 
-/**
- * 若是繼承忽略 (inherited)，就應該 disable Switch
- */
+// 若是繼承忽略 (inherited)，就應該 disable Switch
 const isInheritedIgnore = computed(() => {
   return selectedNode.value?.ignoredType === "inherited";
 });
 
-/**
- * 右側檔案內容的 Switch 綁定
- */
+// 右側檔案內容的 Switch 綁定
 const ignoreSwitch = computed({
   get() {
     const node = selectedNode.value;
     return node ? !!node.ignored && node.ignoredType !== "" : false;
   },
   set(val) {
-    toggleIgnore(selectedKey.value, val);
+    toggleIgnore(selectedPath.value, val);
   },
 });
 
-/**
- * 切換某個 path 是否要被「顯式忽略」
- */
+// 切換某個 path 是否要被「顯式忽略」
 function toggleIgnore(path, shouldIgnore) {
   // 暫存舊的 ignoredPaths，用於發生錯誤時回復
   const oldIgnoredPaths = [...ignoredPaths.value];
@@ -278,10 +376,10 @@ function toggleIgnore(path, shouldIgnore) {
 }
 
 /**
- * 動態決定要顯示哪個子元件
+ * 右側區塊
  */
 const currentComponent = computed(() => {
-  if (selectedKey.value === "/") {
+  if (selectedPath.value === "/") {
     return RootDisplay;
   } else if (selectedNode.value?.isDirectory) {
     return FolderDisplay;
@@ -290,24 +388,20 @@ const currentComponent = computed(() => {
   }
 });
 
-/**
- * 右側元件 emit 出 toggle-ignore 時，實際呼叫父層的邏輯
- */
+// 右側元件 emit 出 toggle-ignore 時，轉為非 json 格式呼叫
 function onToggleIgnore({ path, shouldIgnore }) {
   toggleIgnore(path, shouldIgnore);
 }
 
-/**
- * 點擊樹狀節點
- */
+// 點擊樹狀節點
 function handleNodeClick(node) {
-  selectedKey.value = node.path;
+  selectedPath.value = node.path;
   selectedTitle.value = node.name;
   loading.value = true;
 
   setTimeout(() => {
     if (node.path === "/") {
-      fileSummary.value = `{ "project": "${projectName}", "version": "1.0.0", "description": "A file sorting app built with Vue and Rust." }`;
+      fileSummary.value = `{ "project": "${zoneName}", "version": "1.0.0", "description": "A file sorting app built with Vue and Rust." }`;
     } else if (node.isDirectory) {
       fileSummary.value = "這是資料夾，請選擇一個檔案來查看內容";
     } else {
@@ -322,9 +416,7 @@ function handleNodeClick(node) {
   }, 50);
 }
 
-/**
- * 拖曳/放下檔案或資料夾
- */
+// 拖曳/放下檔案或資料夾
 async function handleDrop(draggingNode, dropNode, dropType, ev) {
   console.log("tree drop:", {
     dragging: draggingNode.data.path,
@@ -380,9 +472,7 @@ async function handleDrop(draggingNode, dropNode, dropType, ev) {
   applyIgnoreStatusToTree(fileTree.value);
 }
 
-/**
- * Drag / Drop Rules
- */
+// DnD Rules
 function allowDrag(node) {
   // 根目錄 ("/") 不可被拖曳
   return node.data.path !== "/";
@@ -404,8 +494,7 @@ onMounted(async () => {
    * 1. 從 store 或其他 state 取得 zonePath
    *    （這裡示意，您可自行依專案需求來設定）
    */
-  zonePath.value = "/Users/exampleZone"; // 假設讀到這個 zone 路徑
-
+  zoneStore.setZone("Example Zone", "/Users/exampleZone");
   /**
    * 2. 呼叫後端 API，根據 zonePath 取得檔案樹資料
    *    （暫時用 Mock 資料作示範）
@@ -415,7 +504,7 @@ onMounted(async () => {
   // fileTree.value = treeData;
   fileTree.value = [
     {
-      name: projectName,
+      name: zoneName,
       path: "/",
       isDirectory: true,
       children: mockFileTree,
@@ -435,7 +524,7 @@ onMounted(async () => {
   applyIgnoreStatusToTree(fileTree.value);
 
   // 5. 預設顯示根目錄資訊
-  fileSummary.value = `{ "project": "${projectName}", "version": "1.0.0", "description": "A file sorting app built with Vue and Rust." }`;
+  fileSummary.value = `{ "project": "${zoneName}", "version": "1.0.0", "description": "A file sorting app built with Vue and Rust." }`;
 });
 </script>
 
