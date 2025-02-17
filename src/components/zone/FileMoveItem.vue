@@ -80,7 +80,7 @@ const moveType = computed(() => {
 
 pre {
   margin: 0;
-  padding: 4px 8px;
+  padding: 2px 6px;
   font-size: smaller;
   font-family: monospace;
   background: #f5f5f5;
