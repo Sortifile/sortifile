@@ -156,7 +156,7 @@ watch(
   gap: 10px;
   padding: 10px;
   border: 2px dashed #ccc;
-  background: #eef;
+  background: #fcfad8;
   border-radius: 8px;
 }
 
