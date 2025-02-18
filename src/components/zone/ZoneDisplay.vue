@@ -1,20 +1,19 @@
 <template>
   <div>
-    <p>這裡是根目錄的資訊</p>
-    <pre>{{ fileInfo }}</pre>
+    <h3>Zone Settings</h3>
+    <pre>Root Path: {{ rootPath }}</pre>
+    <div>這裡要放 rule</div>
+    <div>這裡要放 form</div>
   </div>
 </template>
 
 <script setup>
-/**
- * 父層傳入的屬性 (fileInfo)
- */
-defineProps({
-  fileInfo: {
-    type: String,
-    default: "",
-  },
-});
+import { ref } from "vue";
+import { useZoneStore } from "../../store/zone";
+import { storeToRefs } from "pinia";
+
+const zoneStore = useZoneStore();
+const { zoneName, rootPath } = storeToRefs(zoneStore);
 </script>
 
 <style scoped>
