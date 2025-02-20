@@ -337,6 +337,7 @@ const { zoneName, rootPath } = storeToRefs(zoneStore);
 const props = defineProps({
   name: { type: String, default: "" },
   path: { type: String, default: "" },
+  loading: { type: Boolean, default: false },
   ignoreSwitch: { type: Boolean, default: false },
   isInheritedIgnore: { type: Boolean, default: false },
 });
@@ -344,7 +345,7 @@ const props = defineProps({
 const nameValue = ref(props.name);
 const pathValue = ref(rootPath + props.path);
 
-const emits = defineEmits(["toggle-ignore"]);
+const emits = defineEmits(["toggle-ignore", "update:loading"]);
 
 function onSwitchChange(val) {
   emits("toggle-ignore", props.path, val);

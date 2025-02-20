@@ -73,6 +73,7 @@
           :path="selectedPath"
           :ignore-switch="ignoreSwitch"
           :is-inherited-ignore="isInheritedIgnore"
+          v-model:loading="loading"
           @toggle-ignore="toggleIgnore"
         />
       </div>
