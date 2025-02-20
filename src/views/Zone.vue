@@ -57,7 +57,7 @@
       <!-- 依據選擇的節點類型，動態切換不同的顯示元件 -->
       <div class="right-content">
         <el-skeleton v-if="loading" :rows="5" animated />
-        <ZoneDisplay v-else-if="selectedPath === '/'" />
+        <ZoneDisplay v-else-if="selectedPath === ''" />
         <FolderDisplay
           v-else-if="selectedNode && selectedNode.isDirectory"
           :name="selectedTitle"
@@ -115,7 +115,7 @@ const { zoneName, rootPath } = storeToRefs(zoneStore);
 
 const fileTree = ref([]);
 
-const selectedPath = ref("/");
+const selectedPath = ref("");
 const selectedTitle = ref(zoneName.value);
 
 const loading = ref(false);
@@ -137,32 +137,32 @@ const defaultProps = {
 const mockFileTree = [
   {
     name: "src",
-    path: "/src",
+    path: "src",
     isDirectory: true,
     children: [
-      { name: "main.js", path: "/src/main.js", isDirectory: false },
-      { name: "App.vue", path: "/src/App.vue", isDirectory: false },
+      { name: "main.js", path: "src/main.js", isDirectory: false },
+      { name: "App.vue", path: "src/App.vue", isDirectory: false },
       {
         name: "components",
-        path: "/src/components",
+        path: "src/components",
         isDirectory: true,
         children: [
           {
             name: "Header.vue",
-            path: "/src/components/Header.vue",
+            path: "src/components/Header.vue",
             isDirectory: false,
           },
           {
             name: "Footer.vue",
-            path: "/src/components/Footer.vue",
+            path: "src/components/Footer.vue",
             isDirectory: false,
           },
         ],
       },
     ],
   },
-  { name: "package.json", path: "/package.json", isDirectory: false },
-  { name: "README.md", path: "/README.md", isDirectory: false },
+  { name: "package.json", path: "package.json", isDirectory: false },
+  { name: "README.md", path: "README.md", isDirectory: false },
 ];
 
 /**
@@ -565,7 +565,7 @@ onMounted(async () => {
   fileTree.value = [
     {
       name: zoneName,
-      path: "/",
+      path: "",
       isDirectory: true,
       children: mockFileTree,
     },
