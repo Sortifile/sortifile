@@ -90,7 +90,7 @@
 import { ref, computed, onMounted } from "vue";
 import { DeleteFilled } from "@element-plus/icons-vue";
 import { ElMessageBox, ElMessage, ElLoading } from "element-plus";
-
+import { useRouter } from "vue-router";
 // import { invoke } from "@tauri-apps/api"; // 若需呼叫後端 API，可解除註解
 
 // 右側區塊大元件
@@ -106,7 +106,8 @@ import { useZoneStore } from "../store/zone";
 import { useRuleStore } from "../store/rule";
 import { useFormStore } from "../store/form";
 import { storeToRefs } from "pinia";
-import { el } from "element-plus/es/locales.mjs";
+
+const router = useRouter();
 
 const zoneStore = useZoneStore();
 const ruleStore = useRuleStore();
@@ -124,6 +125,11 @@ const treeRef = ref(null);
 // 用來儲存要被「顯式忽略」的路徑。
 // 若其中包含資料夾路徑，則該資料夾及其子項目會是 "繼承忽略"。
 const ignoredPaths = ref([]);
+
+// router
+const navigateTo = (path) => {
+  router.push({ path });
+};
 
 // Tree 設定
 const defaultProps = {
@@ -203,6 +209,27 @@ function handleSummarizeAll() {
 
 function handleRenewRules() {
   console.log("Renew Rules");
+  ElMessageBox.confirm(
+    "All old rules will be replaced. Continue?",
+    "Are you sure to renew all rules?",
+    {
+      confirmButtonText: "OK",
+      cancelButtonText: "Cancel",
+      type: "warning",
+    },
+  )
+    .then(() => {
+      // TODO: call API to renew all the rules
+      // TODO: save the new rules to store
+      // 重新導向至規則檢視頁面
+      navigateTo("/checkRenewRule");
+    })
+    .catch(() => {
+      ElMessage({
+        type: "info",
+        message: "renew canceled",
+      });
+    });
 }
 
 const sortResult = ref({});
@@ -551,13 +578,11 @@ function allowDrop(draggingNode, dropNode, type) {
  */
 onMounted(async () => {
   /**
-   * 1. 從 store 或其他 state 取得 zonePath
-   *    （這裡示意，您可自行依專案需求來設定）
+   * 1. 從 store 取得 zonePath
    */
   zoneStore.setZone("Example Zone", "/Users/exampleZone");
   /**
    * 2. 呼叫後端 API，根據 zonePath 取得檔案樹資料
-   *    （暫時用 Mock 資料作示範）
    */
   // TODO:
   // const treeData = await invoke("get_file_tree", { zone: zonePath.value });
@@ -572,7 +597,16 @@ onMounted(async () => {
   ];
 
   /**
-   * 3. 呼叫後端 API，取得該 zone 下的 ignore 清單
+   * 3. 呼叫後端 API，取得 rules 和 form data，並存到 store
+   */
+  // TODO:
+  // const rules = await invoke("get_rules", { zone: zonePath.value });
+  // const formData = await invoke("get_form_data", { zone: zonePath.value });
+  // ruleStore.setRules(rules);
+  // formStore.setFormResponse(formData);
+
+  /**
+   * 4. 呼叫後端 API，取得該 zone 下的 ignore 清單
    *    （暫時用靜態範例）
    */
   // TODO:
@@ -580,7 +614,7 @@ onMounted(async () => {
   // ignoredPaths.value = ignoreList;
   ignoredPaths.value = ["/src", "/README.md"];
 
-  // 4. 將 ignore 狀態套用到檔案樹
+  // 5. 將 ignore 狀態套用到檔案樹
   applyIgnoreStatusToTree(fileTree.value);
 });
 </script>
