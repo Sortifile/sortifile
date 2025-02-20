@@ -24,7 +24,9 @@ Please analyze the provided files and extract every file's key information to as
     "language": "文件語言，如 EN、ZH-TW",
     "metadata": {
       "created_date": "文件建立日期，如 '2025-02-20'",
-      "last_modified_date": "最後修改日期，如 '2025-02-25'"
+      "last_modified_date": "最後修改日期，如 '2025-02-25'",
+      "last_sorted_date": "最後自動分類日期",
+      "last_summarized_date": "最後摘要日期"
     }
   },
   {
