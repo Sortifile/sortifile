@@ -71,7 +71,6 @@
           v-else
           :name="selectedTitle"
           :path="selectedPath"
-          :summary="fileSummary"
           :ignore-switch="ignoreSwitch"
           :is-inherited-ignore="isInheritedIgnore"
           @toggle-ignore="toggleIgnore"
@@ -115,7 +114,6 @@ const formStore = useFormStore();
 const { zoneName, rootPath } = storeToRefs(zoneStore);
 
 const fileTree = ref([]);
-const fileSummary = ref("");
 
 const selectedPath = ref("/");
 const selectedTitle = ref(zoneName.value);
@@ -166,14 +164,6 @@ const mockFileTree = [
   { name: "package.json", path: "/package.json", isDirectory: false },
   { name: "README.md", path: "/README.md", isDirectory: false },
 ];
-const mockFileData = {
-  "/src/main.js": `{ "type": "JavaScript", "size": "2KB", "modified": "2025-02-10" }`,
-  "/src/App.vue": `{ "type": "Vue Component", "size": "3KB", "modified": "2025-02-09" }`,
-  "/src/components/Header.vue": `{ "type": "Vue Component", "size": "1KB", "modified": "2025-02-08" }`,
-  "/src/components/Footer.vue": `{ "type": "Vue Component", "size": "1KB", "modified": "2025-02-08" }`,
-  "/package.json": `{ "name": "sortifile", "version": "1.0.0", "dependencies": { "vue": "^3.5.0" } }`,
-  "/README.md": `# Sortifile\n\nA file sorting app built with Vue and Rust.`,
-};
 
 /**
  * 右上方按鈕
@@ -186,6 +176,29 @@ function handleShowHistory() {
 
 function handleSummarizeAll() {
   console.log("Summarize All");
+
+  ElMessageBox.confirm(
+    "All old summaries will be replaced. Continue?",
+    "Are you sure to summarize all files?",
+    {
+      confirmButtonText: "OK",
+      cancelButtonText: "Cancel",
+      type: "warning",
+    },
+  )
+    .then(() => {
+      // TODO: call API to resummarize all the files
+      ElMessage({
+        type: "success",
+        message: "summarize completed",
+      });
+    })
+    .catch(() => {
+      ElMessage({
+        type: "info",
+        message: "summarize canceled",
+      });
+    });
 }
 
 function handleRenewRules() {
@@ -461,23 +474,6 @@ function toggleIgnore(path, shouldIgnore) {
 function handleNodeClick(node) {
   selectedPath.value = node.path;
   selectedTitle.value = node.name;
-  loading.value = true;
-
-  setTimeout(() => {
-    if (node.path === "/") {
-      fileSummary.value = {};
-    } else if (node.isDirectory) {
-      fileSummary.value = {};
-    } else {
-      // TODO: 呼叫後端 API 取得檔案資訊
-      // const info = await invoke("get_file_info", { zone: zonePath.value, filePath: node.path });
-      // fileSummary.value = JSON.stringify(info, null, 2);
-
-      // 暫時先使用 mock
-      fileSummary.value = mockFileData[node.path] || "無法獲取檔案資訊";
-    }
-    loading.value = false;
-  }, 50);
 }
 
 // 拖曳/放下檔案或資料夾
@@ -586,9 +582,6 @@ onMounted(async () => {
 
   // 4. 將 ignore 狀態套用到檔案樹
   applyIgnoreStatusToTree(fileTree.value);
-
-  // 5. 預設顯示根目錄資訊
-  fileSummary.value = `{ "project": "${zoneName}", "version": "1.0.0", "description": "A file sorting app built with Vue and Rust." }`;
 });
 </script>
 
