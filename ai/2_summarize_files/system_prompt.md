@@ -3,22 +3,28 @@ Please analyze the provided files and extract every file's key information to as
 ```json
 [
   {
-    "title":"Document title or main heading, if available",
-    "author":"Author's name or attribution, if mentioned",
-    "summary":"A concise summary of the file's content, including key points or highlights",
-    "topics":[
-      "List of main topics or themes"
-    ],
-    "intended_use":"The potential purpose or context of the file (e.g., homework, project, report, reference material)",
-    "section_range":"The range of sections covered, if applicable",
-    "metadata":{
-      "created_date":"Creation date, if available",
-      "last_modified_date":"Last modification date, if applicable"
-      "file_type":"Type of the file (e.g., PDF, DOCX, TXT, etc.)",
-      "language":"Language of the document",
-      "tags":[
-        "Relevant tags for categorization, if identifiable"
-      ],
+    "title": "Document title or main heading, if available",
+    "version": "Version number of the document, e.g., v1.0",
+    "author": {
+      "name": "作者姓名，如 John Doe",
+      "organization": "作者隸屬機構或單位，若無則留空",
+      "school_class": "學校/科系/年級/班級名稱，如『台大資工一』，若無則留空",
+      "id": "學號、座號或員工編號，若無則留空",
+      "semester": "學期資訊，如 113-2、2025spring 等，若無則留空",
+      "team": "小組或專案組名稱，如『專題A組』，若無則留空"
+    },
+    "subject": "文件主要科目或領域，如 Calculus、History",
+    "summary": "文件內容的精簡摘要或重點說明",
+    "intended_use": "The potential purpose or context of the file (e.g., homework, project, report, reference material)",
+    "section_range": "The range of sections covered, if applicable",
+    "status": "文件狀態，如 '草稿'、'最終版'",
+    "topics": ["文件中的主要主題或議題，如 ['微分','極限']"],
+    "tags": ["用於分類或搜索的關鍵字，如 ['重要','參考資料']"],
+    "file_format": "原始檔案格式，如 PDF、DOCX、TXT",
+    "language": "文件語言，如 EN、ZH-TW",
+    "metadata": {
+      "created_date": "文件建立日期，如 '2025-02-20'",
+      "last_modified_date": "最後修改日期，如 '2025-02-25'"
     }
   },
   {
