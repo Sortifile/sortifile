@@ -35,11 +35,11 @@
     <!-- 右側資訊顯示 -->
     <div class="content-display">
       <el-row :gutter="20" align="middle" justify="end" style="max-width: 100%">
-        <el-col :span="9">
+        <el-col :span="10">
           <h2>{{ zoneName }}</h2>
         </el-col>
         <el-col
-          :span="15"
+          :span="14"
           style="display: flex; justify-content: flex-end; padding-right: 20px"
         >
           <el-button type="danger" plain>
@@ -112,7 +112,7 @@ import { el } from "element-plus/es/locales.mjs";
 const zoneStore = useZoneStore();
 const ruleStore = useRuleStore();
 const formStore = useFormStore();
-const { zoneName, zonePath } = storeToRefs(zoneStore);
+const { zoneName, rootPath } = storeToRefs(zoneStore);
 
 const fileTree = ref([]);
 const fileSummary = ref("");
