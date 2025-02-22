@@ -15,14 +15,14 @@
     </div>
 
     <!-- Dark Mode Section (改成三選一) -->
-    <div class="setting-item">
+    <!-- <div class="setting-item">
       <label for="theme-mode">Theme Mode:</label>
       <el-radio-group v-model="themeMode">
         <el-radio label="system">System</el-radio>
         <el-radio label="light">Light</el-radio>
         <el-radio label="dark">Dark</el-radio>
       </el-radio-group>
-    </div>
+    </div> -->
   </div>
 </template>
 
