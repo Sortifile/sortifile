@@ -3,66 +3,31 @@
     <template #header>
       <div class="card-header">
         <h4 class="question-title">6. 你習慣如何命名檔案？</h4>
-        <p class="instruction-text">點選選項可加入/刪除，拖移可調整順序</p>
       </div>
     </template>
 
     <!-- 命名順序區域 -->
+    <h5 class="instruction-text">請勾選你會列入考慮的項目:</h5>
     <div class="naming-box">
-      <draggable
-        v-model="userNamingOrder"
-        group="naming"
-        class="drop-area"
-        item-key="key"
-        :component-data="{ tag: 'span' }"
+      <el-checkbox-group
+        :model-value="props.naming"
+        @update:modelValue="updateSelection"
       >
-        <template #item="{ element, index }">
-          <span>
-            <el-tooltip
-              effect="dark"
-              :content="element.description"
-              placement="top"
-            >
-              <el-button
-                type="primary"
-                class="naming-btn"
-                @click="removeNaming(index)"
-              >
-                {{ element.name }}
-              </el-button>
-            </el-tooltip>
-          </span>
-        </template>
-      </draggable>
-    </div>
-
-    <!-- 可選擇的命名要素 -->
-    <div class="naming-bank">
-      <draggable
-        v-model="availableNamingOptions"
-        group="naming"
-        class="drag-area"
-        item-key="key"
-        :component-data="{ tag: 'span' }"
-      >
-        <template #item="{ element }">
-          <span>
-            <el-tooltip
-              effect="dark"
-              :content="element.description"
-              placement="top"
-            >
-              <el-button
-                type="default"
-                class="naming-btn"
-                @click="addNaming(element)"
-              >
-                {{ element.name }}
-              </el-button>
-            </el-tooltip>
-          </span>
-        </template>
-      </draggable>
+        <el-checkbox
+          v-for="option in namingOptions"
+          :key="option.key"
+          :value="option.key"
+          :label="option.name"
+        >
+          <el-tooltip
+            effect="dark"
+            :content="option.description"
+            placement="top"
+          >
+            {{ option.name }}
+          </el-tooltip>
+        </el-checkbox>
+      </el-checkbox-group>
     </div>
 
     <!-- 日期格式選擇 -->
@@ -72,7 +37,7 @@
         <el-option
           v-for="format in dateFormatOptions"
           :key="format.value"
-          :label="format.label"
+          :label="format.name"
           :value="format.value"
         />
       </el-select>
@@ -84,10 +49,11 @@
       <el-radio-group v-model="fileNameRule">
         <el-radio
           v-for="rule in fileNameRuleOptions"
-          :key="rule.value"
-          :label="rule.label"
+          :key="rule.key"
+          :value="rule.key"
+          :label="rule.name"
         >
-          {{ rule.label }}
+          {{ rule.name }}
         </el-radio>
       </el-radio-group>
     </div>
@@ -96,11 +62,10 @@
 
 <script setup>
 import { ref, watch } from "vue";
-import draggable from "vuedraggable";
 
-const props = defineProps(["namingFormat", "dateFormat", "fileNameRule"]);
+const props = defineProps(["naming", "dateFormat", "fileNameRule"]);
 const emit = defineEmits([
-  "update:namingFormat",
+  "update:naming",
   "update:dateFormat",
   "update:fileNameRule",
 ]);
@@ -119,48 +84,27 @@ const namingOptions = [
   { key: "language", name: "語言", description: "如『EN』『ZH-TW』" },
 ];
 
-const userNamingOrder = ref([]);
-const availableNamingOptions = ref([...namingOptions]);
-
-const addNaming = (option) => {
-  if (!userNamingOrder.value.some((item) => item.key === option.key)) {
-    userNamingOrder.value.push(option);
-    availableNamingOptions.value = availableNamingOptions.value.filter(
-      (w) => w.key !== option.key,
-    );
-  }
+const updateSelection = (value) => {
+  console.log(value);
+  emit("update:naming", value);
 };
 
-const removeNaming = (index) => {
-  availableNamingOptions.value.push(userNamingOrder.value[index]);
-  userNamingOrder.value.splice(index, 1);
-};
-
-watch(
-  userNamingOrder,
-  (newValue) => {
-    emit(
-      "update:namingFormat",
-      newValue.map((item) => item.name),
-    );
-  },
-  { deep: true },
-);
 // 日期格式選擇
 const dateFormat = ref(props.dateFormat || "YYYYMMDD");
 
 // 可選日期格式
 const dateFormatOptions = [
-  { value: "YYYYMMDD", label: "YYYYMMDD (20250212)" },
-  { value: "YYYY-MM-DD", label: "YYYY-MM-DD (2025-02-12)" },
-  { value: "MM-DD-YYYY", label: "MM-DD-YYYY (02-12-2025)" },
-  { value: "DD-MM-YYYY", label: "DD-MM-YYYY (12-02-2025)" },
-  { value: "DD MMMM YYYY", label: "DD MMMM YYYY (12 February 2025)" },
-  { value: "DD MMM YYYY", label: "DD MMM YYYY (12 Feb 2025)" },
+  { value: "YYYYMMDD", name: "YYYYMMDD (20250212)" },
+  { value: "YYYY-MM-DD", name: "YYYY-MM-DD (2025-02-12)" },
+  { value: "MM-DD-YYYY", name: "MM-DD-YYYY (02-12-2025)" },
+  { value: "DD-MM-YYYY", name: "DD-MM-YYYY (12-02-2025)" },
+  { value: "DD MMMM YYYY", name: "DD MMMM YYYY (12 February 2025)" },
+  { value: "DD MMM YYYY", name: "DD MMM YYYY (12 Feb 2025)" },
 ];
 
 // 監聽 dateFormat 變化，通知父元件
 watch(dateFormat, (newValue) => {
+  console.log(newValue);
   emit("update:dateFormat", newValue);
 });
 
@@ -169,16 +113,17 @@ const fileNameRule = ref(props.fileNameRule || "allowAny");
 
 // 可選擇的檔名用字規則
 const fileNameRuleOptions = [
-  { value: "allowChinese", label: "允許任何字符與中文名稱" },
-  { value: "allowSpace", label: "允許空格" },
+  { key: "allowChinese", name: "允許任何字符與中文名稱" },
+  { key: "allowSpace", name: "允許空格" },
   {
-    value: "alphaNumUnderscoreDash",
-    label: "僅允許英文、數字、底線 (_)、破折號 (-)",
+    key: "alphaNumUnderscoreDash",
+    name: "僅允許英文、數字、底線 (_)、破折號 (-)",
   },
 ];
 
 // 監聽 fileNameRule 變化，通知父元件
 watch(fileNameRule, (newValue) => {
+  console.log(newValue);
   emit("update:fileNameRule", newValue);
 });
 </script>
@@ -192,9 +137,8 @@ watch(fileNameRule, (newValue) => {
 }
 
 .instruction-text {
-  font-size: 14px;
-  color: #666;
   margin-top: 4px;
+  margin-bottom: 0px;
 }
 
 .question-card {
@@ -204,25 +148,12 @@ watch(fileNameRule, (newValue) => {
 
 .naming-box {
   min-height: 65px;
-  border: 2px dashed #ccc;
   padding: 10px;
   margin-bottom: 20px;
   display: flex;
   gap: 10px;
   flex-wrap: nowrap;
   overflow-x: hidden;
-  background: #f9f9f9;
-  border-radius: 8px;
-}
-
-.naming-bank {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 10px;
-  border: 2px dashed #ccc;
-  background: #fcfad8;
-  border-radius: 8px;
 }
 
 .drop-area {
