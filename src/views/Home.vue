@@ -11,8 +11,7 @@ function navigateTo(page) {
 
 <template>
   <main class="container">
-    <h1>Welcome to Sortifile</h1>
-
+    <img src="/sortifile.png" alt="sortifile logo" />
     <div class="grid">
       <el-tooltip content="New Zone..." placement="left-start">
         <el-button class="button" type="primary" @click="navigateTo('create')">
@@ -36,6 +35,11 @@ function navigateTo(page) {
 </template>
 
 <style scoped>
+img {
+  height: 250px;
+  margin-bottom: 20px;
+}
+
 .container {
   margin: 0;
   padding-top: 10vh;
