@@ -42,7 +42,7 @@
           :span="14"
           style="display: flex; justify-content: flex-end; padding-right: 20px"
         >
-          <el-button type="danger" plain>
+          <el-button type="warning">
             <el-icon><DeleteFilled /></el-icon>
           </el-button>
           <el-button @click="handleShowHistory">Show History</el-button>

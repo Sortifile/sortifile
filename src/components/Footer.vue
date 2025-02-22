@@ -17,7 +17,7 @@ export default {
   bottom: 0;
   left: 0;
   width: 100%;
-  background-color: #232f47;
+  background-color: #394c68;
   color: white;
   text-align: right;
   align-content: center;

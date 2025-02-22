@@ -5,7 +5,7 @@
         <h1>Confirming Zone Rules</h1>
       </el-col>
       <el-col :span="4">
-        <el-button type="danger" plain @click=""> Regenerate Rules </el-button>
+        <el-button type="warning" @click=""> Regenerate Rules </el-button>
       </el-col>
       <el-col :span="2">
         <el-button plain @click=""> Reset </el-button>
