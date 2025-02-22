@@ -22,6 +22,7 @@ const options = [
 ];
 
 const updateSelection = (value) => {
+  console.log(value);
   emit("update:modelValue", value);
 };
 </script>
@@ -37,14 +38,14 @@ const updateSelection = (value) => {
     </template>
     <div class="answer-area">
       <el-radio-group
-        v-model="props.modelValue"
-        class="radio-group"
+        :model-value="props.modelValue"
         @update:modelValue="updateSelection"
+        class="radio-group"
       >
         <el-radio
           v-for="(opt, index) in options"
           :key="index"
-          :label="opt.value"
+          :value="opt.value"
           class="radio-item"
         >
           {{ opt.label }}

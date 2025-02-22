@@ -33,7 +33,7 @@ const updateSelection = (value) => {
         :model-value="props.modelValue"
         @update:modelValue="updateSelection"
       >
-        <el-checkbox v-for="option in options" :key="option" :label="option">
+        <el-checkbox v-for="option in options" :key="option" :value="option">
           {{ option }}
         </el-checkbox>
       </el-checkbox-group>
