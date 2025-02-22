@@ -41,12 +41,12 @@ function goToGithub() {
 <style scoped>
 img {
   height: 250px;
+  margin-top: 20px;
   margin-bottom: 20px;
 }
 
 .container {
   margin: 0;
-  padding-top: 10vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
