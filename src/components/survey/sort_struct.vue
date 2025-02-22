@@ -77,16 +77,14 @@ const emit = defineEmits(["update:modelValue"]);
 // 檔案樹結構選項
 // prettier-ignore
 const structureOptions = [
-  { key: "year", name: "年份", description: "以年份作為主要分類，如2024/2025" },
-  { key: "category", name: "類別", description: "依據用途分類，如作業/專案/報告",},
-  { key: "course", name: "課程名稱", description: "按課程分類，如線性代數、物理", },
-  { key: "project", name: "專案名稱", description: "如『機器學習專題』或『網站設計』", },
-  { key: "date", name: "日期", description: "依日期排序，如2024-02-10" },
-  { key: "version", name: "版本號", description: "不同版本的管理，如v1.0、v2.0", },
-  { key: "team", name: "小組名稱", description: "如『專題A組』或『報告B組』" },
-  { key: "tag", name: "標籤", description: "透過標籤進行分類，如『重要』『草稿』", },
-  { key: "file_type", name: "檔案類型", description: "按照檔案性質分類，如PDF、Word", },
-  { key: "hello_world", name: "思諾這裡選項我亂生的幫我想正確的", description: "Hello World", },
+  { key: "time", name: "時間", description: "依時間（學期、年份、日期或時間戳記）分類。ex: 分為 2025/2024/2023" },
+  { key: "source", name: "來源", description: "檔案的來源，如某堂課程或特定資料庫。ex: 分爲 微積分/物理科/駕訓班" },
+  { key: "usage", name: "用途",  description: "依據用途分類。ex:分為 程式/作業/專案/報告",},
+  { key: "topic", name: "檔案主題", description: "依據檔案的主題或內容分類。ex: Sortifile專案/上課程式/個人網頁" },
+  { key: "version_order", name: "版本/次序", description: "不同版本的管理。ex: 分爲 v1.0/v2.0" },
+  { key: "tags", name: "關鍵字標籤", description: "透過個人化的標籤進行分類。ex: 分為 重要/草稿/私人" },
+  { key: "file_format", name: "檔案格式類型", description: "按照檔案格式分類。ex: 分為 PDF/Word/Excel" },
+  { key: "index", name: "編號", description: "屬於某項特定編號的檔案。ex: 分為 01/02/03" }
 ];
 
 const userStructureOrder = ref([]);

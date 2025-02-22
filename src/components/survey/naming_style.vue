@@ -108,21 +108,14 @@ const emit = defineEmits([
 // 命名要素選項
 // prettier-ignore
 const namingOptions = [
-  { key: "subject", name: "科目名稱", description: "如：數學、物理、英文" },
-  { key: "course", name: "課程名稱", description: "如：線性代數、文學概論" },
-  { key: "assignment", name: "作業/考試名稱", description: "如：期中考、作業3" },
-  { key: "date", name: "日期", description: "標記日期" },
-  { key: "timestamp", name: "時間戳", description: "YYYYMMDD-HHMMSS，確保唯一，如 20250211-153045" },
-  { key: "version", name: "版本號", description: "如 v1.0, v2.1" },
-  { key: "description", name: "描述", description: "簡述內容，如『期末報告-氣候變遷』" },
-  { key: "author", name: "作者名稱", description: "文件創建者，如『張小明』" },
-  { key: "school_class", name: "學校/系級/班級名稱", description: "如『台大資工一』" },
-  { key: "number", name: "學號/座號", description: "如『B13901011』『4號』" },
-  { key: "file_type", name: "檔案類型", description: "如『草稿』『最終版』" },
-  { key: "tag", name: "標籤", description: "如『重要』『參考』『需修改』" },
-  { key: "usage", name: "檔案用途", description: "如『報告』『論文』『簡報』" },
-  { key: "team", name: "小組名稱", description: "如『專題A組』" },
-  { key: "uuid", name: "UUID (唯一識別碼)", description: "確保檔案唯一性" },
+  { key: "date", name: "日期", description: "標記該版本日期" },
+  { key: "timestamp", name: "時間戳", description: "標記時間戳記，如 20250211-153045" },
+  { key: "id", name: "編號/代號", description: "簡短編號或代號，如 hw1、lab2"},
+  { key: "content", name: "檔案內容", description: "簡述檔案的標題和主要內容，如『期末報告-氣候變遷』、『營隊第三次籌會記錄』" },
+  { key: "source", name: "來源", description: "檔案的來源，如檔案的來源，如某科目、某堂課程或特定資料庫" },
+  { key: "usage", name: "用途", description: "檔案的用途，如收藏、研究、報告或參考資料" },
+  { key: "version", name: "版本編號", description: "不同版本或修訂次序的管理，如 v1.0, v2.1、draft、final" },
+  { key: "author_info", name: "作者資訊", description: "文件創建者的相關資訊，如作者姓名、學號或團隊名稱" },
   { key: "language", name: "語言", description: "如『EN』『ZH-TW』" },
 ];
 
