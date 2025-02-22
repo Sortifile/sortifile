@@ -7,6 +7,10 @@ const router = useRouter();
 function navigateTo(page) {
   router.push(`/${page}`);
 }
+
+function goToGithub() {
+  window.open("https://github.com/sortifile/sortifile");
+}
 </script>
 
 <template>
@@ -27,8 +31,8 @@ function navigateTo(page) {
       <el-button class="button" type="primary" @click="navigateTo('settings')">
         Settings
       </el-button>
-      <el-button class="button" type="primary" @click="navigateTo('help')">
-        Help
+      <el-button class="button" type="primary" @click="goToGithub">
+        Docs
       </el-button>
     </div>
   </main>
