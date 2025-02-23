@@ -62,6 +62,7 @@ import {
   ElButton,
   ElCol,
   ElDivider,
+  ElMessage,
 } from "element-plus";
 import { useRouter } from "vue-router";
 import { useZoneStore } from "../../store/zone";
@@ -114,6 +115,7 @@ const selectPath = async () => {
       zoneStore.setPath(selected[0]);
     }
   } catch (error) {
+    ElMessage.error("選擇路徑時發生錯誤");
     console.error("選擇路徑時發生錯誤：", error);
   }
 };
