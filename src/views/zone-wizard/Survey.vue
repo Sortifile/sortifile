@@ -32,7 +32,11 @@
           </el-button>
         </el-col>
         <el-col :span="3">
-          <el-button type="primary" :loading="loading" @click="submitForm">
+          <el-button
+            type="primary"
+            v-loading.fullscreen.lock="loading"
+            @click="submitForm"
+          >
             Submit
             <el-icon class="el-icon--right"><ArrowRight /></el-icon>
           </el-button>
@@ -45,9 +49,9 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { ElButton, ElMessage } from "element-plus";
+import { ElButton, ElMessage, ElLoading } from "element-plus";
 import { ArrowRight, ArrowLeft } from "@element-plus/icons-vue";
-// import { invoke } from "@tauri-apps/api/tauri";
+import { invoke } from "@tauri-apps/api/core";
 import { useFormStore } from "../../store/form";
 import { useRuleStore } from "../../store/rule";
 import { useZoneStore } from "../../store/zone";
@@ -90,6 +94,7 @@ const submitForm = async () => {
   try {
     // 1. 存入 Pinia 的 surveyData
     formStore.setFormResponse(formResponse.value);
+    ruleStore.resetRule();
 
     // 2. 呼叫 Tauri API 生成 rule.json
     // const ruleJson = await invoke("ai_create_rule", {
@@ -99,12 +104,12 @@ const submitForm = async () => {
     //   form_question: formStore.formQuestion,
     //   form_response: formResponse.value,
     // });
-    const ruleJson = {};
+    const ruleJson = ruleStore.rule; // TO BE REMOVED
 
-    // 3. 存入 Pinia 的 ruleData
+    // 存入 Pinia 的 ruleData
     ruleStore.setRule(ruleJson);
 
-    // 4. 顯示成功訊息並跳轉
+    // 顯示成功訊息並跳轉
     ElMessage.success("AI 生成規則成功！");
     router.push("/zone-wizard/CheckRule");
   } catch (error) {
