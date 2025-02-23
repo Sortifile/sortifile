@@ -79,6 +79,7 @@ const zoneStore = useZoneStore();
 // 表單驗證規則
 const rules = {
   // NOTE: 這裡的 required 設為 false，only for development
+  // TODO: 請將 required 設為 true
   zoneName: [{ required: false, message: "請輸入 Zone 名稱", trigger: "blur" }],
   rootPath: [{ required: false, message: "請選擇路徑", trigger: "blur" }],
 };
@@ -87,7 +88,7 @@ const rules = {
 const submitForm = () => {
   formRef.value.validate((valid) => {
     if (valid) {
-      console.log("提交的資料：", zoneStore.zoneName, zoneStore.rootPath);
+      console.log("Zonestore：", zoneStore.zoneName, zoneStore.rootPath);
       navigateTo("survey");
     }
   });
