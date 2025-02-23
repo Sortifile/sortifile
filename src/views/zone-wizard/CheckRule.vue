@@ -20,7 +20,7 @@
         <el-col :span="8">
           <el-form-item label="Sorting Entropy">
             <el-slider
-              v-model="formData.index.sorting_entropy"
+              v-model="ruleData.index.sorting_entropy"
               :min="0"
               :max="10"
             />
@@ -29,7 +29,7 @@
         <el-col :span="8">
           <el-form-item label="Naming Complexity">
             <el-slider
-              v-model="formData.index.naming_complexity"
+              v-model="ruleData.index.naming_complexity"
               :min="0"
               :max="10"
             />
@@ -38,7 +38,7 @@
         <el-col :span="8">
           <el-form-item label="Archival Tendency">
             <el-slider
-              v-model="formData.index.archival_tendency"
+              v-model="ruleData.index.archival_tendency"
               :min="0"
               :max="10"
             />
@@ -50,24 +50,31 @@
     <!-- 自然語言規則 -->
     <h3>自然語言規則</h3>
     <el-form-item>
-      <el-checkbox
-        v-model="checkAll"
-        :indeterminate="isIndeterminate"
-        @change="handleCheckAllChange"
-      >
-        Select All
-      </el-checkbox>
-      <el-checkbox-group v-model="selectedRules" @change="handleRulesChange">
-        <el-checkbox
-          v-for="(rule, idx) in formData.natural_language_rules"
-          :key="idx"
-          :label="rule"
-        >
-          {{ rule }}
-        </el-checkbox>
-      </el-checkbox-group>
-      <div v-if="isWarn" class="warning-text">
-        至少需要選擇 {{ MIN_REQUIRED }} 項規則！
+      <div style="display: flex; flex-direction: column; width: 100%">
+        <el-row :gutter="20">
+          <el-col :span="6">
+            <el-checkbox
+              v-model="checkAll"
+              :indeterminate="isIndeterminate"
+              @change="handleCheckAllChange"
+            >
+              Select All
+            </el-checkbox>
+          </el-col>
+          <el-col :span="18">
+            <el-text v-show="isWarn" class="warning-text" type="danger"
+              >至少需要選擇 {{ MIN_REQUIRED }} 項規則！</el-text
+            >
+          </el-col>
+        </el-row>
+
+        <el-checkbox-group v-model="selectedRules" @change="handleRulesChange">
+          <el-row v-for="(rule, idx) in ruleData.natural_language_rules">
+            <el-checkbox :key="idx" :value="rule" :label="rule">
+              {{ rule }}
+            </el-checkbox>
+          </el-row>
+        </el-checkbox-group>
       </div>
     </el-form-item>
 
@@ -96,36 +103,27 @@ import { ref } from "vue";
 import { ElMessage } from "element-plus";
 import { ArrowRight, ArrowLeft } from "@element-plus/icons-vue";
 import { useRouter } from "vue-router";
+import { useZoneStore } from "../../store/zone";
+import { useRuleStore } from "../../store/rule";
+import { useFormStore } from "../../store/form";
+import { storeToRefs } from "pinia";
 
 const router = useRouter();
+const zoneStore = useZoneStore();
+const ruleStore = useRuleStore();
+const formStore = useFormStore();
 
 function navigateTo(page) {
   router.push(`/${page}`);
 }
 
 // 表單數據
-const formData = ref({
-  index: {
-    sorting_entropy: 8,
-    naming_complexity: 6,
-    archival_tendency: 10,
-  },
-  natural_language_rules: [
-    "Organize files primarily by semester, then by subject, and finally by their intended use.",
-    "Homework, reports, and presentations should be the primary file types considered for organization.",
-    "Maintain a maximum folder depth of 5 levels to ensure easy navigation and accessibility.",
-    "Limit the number of items in a single folder to 30. Create subfolders when this limit is reached.",
-    "Prioritize a logical structure for file classification, adhering to a consistent framework.",
-    "File names should clearly indicate the name and version when applicable.",
-    "Consistently archive files to ensure long-term preservation and structured storage.",
-    "New folders should be created based on the semester to reflect the chronological order of academic activities.",
-    "Within each semester folder, create subfolders for each subject to categorize coursework.",
-    "Further categorize files within each subject folder by their purpose, such as assignments, projects, or study materials.",
-  ],
-});
+const { zoneName, rootPath } = storeToRefs(zoneStore);
+const { formResponse, formQuestion } = storeToRefs(formStore);
+const ruleData = ref(ruleStore.rule);
 
 // 全選和部分選邏輯
-const selectedRules = ref([...formData.value.natural_language_rules]);
+const selectedRules = ref([...ruleData.value.natural_language_rules]);
 const checkAll = ref(true);
 const isIndeterminate = ref(false);
 const isWarn = ref(false);
@@ -133,18 +131,33 @@ const MIN_REQUIRED = 4;
 
 // 全選 / 全不選
 const handleCheckAllChange = (val) => {
-  selectedRules.value = val ? [...formData.value.natural_language_rules] : [];
+  selectedRules.value = val ? [...ruleData.value.natural_language_rules] : [];
   isWarn.value = selectedRules.value.length < MIN_REQUIRED;
   isIndeterminate.value = false;
 };
 
 // 單獨選擇邏輯
 const handleRulesChange = (value) => {
-  const total = formData.value.natural_language_rules.length;
+  const total = ruleData.value.natural_language_rules.length;
   const checkedCount = value.length;
   isWarn.value = checkedCount < MIN_REQUIRED;
   checkAll.value = checkedCount === total;
   isIndeterminate.value = checkedCount > 0 && checkedCount < total;
+};
+
+const handleRegenerate = () => {
+  // TODO: call API to regenerate rules
+  // TODO: store new rules to ruleStore
+  // TODO: update ruleData
+  console.log("Regenerate rules");
+};
+
+const handleReset = () => {
+  ruleData = ruleStore.rule;
+  selectedRules.value = [...ruleData.value.natural_language_rules];
+  checkAll.value = true;
+  isIndeterminate.value = false;
+  isWarn.value = false;
 };
 
 // 提交邏輯
@@ -153,9 +166,26 @@ const handleSubmit = () => {
     ElMessage.error(`至少需要選擇 ${MIN_REQUIRED} 項規則！`);
     return;
   }
-  console.log("Index 部分:", formData.value.index);
+  console.log("Index 部分:", ruleData.value.index);
   console.log("選擇的規則:", selectedRules.value);
-  navigateTo("zone");
+
+  // 自行處理 ruleJson 的 spec 區塊
+  ruleData.value.spec = {
+    // TODO: 這裡 file_types 格式要改，目前是陣列，應該要是物件
+    file_types: formResponse.value.file_types,
+    sort_struct: formResponse.value.sort_struct,
+    folder_depth: formResponse.value.folder_depth,
+    capacity: formResponse.value.capacity,
+    naming_style: formResponse.value.naming,
+  };
+  ruleStore.setRule(ruleData.value);
+
+  try {
+    // TODO: call API to save and create zone
+    navigateTo("zone");
+  } catch (error) {
+    ElMessage.error("Error when submitting zone rules", error);
+  }
 };
 </script>
 
