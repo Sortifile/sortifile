@@ -3,7 +3,7 @@
     <h3>{{ name }}</h3>
 
     <!-- 檔案專屬畫面 -->
-    <el-row :gutter="20" class="command-bar">
+    <el-row class="command-bar">
       <el-col :span="12">
         <div>
           <el-switch
@@ -15,10 +15,7 @@
           />
         </div>
       </el-col>
-      <el-col
-        :span="12"
-        style="display: flex; justify-content: flex-end; padding-right: 20px"
-      >
+      <el-col :span="12" style="display: flex; justify-content: flex-end">
         <el-button type="primary" @click="handleResummarize">
           Resummarize this file
         </el-button>
@@ -463,6 +460,6 @@ onMounted(() => {
 .command-bar {
   max-width: 100%;
   width: 100%;
-  margin: 15px, 0;
+  margin: 0px;
 }
 </style>

@@ -34,14 +34,14 @@
 
     <!-- 右側資訊顯示 -->
     <div class="content-display">
-      <el-row :gutter="20" align="middle" justify="end" style="max-width: 100%">
-        <el-col :span="10">
-          <h2>{{ zoneName }}</h2>
-        </el-col>
-        <el-col
-          :span="14"
-          style="display: flex; justify-content: flex-end; padding-right: 20px"
-        >
+      <h2>{{ zoneName }}</h2>
+      <el-row
+        :gutter="20"
+        align="middle"
+        justify="start"
+        style="max-width: 100%"
+      >
+        <el-col :span="14" style="display: flex">
           <el-button type="warning">
             <el-icon><DeleteFilled /></el-icon>
           </el-button>
@@ -629,7 +629,8 @@ onMounted(async () => {
 }
 
 .sidebar {
-  width: 250px;
+  width: 20vw;
+  max-width: 250px;
   border-right: 1px solid #dcdcdc;
   padding: 10px;
   overflow: hidden;
