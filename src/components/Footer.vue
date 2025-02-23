@@ -23,7 +23,7 @@ export default {
   align-content: center;
   box-sizing: border-box;
   padding: 0px 30px;
-  /* z-index: 10; */
+  z-index: 30;
 }
 .footer p {
   margin: 0;

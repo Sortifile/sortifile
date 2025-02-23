@@ -1,7 +1,7 @@
 <!-- zone-wizard/Create.vue -->
 
 <template>
-  <div style="max-width: 600px; margin: 0 auto">
+  <div class="container">
     <h1>Create New Zone</h1>
     <el-form ref="formRef" :model="zoneStore" :rules="rules" label-width="auto">
       <!-- Zone 名稱 -->
@@ -117,3 +117,13 @@ const selectPath = async () => {
   }
 };
 </script>
+
+<style scoped>
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+</style>

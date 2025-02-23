@@ -40,12 +40,14 @@ function goToGithub() {
 
 <style scoped>
 img {
-  height: 250px;
+  height: 30vh;
   margin-top: 20px;
   margin-bottom: 20px;
 }
 
 .container {
+  height: 100%;
+  width: 100%;
   margin: 0;
   display: flex;
   flex-direction: column;
