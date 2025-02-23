@@ -24,5 +24,8 @@ export const useFormStore = defineStore("form", {
     resetFormResponse() {
       this.formResponse = initialFormState;
     },
+    resetForm() {
+      this.resetFormResponse();
+    },
   },
 });
