@@ -5,16 +5,7 @@ const props = defineProps({
 
 const emit = defineEmits(["update:modelValue"]);
 
-const options = [
-  "圖片",
-  "影片",
-  "音訊",
-  "作業",
-  "簡報",
-  "報告",
-  "程式碼",
-  "TODO: 思諾再幫我加上其他的或調整選項",
-];
+const options = ["作業", "簡報", "報告", "其他文件", "圖片", "程式碼"];
 
 const updateSelection = (value) => {
   emit("update:modelValue", value);
