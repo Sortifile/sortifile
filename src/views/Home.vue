@@ -1,7 +1,14 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { ElButton } from "element-plus";
+import { onMounted } from "vue";
+import { useZoneStore } from "../store/zone";
+import { useRuleStore } from "../store/rule";
+import { useFormStore } from "../store/form";
 
+const zoneStore = useZoneStore();
+const ruleStore = useRuleStore();
+const formStore = useFormStore();
 const router = useRouter();
 
 function navigateTo(page) {
@@ -11,6 +18,14 @@ function navigateTo(page) {
 function goToGithub() {
   window.open("https://github.com/sortifile/sortifile");
 }
+
+onMounted(() => {
+  console.log("Home page mounted");
+  // clear all store data
+  zoneStore.resetZone();
+  ruleStore.resetRule();
+  formStore.resetForm();
+});
 </script>
 
 <template>
