@@ -8,7 +8,7 @@
         <el-button type="warning" @click=""> Regenerate Rules </el-button>
       </el-col>
       <el-col :span="2">
-        <el-button plain @click=""> Reset </el-button>
+        <el-button plain @click="handleReset"> Reset </el-button>
       </el-col>
     </el-row>
     <el-text class="mx-1" type="info">Some description</el-text>
@@ -120,7 +120,8 @@ function navigateTo(page) {
 // 表單數據
 const { zoneName, rootPath } = storeToRefs(zoneStore);
 const { formResponse, formQuestion } = storeToRefs(formStore);
-const ruleData = ref(ruleStore.rule);
+import { cloneDeep } from "lodash";
+const ruleData = ref(cloneDeep(ruleStore.rule));
 
 // 全選和部分選邏輯
 const selectedRules = ref([...ruleData.value.natural_language_rules]);
@@ -153,7 +154,7 @@ const handleRegenerate = () => {
 };
 
 const handleReset = () => {
-  ruleData = ruleStore.rule;
+  ruleData.value = cloneDeep(ruleStore.rule);
   selectedRules.value = [...ruleData.value.natural_language_rules];
   checkAll.value = true;
   isIndeterminate.value = false;

@@ -63,6 +63,7 @@ import folder_depth from "../../components/survey/folder_depth.vue";
 import capacity from "../../components/survey/capacity.vue";
 import naming_style from "../../components/survey/naming_style.vue";
 import archival_tendency from "../../components/survey/archival_tendency.vue";
+import { cloneDeep } from "lodash";
 
 const router = useRouter();
 const formStore = useFormStore();
@@ -82,10 +83,10 @@ const initialFormState = {
   archival_tendency: "",
 };
 
-const formResponse = ref({ ...initialFormState });
+const formResponse = ref(cloneDeep(initialFormState));
 
 const resetForm = () => {
-  formResponse.value = { ...initialFormState };
+  formResponse.value = cloneDeep(initialFormState);
   console.log("表單已重置:", formResponse.value);
 };
 
@@ -108,6 +109,8 @@ const submitForm = async () => {
 
     // 存入 Pinia 的 ruleData
     ruleStore.setRule(ruleJson);
+    ruleStore.resetRule();
+    console.log("AI 生成的規則：", ruleStore.rule);
 
     // 顯示成功訊息並跳轉
     ElMessage.success("AI 生成規則成功！");

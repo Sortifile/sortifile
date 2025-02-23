@@ -21,6 +21,8 @@ const initialRuleState = {
     "blah blah",
     "blah blah blah",
     "blah blah blah blah",
+    "blah blah blah blah blah",
+    "blah blah blah blah blah blah",
   ],
 };
 
