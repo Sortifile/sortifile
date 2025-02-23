@@ -1,10 +1,15 @@
-use sqlx::{sqlite::{SqliteQueryResult, SqliteRow}, sqlx_macros, Column, Error, Row, Sqlite, SqlitePool};
+use sqlx::{
+    sqlite::{SqliteQueryResult, SqliteRow},
+    sqlx_macros, Column, Error, Row, Sqlite, SqlitePool,
+};
 use std::sync::Arc;
 use tauri::State;
 use tokio::time::{self, Duration};
+
 pub struct Database {
     pub pool: sqlx::SqlitePool,
 }
+
 pub fn get_value_as_string(row: &SqliteRow, index: usize) -> String {
     // Try to get the column as an Option<String>.
     if let Ok(opt) = row.try_get::<Option<String>, _>(index) {
@@ -33,6 +38,7 @@ pub fn get_value_as_string(row: &SqliteRow, index: usize) -> String {
     // Fallback: if none of the above work, we return "NULL".
     "NULL".to_owned()
 }
+
 impl Database {
     pub async fn new(database_url: &str) -> Self {
         let pool = sqlx::SqlitePool::connect(database_url)
@@ -40,12 +46,15 @@ impl Database {
             .expect("Failed to create SQLite pool");
         Self { pool }
     }
+
+    /// Creates a zone table with an additional file_id column.
     pub async fn create_zone_table(&self, zone_name: &str) -> Result<(), sqlx::Error> {
         let table_name = format!("zone_{}", zone_name);
         let query = format!(
             "CREATE TABLE IF NOT EXISTS {} (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 file_path TEXT NOT NULL,
+                file_id INTEGER,
                 summary TEXT,
                 last_modified_date TEXT,
                 last_summary_date TEXT
@@ -55,12 +64,14 @@ impl Database {
         sqlx::query(&query).execute(&self.pool).await?;
         Ok(())
     }
+
     pub fn get_pool(&self) {
         println!(
             "Database pool is active at memory address: {:p}",
             &self.pool
         );
     }
+
     pub async fn listen_for_changes(&self) {
         loop {
             let mut input = String::new();
@@ -91,6 +102,7 @@ impl Database {
             }
         }
     }
+
     pub async fn get_file_summary(
         &self,
         zone_name: &str,
@@ -105,15 +117,18 @@ impl Database {
         let summary: String = row.get(0);
         Ok(summary)
     }
+
     pub async fn exec_select(&self, input: &str) -> Result<Vec<SqliteRow>, Error> {
         let rows = sqlx::query(&input).fetch_all(&self.pool).await;
         Ok(rows.unwrap())
     }
+
     pub async fn exec(&self, input: &str) -> Result<SqliteQueryResult, Error> {
         let changes = sqlx::query(&input).execute(&self.pool).await;
         Ok(changes.unwrap())
     }
 }
+
 pub async fn get_db() -> Database {
     let db_url = "sqlite://my_database.db";
     let pool = Database::new(db_url).await;

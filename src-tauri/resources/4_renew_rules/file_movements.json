@@ -1,0 +1,130 @@
+{
+  "file_movements": [
+    {
+      "src_path": "報告_改.pdf",
+      "new_path": "112-2/中國文學/報告/論聊齋誌異·促織的社會諷喻與歷史隱喻_v1.pdf",
+      "move_timestamp": "2025-01-02T15:00:00Z",
+      "moved_by": "system",
+      "reason": "Based on the rules, files are categorized by '學期' (112-2), then '科目' (中國文學), and finally '用途' (報告). The filename includes the title and version (v1) according to the specified naming style."
+    },
+    {
+      "src_path": "論文評述_吳亞倫_B13901011.pdf",
+      "new_path": "112-2/中國文學/報告/樂蘅軍〈唐傳奇的意志世界〉論文評述_v1.pdf",
+      "move_timestamp": "2025-01-02T15:00:00Z",
+      "moved_by": "system",
+      "reason": "Following the categorization rules, this file is placed under '學期' (112-2), '科目' (中國文學), and '用途' (報告, as 論文評述 can be considered a type of report). The filename includes the title and version (v1)."
+    },
+    {
+      "src_path": "期末報告2.pdf",
+      "new_path": "113-1/全民國防教育軍事訓練/簡報/以色列培育資安國防人才的模式與臺灣全民國防的借鏡_v2.pdf",
+      "move_timestamp": "2025-01-02T15:00:00Z",
+      "moved_by": "system",
+      "reason": "This file is categorized under '學期' (113-1), '科目' (全民國防教育軍事訓練), and '用途' (簡報). The filename includes the title and version (v2) to distinguish it from another similar file."
+    },
+    {
+      "src_path": "期中研究計劃.pdf",
+      "new_path": "113-1/全民國防教育軍事訓練/報告/以色列培育資安國防人才的模式與臺灣全民國防的借鏡_v1.pdf",
+      "move_timestamp": "2025-01-02T15:00:00Z",
+      "moved_by": "system",
+      "reason": "Categorized under '學期' (113-1), '科目' (全民國防教育軍事訓練), and '用途' (報告, since it's a research plan). The filename includes the title and version (v1)."
+    },
+    {
+      "src_path": "期末報告.pdf",
+      "new_path": "113-1/全民國防教育軍事訓練/簡報/以色列培育資安國防人才的模式與臺灣全民國防的借鏡_v1.pdf",
+      "move_timestamp": "2025-01-02T15:00:00Z",
+      "moved_by": "system",
+      "reason": "Similar to '期末報告2.pdf', this file is also categorized under '學期' (113-1), '科目' (全民國防教育軍事訓練), and '用途' (簡報). It's assigned version (v1) as it is the first version."
+    },
+    {
+      "src_path": "homework/Homework 1_241103_105200.pdf",
+      "new_path": "113-1/微積分/作業/HW1_v1.pdf",
+      "move_timestamp": "2025-01-02T15:00:00Z",
+      "moved_by": "system",
+      "reason": "Moved from the 'homework' directory to the main directory structure under '學期' (113-1), '科目' (微積分), and '用途' (作業). The filename is simplified to 'HW1' and version (v1)."
+    },
+    {
+      "src_path": "homework/Homework 3_241115_171017.pdf",
+      "new_path": "113-1/微積分/作業/HW3_v1.pdf",
+      "move_timestamp": "2025-01-02T15:00:00Z",
+      "moved_by": "system",
+      "reason": "Moved from the 'homework' directory to the main structure under '學期' (113-1), '科目' (微積分), and '用途' (作業). The filename is simplified to 'HW3' and version (v1)."
+    },
+    {
+      "src_path": "homework/Homework 4_241124_161805.pdf",
+      "new_path": "113-1/微積分/作業/HW4_v2.pdf",
+      "move_timestamp": "2025-01-02T15:00:00Z",
+      "moved_by": "system",
+      "reason": "Moved under '學期' (113-1), '科目' (微積分), and '用途' (作業). It's assigned version (v2) to distinguish it from another 'HW4'."
+    },
+    {
+      "src_path": "homework/Homework 4_241003_213545 (1).pdf",
+      "new_path": "113-1/微積分/作業/HW4_v1.pdf",
+      "move_timestamp": "2025-01-02T15:00:00Z",
+      "moved_by": "system",
+      "reason": "Moved under '學期' (113-1), '科目' (微積分), and '用途' (作業). It's assigned version (v1) as it is the first version of 'HW4'."
+    },
+    {
+      "src_path": "homework/Homework 2_241111_170340.pdf",
+      "new_path": "113-1/微積分/作業/HW2_v1.pdf",
+      "move_timestamp": "2025-01-02T15:00:00Z",
+      "moved_by": "system",
+      "reason": "Moved under '學期' (113-1), '科目' (微積分), and '用途' (作業). The filename is simplified to 'HW2' and version (v1)."
+    },
+    {
+      "src_path": "Section 4.5 Lecture Notes",
+      "new_path": "113-1/微積分/其他/Section_4.5_v1.pdf",
+      "move_timestamp": "2025-01-02T15:00:00Z",
+      "moved_by": "system",
+      "reason": "Since lecture notes do not fall under '作業', '報告', or '簡報', they are categorized as '其他' under '學期' (113-1) and '科目' (微積分). The filename is simplified and given version (v1)."
+    },
+    {
+      "src_path": "113-1/微積分/其他/Section_4.5_v1.pdf",
+      "new_path": "113-1/微積分/簡報/Section_4.5_v1.pdf",
+      "move_timestamp": "2025-01-15T15:00:00Z",
+      "moved_by": "user",
+      "reason": ""
+    },
+    {
+      "src_path": "113-1/微積分/其他/Section_3.10_v1.pdf",
+      "new_path": "113-1/微積分/簡報/Section_3.10_v1.pdf",
+      "move_timestamp": "2025-01-15T15:00:00Z",
+      "moved_by": "user",
+      "reason": ""
+    },
+    {
+      "src_path": "113-1/微積分/其他/Section_3.6_v1.pdf",
+      "new_path": "113-1/微積分/簡報/Section_3.6_v1.pdf",
+      "move_timestamp": "2025-01-15T15:00:00Z",
+      "moved_by": "user",
+      "reason": ""
+    },
+    {
+      "src_path": "113-1/微積分/其他/Section_5.5_v1.pdf",
+      "new_path": "113-1/微積分/簡報/Section_5.5_v1.pdf",
+      "move_timestamp": "2025-01-15T15:00:00Z",
+      "moved_by": "user",
+      "reason": ""
+    },
+    {
+      "src_path": "113-1/微積分/其他/Section_3.5_v1.pdf",
+      "new_path": "113-1/微積分/簡報/Section_3.5_v1.pdf",
+      "move_timestamp": "2025-01-15T15:00:00Z",
+      "moved_by": "user",
+      "reason": ""
+    },
+    {
+      "src_path": "112-2/中國文學/報告/論聊齋誌異·促織的社會諷喻與歷史隱喻_v1.pdf",
+      "new_path": "113-1/中國文學/報告/論聊齋誌異·促織的社會諷喻與歷史隱喻_v1.pdf",
+      "move_timestamp": "2025-01-15T15:00:00Z",
+      "moved_by": "user",
+      "reason": ""
+    },
+    {
+      "src_path": "112-2/中國文學/報告/樂蘅軍〈唐傳奇的意志世界〉論文評述_v1.pdf",
+      "new_path": "113-1/中國文學/報告/唐傳奇的意志世界_論文評述_v1.pdf",
+      "move_timestamp": "2025-01-15T15:00:00Z",
+      "moved_by": "user",
+      "reason": ""
+    }
+  ]
+}

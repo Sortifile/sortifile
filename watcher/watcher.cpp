@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <thread>
+#include <cstring>
 
 #include "sqlite3.h"
 
@@ -41,6 +42,8 @@ struct Sqlite{
 
 }; 
 
+
+
 SERVICE_STATUS ServiceStatus;
 SERVICE_STATUS_HANDLE hStatus;
 
@@ -48,8 +51,35 @@ std::string directoryToWatch = "C:\\path\\to\\watch";  // Default path
 std::string db_path = "C:\\Users\\jimts\\ytp\\sortifile\\watcher\\example.db";
 
 // Function to monitor the directory
+// Helper function to get the file ID given its full path.
+ULONGLONG GetFileId(const std::string& fullPath) {
+    // Open the file with minimal access
+    HANDLE hFile = CreateFileA(fullPath.c_str(),
+                               0,  // no access required, just for metadata
+                               FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+                               nullptr,
+                               OPEN_EXISTING,
+                               FILE_FLAG_BACKUP_SEMANTICS,
+                               nullptr);
+    if (hFile == INVALID_HANDLE_VALUE) {
+        return 0; // File may not exist (e.g., if it was removed) or an error occurred.
+    }
+
+    BY_HANDLE_FILE_INFORMATION fileInfo;
+    ULONGLONG fileId = 0;
+    if (GetFileInformationByHandle(hFile, &fileInfo)) {
+        fileId = (static_cast<ULONGLONG>(fileInfo.nFileIndexHigh) << 32) |
+                  fileInfo.nFileIndexLow;
+    }
+    CloseHandle(hFile);
+    return fileId;
+}
+
 void WatchDirectory(const std::string& directory) {
+    // Create or open the database and ensure the table has the fileId column.
     Sqlite db(db_path);
+    db.exec("CREATE TABLE IF NOT EXISTS lis (id INTEGER PRIMARY KEY, data TEXT, fileId INTEGER);");
+
     HANDLE hDir = CreateFileA(
         directory.c_str(),
         FILE_LIST_DIRECTORY,
@@ -93,6 +123,7 @@ void WatchDirectory(const std::string& directory) {
             FILE_NOTIFY_INFORMATION* pNotify =
                 reinterpret_cast<FILE_NOTIFY_INFORMATION*>(buffer.data() + offset);
 
+            // Convert the wide-character file name to a multi-byte string.
             int length = WideCharToMultiByte(CP_ACP, 0, pNotify->FileName,
                                              pNotify->FileNameLength / sizeof(WCHAR),
                                              nullptr, 0, nullptr, nullptr);
@@ -101,28 +132,43 @@ void WatchDirectory(const std::string& directory) {
                                 pNotify->FileNameLength / sizeof(WCHAR),
                                 &fileName[0], length, nullptr, nullptr);
 
+            // Construct the full path.
+            std::string fullPath = directory;
+            if (!fullPath.empty() && fullPath.back() != '\\') {
+                fullPath += "\\";
+            }
+            fullPath += fileName;
+
+            // Retrieve the file ID.
+            ULONGLONG fileId = GetFileId(fullPath);
+
+            // Prepare the log entry.
+            std::string eventDescription;
             switch (pNotify->Action) {
                 case FILE_ACTION_ADDED:
-                    //std::cout << "File added: " << fileName << std::endl;
-                    db.exec("INSERT INTO lis (data) VALUES ('File added: " + fileName + "');");
+                    eventDescription = "File added: " + fileName;
                     break;
                 case FILE_ACTION_REMOVED:
-                    //std::cout << "File removed: " << fileName << std::endl;
-                    db.exec("INSERT INTO lis (data) VALUES ('File removed: " + fileName + "');");
+                    eventDescription = "File removed: " + fileName;
                     break;
                 case FILE_ACTION_MODIFIED:
-                    //std::cout << "File modified: " << fileName << std::endl;
-                    db.exec("INSERT INTO lis (data) VALUES ('File modified: " + fileName + "');");
+                    eventDescription = "File modified: " + fileName;
                     break;
                 case FILE_ACTION_RENAMED_OLD_NAME:
-                    //std::cout << "File renamed (old name): " << fileName << std::endl;
-                    db.exec("INSERT INTO lis (data) VALUES ('File renamed (old name): " + fileName + "');");
+                    eventDescription = "File renamed (old name): " + fileName;
                     break;
                 case FILE_ACTION_RENAMED_NEW_NAME:
-                    //std::cout << "File renamed (new name): " << fileName << std::endl;
-                    db.exec("INSERT INTO lis (data) VALUES ('File renamed (new name): " + fileName + "');");
+                    eventDescription = "File renamed (new name): " + fileName;
+                    break;
+                default:
+                    eventDescription = "Unknown action on: " + fileName;
                     break;
             }
+
+            // Insert the log entry and file ID into the database.
+            std::string sql = "INSERT INTO lis (data, fileId) VALUES ('" + 
+                              eventDescription + "', " + std::to_string(fileId) + ");";
+            db.exec(sql);
 
             if (pNotify->NextEntryOffset == 0)
                 break;
@@ -132,6 +178,7 @@ void WatchDirectory(const std::string& directory) {
 
     CloseHandle(hDir);
 }
+
 
 // Service Control Handler
 void WINAPI ServiceCtrlHandler(DWORD CtrlCode) {
@@ -175,7 +222,7 @@ int main(int argc, char* argv[]) {
         db_path = argv[2];
     }
     auto db = Sqlite(db_path);
-    db.exec("CREATE TABLE IF NOT EXISTS lis (id INTEGER PRIMARY KEY, data TEXT);");
+    db.exec("CREATE TABLE IF NOT EXISTS lis (id INTEGER PRIMARY KEY, data TEXT, fileId INTEGER);");
 
     // WatchDirectory(directoryToWatch);
 
