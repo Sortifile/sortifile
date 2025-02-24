@@ -33,6 +33,21 @@ def generate_rules(
     response_text = start_chat_and_get_response(model, message_components)
     if response_text == "ERROR":
         return
+    response_json = json.loads(response_text)
+
+    with open(form_respond_path, "r", encoding="utf-8") as file:
+        formResponse = json.load(file)
+
+    response_json["spec"] = {
+        "file_types": formResponse["file_types"],
+        "sort_struct": formResponse["sort_struct"],
+        "folder_depth": formResponse["folder_depth"],
+        "capacity": formResponse["capacity"],
+        "naming_style": formResponse["naming"],
+        "date_format": formResponse["date_format"],
+        "filename_letter_rule": formResponse["filename_letter_rule"],
+    }
+    response_text = json.dumps(response_json, indent=4, ensure_ascii=False)
     save_json(output_path, response_text)
 
 def main():
