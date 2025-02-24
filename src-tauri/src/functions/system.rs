@@ -2,6 +2,8 @@ use std::path;
 use std::env;
 
 use dirs;
+
+use crate::functions::file;
 //#[tauri::command]
 pub fn get_appdata_dir() -> Result<String, std::env::VarError> {
     match std::env::var("APPDATA") {
@@ -14,6 +16,29 @@ pub fn get_appdata_dir() -> Result<String, std::env::VarError> {
             Err(e)
         }
     }
+}
+
+pub fn get_tmp_dir() -> Result<String, std::env::VarError> {
+    match std::env::var("TEMP") {
+        Ok(appdata) => {
+            //println!("APPDATA is: {}", appdata);
+            Ok(appdata)
+        }
+        Err(e ) => {
+            //println!("Couldn't read APPDATA: {}", e);
+            Err(e)
+        }
+    }
+}
+
+pub fn write_to_temp_file(file_name: String, data: String) -> std::io::Result<()> {
+    // Get the temporary directory path
+    let mut temp_path = get_tmp_dir().unwrap();
+    // Append your desired file name
+    temp_path.push_str(file_name.as_str());
+    // Write text content into the file
+    std::fs::write(&temp_path, data.as_str())?;
+    Ok(())
 }
 
 #[tauri::command]

@@ -28,3 +28,5 @@ sqlx = { version = "0.8.3", features = ["sqlite", "runtime-tokio-native-tls"] }
 dirs = "6.0"
 tauri-plugin-shell = "2.2.0"
 glob = "0.3"
+chrono = { version = "0.4", features = ["serde"] }
+async-recursion = "1.0"

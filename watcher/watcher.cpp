@@ -4,25 +4,36 @@
 #include <string>
 #include <thread>
 #include <cstring>
+#include <cstdio>  // For sprintf
 
 #include "sqlite3.h"
 
-struct Sqlite{
+// Helper function to get the current timestamp as a string.
+std::string GetCurrentTimestamp() {
+    SYSTEMTIME st;
+    GetLocalTime(&st);
+    char buffer[100];
+    sprintf(buffer, "%04d-%02d-%02d %02d:%02d:%02d",
+            st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
+    return std::string(buffer);
+}
+
+struct Sqlite {
     sqlite3* db = nullptr;
     char* errMsg = nullptr;
     int rc;
-    Sqlite(std::string db_path){
+    Sqlite(std::string db_path) {
         rc = sqlite3_open(db_path.c_str(), &db);
         if (rc != SQLITE_OK) {
             std::cerr << "Can't open database: " 
-                  << sqlite3_errmsg(db) << std::endl;
+                      << sqlite3_errmsg(db) << std::endl;
         }
     }
-    ~Sqlite(){
+    ~Sqlite() {
         sqlite3_close(db);
     }
 
-    void exec(std::string sql){
+    void exec(std::string sql) {
         rc = sqlite3_exec(db, sql.c_str(), callback, nullptr, &errMsg);
         if (rc != SQLITE_OK) {
             std::cerr << "SQL error: " << (errMsg ? errMsg : "Unknown error") << std::endl;
@@ -32,17 +43,15 @@ struct Sqlite{
     }
 
     static int callback(void* /*unused*/, int argc, char** argv, char** azColName) {
-    for (int i = 0; i < argc; i++) {
-        // Print column name and value; if value is NULL, display "NULL"
-        //std::cout << (azColName[i] ? azColName[i] : "NULL") << " = " << (argv[i] ? argv[i] : "NULL") << "\n";
+        for (int i = 0; i < argc; i++) {
+            // Uncomment if you want to print query results.
+            // std::cout << (azColName[i] ? azColName[i] : "NULL") << " = " 
+            //           << (argv[i] ? argv[i] : "NULL") << "\n";
+        }
+        // std::cout << std::endl;
+        return 0;
     }
-    //std::cout << std::endl;  // Extra newline between rows.
-    return 0;
-    }
-
-}; 
-
-
+};
 
 SERVICE_STATUS ServiceStatus;
 SERVICE_STATUS_HANDLE hStatus;
@@ -50,7 +59,6 @@ SERVICE_STATUS_HANDLE hStatus;
 std::string directoryToWatch = "C:\\path\\to\\watch";  // Default path
 std::string db_path = "C:\\Users\\jimts\\ytp\\sortifile\\watcher\\example.db";
 
-// Function to monitor the directory
 // Helper function to get the file ID given its full path.
 ULONGLONG GetFileId(const std::string& fullPath) {
     // Open the file with minimal access
@@ -76,9 +84,18 @@ ULONGLONG GetFileId(const std::string& fullPath) {
 }
 
 void WatchDirectory(const std::string& directory) {
-    // Create or open the database and ensure the table has the fileId column.
+    // Create or open the database and ensure the table has all desired columns.
     Sqlite db(db_path);
-    db.exec("CREATE TABLE IF NOT EXISTS lis (id INTEGER PRIMARY KEY, data TEXT, fileId INTEGER);");
+    db.exec("CREATE TABLE IF NOT EXISTS lis ("
+            "id INTEGER PRIMARY KEY, "
+            "src_path TEXT, "
+            "new_path TEXT, "
+            "move_timestamp TEXT, "
+            "moved_by TEXT, "
+            "reason TEXT DEFAULT 'none', "
+            "fileID INTEGER, "
+            "event_type TEXT"
+            ");");
 
     HANDLE hDir = CreateFileA(
         directory.c_str(),
@@ -91,6 +108,7 @@ void WatchDirectory(const std::string& directory) {
     );
 
     if (hDir == INVALID_HANDLE_VALUE) {
+        std::cerr << "Failed to open directory: " << directory << std::endl;
         return;
     }
 
@@ -115,6 +133,7 @@ void WatchDirectory(const std::string& directory) {
         );
 
         if (!success) {
+            std::cerr << "Error reading directory changes." << std::endl;
             break;
         }
 
@@ -142,33 +161,72 @@ void WatchDirectory(const std::string& directory) {
             // Retrieve the file ID.
             ULONGLONG fileId = GetFileId(fullPath);
 
-            // Prepare the log entry.
-            std::string eventDescription;
+            // Get the current timestamp.
+            std::string timestamp = GetCurrentTimestamp();
+
+            // Default values for moved_by and reason.
+            std::string moved_by = "unknown";
+            std::string reason = "none";
+
+            // Determine event type and set src_path/new_path accordingly.
+            std::string src_path;
+            std::string new_path;
+            std::string event_type;
+
             switch (pNotify->Action) {
                 case FILE_ACTION_ADDED:
-                    eventDescription = "File added: " + fileName;
+                    src_path = fullPath;
+                    new_path = "";
+                    event_type = "added";
                     break;
                 case FILE_ACTION_REMOVED:
-                    eventDescription = "File removed: " + fileName;
+                    src_path = fullPath;
+                    new_path = "";
+                    event_type = "removed";
                     break;
                 case FILE_ACTION_MODIFIED:
-                    eventDescription = "File modified: " + fileName;
+                    src_path = fullPath;
+                    new_path = "";
+                    event_type = "modify";
                     break;
                 case FILE_ACTION_RENAMED_OLD_NAME:
-                    eventDescription = "File renamed (old name): " + fileName;
+                    // For a rename, we record the old name.
+                    src_path = fullPath;
+                    new_path = "";
+                    event_type = "move";
                     break;
                 case FILE_ACTION_RENAMED_NEW_NAME:
-                    eventDescription = "File renamed (new name): " + fileName;
+                    // For a rename, we record the new name.
+                    src_path = "";
+                    new_path = fullPath;
+                    event_type = "move";
                     break;
                 default:
-                    eventDescription = "Unknown action on: " + fileName;
+                    src_path = fullPath;
+                    new_path = "";
+                    event_type = "unknown";
                     break;
             }
 
-            // Insert the log entry and file ID into the database.
-            std::string sql = "INSERT INTO lis (data, fileId) VALUES ('" + 
-                              eventDescription + "', " + std::to_string(fileId) + ");";
-            db.exec(sql);
+            // Prepare the SQL insert statement using a prepared statement.
+            const char* insert_sql = "INSERT INTO lis (src_path, new_path, move_timestamp, moved_by, reason, fileID, event_type) VALUES (?, ?, ?, ?, ?, ?, ?);";
+            sqlite3_stmt* stmt;
+            if (sqlite3_prepare_v2(db.db, insert_sql, -1, &stmt, nullptr) == SQLITE_OK) {
+                sqlite3_bind_text(stmt, 1, src_path.c_str(), -1, SQLITE_TRANSIENT);
+                sqlite3_bind_text(stmt, 2, new_path.c_str(), -1, SQLITE_TRANSIENT);
+                sqlite3_bind_text(stmt, 3, timestamp.c_str(), -1, SQLITE_TRANSIENT);
+                sqlite3_bind_text(stmt, 4, moved_by.c_str(), -1, SQLITE_TRANSIENT);
+                sqlite3_bind_text(stmt, 5, reason.c_str(), -1, SQLITE_TRANSIENT);
+                sqlite3_bind_int64(stmt, 6, static_cast<sqlite3_int64>(fileId));
+                sqlite3_bind_text(stmt, 7, event_type.c_str(), -1, SQLITE_TRANSIENT);
+
+                if (sqlite3_step(stmt) != SQLITE_DONE) {
+                    std::cerr << "Error inserting data: " << sqlite3_errmsg(db.db) << std::endl;
+                }
+            } else {
+                std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db.db) << std::endl;
+            }
+            sqlite3_finalize(stmt);
 
             if (pNotify->NextEntryOffset == 0)
                 break;
@@ -178,7 +236,6 @@ void WatchDirectory(const std::string& directory) {
 
     CloseHandle(hDir);
 }
-
 
 // Service Control Handler
 void WINAPI ServiceCtrlHandler(DWORD CtrlCode) {
@@ -190,7 +247,6 @@ void WINAPI ServiceCtrlHandler(DWORD CtrlCode) {
         default:
             break;
     }
-
     SetServiceStatus(hStatus, &ServiceStatus);
 }
 
@@ -221,20 +277,27 @@ int main(int argc, char* argv[]) {
         directoryToWatch = argv[1];
         db_path = argv[2];
     }
-    auto db = Sqlite(db_path);
-    db.exec("CREATE TABLE IF NOT EXISTS lis (id INTEGER PRIMARY KEY, data TEXT, fileId INTEGER);");
+    Sqlite db(db_path);
+    db.exec("CREATE TABLE IF NOT EXISTS lis ("
+            "id INTEGER PRIMARY KEY, "
+            "src_path TEXT, "
+            "new_path TEXT, "
+            "move_timestamp TEXT, "
+            "moved_by TEXT, "
+            "reason TEXT DEFAULT 'none', "
+            "fileID INTEGER, "
+            "event_type TEXT"
+            ");");
 
+    // Uncomment the following line to run the directory watcher in standalone mode.
     // WatchDirectory(directoryToWatch);
 
-    
     SERVICE_TABLE_ENTRY ServiceTable[] = {
         {"FileWatcherService", (LPSERVICE_MAIN_FUNCTION)ServiceMain},
         {nullptr, nullptr}
     };
 
     StartServiceCtrlDispatcher(ServiceTable);
-    //db = Sqlite("example.db");
-    
 
     return 0;
 }
