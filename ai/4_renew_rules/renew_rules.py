@@ -64,7 +64,7 @@ def renew_rules(
 def main():
     # 检查是否传入足够的参数（sys.argv[0] 是脚本名）
     if len(sys.argv) < 6:
-        print("Usage: process_json.py <system_prompt> <file_movements> <file_summary> <rule_path> <output_file>")
+        print("Usage: renew_rules.py <system_prompt> <file_movements> <file_summary> <rule_path> <output_file>")
         print("    - Note: The GEMINI_API_KEY environment variable must be set.")
         sys.exit(1)
 
