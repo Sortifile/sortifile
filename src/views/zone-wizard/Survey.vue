@@ -8,7 +8,9 @@
         <el-button plain @click="resetForm"> Reset </el-button>
       </el-col>
     </el-row>
-    <el-text class="mx-1" type="info">Some description</el-text>
+    <el-text class="mx-1" type="info">
+      Answer the questions based on how you want to structure this zone
+    </el-text>
 
     <file_types v-model="formResponse.file_types" />
     <logic_habit v-model="formResponse.logic_habit" />
