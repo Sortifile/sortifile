@@ -20,7 +20,7 @@ Please analyze the provided file and extract file's key information to assist in
   "topics": ["Integration Architecture", "Performance Benchmarks"],
   "tags": ["Tauri", "Rust", "Vue", "Sortifile"],
   "file_format": "DOCX",
-  "language": "EN",
+  "language": "EN"
 }
 ```
 

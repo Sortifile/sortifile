@@ -47,9 +47,18 @@ A JSON object containing organizational rules, structured as follows:
 
 - **spec**: Specifies detailed organizational rules, including:
 
-  - **file_types**: A list of recognized file categories (e.g., "homework", "reports", "presentations").
+  - **file_types**: A list of recognized file categories.
+    - options: ["作業", "簡報", "報告", "其他文件", "圖片", "程式碼"];
   - **folder_depth**: Maximum allowed folder hierarchy depth (e.g., 5).
   - **capacity**: Maximum number of files allowed per folder (e.g., 30).
+  - **date_format**: The User's prefer format of date in their naming
+  - **filename_letter_rule**: The limitation in file naming.
+    - options:
+    ```json
+    { key: "allowChinese", name: "允許任何字符與中文名稱" },
+    { key: "allowSpace", name: "允許空格" },
+    { key: "alphaNumUnderscoreDash", name: "僅允許英文、數字、底線 (\_)、破折號 (-)" }
+    ```
 
 - **natural_language_rules**: Sorting guidelines expressed in natural language.
 
@@ -57,11 +66,12 @@ A JSON object containing organizational rules, structured as follows:
 
 A list of files to be organized. Each entry includes:
 
-- **src_path**: The original file path.
-- **allow_move**: Whether the file can be relocated. If `false`, keep the file in its current location.
-- **title**, **author**, **summary**: Short details about the file’s content.
-- **topics**, **intended_use**: Helps determine the folder/category.
-- **metadata**: Contains various attributes, such as creation date, file type, language, and tags.
+- src_path: The original file path.
+- allow_move: Whether the file can be relocated. If false, keep the file in its current location.
+- title, version, author, summary: Basic details about the file’s content, including the title, version info, author details (name, organization, class, id, semester, team), and a brief summary.
+- subject, intended_use: Determines the file’s subject and how it is intended to be used.
+- section_range, status, topics, tags, file_format, language: Additional descriptors covering document sections, current status, content topics, relevant tags, file format, and language.
+- metadata: Contains various attributes such as creation date, last modified date, last sorted date, and last summarized date.
 
 #### 3. `history_file_movements.json`
 
