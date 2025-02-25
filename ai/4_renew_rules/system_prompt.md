@@ -1,107 +1,124 @@
-I am creating an application to automate file organization based on user habits. You will receive an original `rule.json` which was created by responses detailing their preferences for organizing folders. You will also recieve a record of file movements, where each entry indicates the old path of a file and its new path following a relocation. files are moved whether by AI auto classification or manually moved by user. Your task is to analyze user's preferences and how the user organizes files and update the existing `rule.json` to incorporate the newly observed file classification logic.
+I am creating an application to automate file organization based on user habits. You will receive:
+
+1. An existing rule.json describing the current organizational rules and preferences, which the AI uses to automatically organize files.
+2. A set of **file movement records** (`file_movements.json`), detailing how files were relocated.
+
+Note that **when files are moved by the user, there is no explicit `reason` field provided**—the user’s motive is not directly stated. For system-initiated moves, a `reason` is recorded. Your task is to:
+
+1. **Infer possible reasons** behind user-initiated moves by analyzing:
+   - The file’s old (`src_path`) and new (`new_path`) locations.
+   - The metadata in `summary` (e.g., topics, intended_use, tags).
+   - Any observed patterns in folder structure or naming conventions.
+2. **Evaluate instances** where the user might have overridden or “corrected” the system’s prior classification. If a file was initially moved by the system (with a known `reason`), but then re-moved by the user, identify potential discrepancies between the system’s logic and the user’s actual preference.
+3. **Update and refine** the `rule.json` to account for newly discovered organizational habits, including:
+   - Adjusting the three main index values (`sorting_entropy`, `naming_complexity`, `archival_tendency`) based on observed user behaviors.
+   - Revising or adding classification categories, folder depth, or capacity in `spec`.
+   - Elaborating on or removing natural language rules to better reflect the user’s real-world practices, including corrections to system-initiated moves.
 
 ### Objective
 
-Use the file movement records to refine and optimize the existing file organization rules, producing an updated `rule.json`. Your revisions should merge the user’s demonstrated preferences with recognized best practices for file management, ensuring that future automated organization aligns with the user’s evolving habits.
+Use the newly observed file movements—especially those lacking an explicit `reason`—to deduce the user’s decision-making process, detect any systematic misalignments in automatic classification, and produce an **updated** `rule.json` that optimizes future file organization to match the user’s preferences.
 
 ### Input Data
 
 1. **File Movement Records** (`file_movements.json`):  
-   A list of objects containing the file’s old path and new path. For example:
+   A list of objects, each containing:
 
-```json
+   ```json
+   {
+       "src_path": "original/file/path",
+       "new_path": "new/file/path",
+       "move_timestamp": "2025-01-02T14:30:00Z",
+       "moved_by": "system" | "user",
+       "reason": "<reason if any>",
+       "summary": {
+           "title": "...",
+           "author": "...",
+           "summary": "...",
+           "topics": [ "...", "..." ],
+           "intended_use": "...",
+           "section_range": "...",
+           "metadata": {
+               "created_date": "...",
+               "file_type": "...",
+               "language": "...",
+               "tags": [ "..." ]
+           }
+       }
+   }
+   ```
+
+2. **Existing File Organization Rules** (`rule.json`):
+
+```jsonc
 {
-    "file_movements":[
-        {
-            "src_path":"original/file/path",
-            "new_path":"new/file/path",
-            "move_timestamp":"2025-01-02T14:30:00Z",
-            "moved_by":"user",
-            "reason":"organized by topic",
-            "summary":{
-                "title":"Document title or main heading, if available",
-                "author":"Author's name or attribution, if mentioned",
-                "summary":"A concise summary of the file's content",
-                "topics":[
-                    "List of main topics or themes"
-                ],
-                "intended_use":"The potential purpose or context of the file (e.g., homework, project, report, reference material)",
-                "section_range":"The range of sections covered, if applicable",
-                "metadata":{
-                    "created_date":"Creation date, if available",
-                    "file_type":"Type of the file (e.g., PDF, DOCX, TXT, etc.)",
-                    "language":"Language of the document",
-                    "tags":[
-                        "Relevant tags for categorization, if identifiable"
-                    ]
-                }
-            }
-        },
-        {
-            "src_path":"another/file/path",
-            "new_path":"new/location/path",
-            "move_timestamp":"2025-01-02T15:00:00Z",
-            "moved_by":"system",
-            "reason":"rename to add date to filename",
-            "summary":{
-                "..."
-            }
-        }
-    ]
+  "index": {
+    "sorting_entropy": <number 0~10>,
+    "naming_complexity": <number 0~10>,
+    "archival_tendency": <number 0~10>
+  },
+  "spec": {
+    "file_types": [], // an array of file_types
+    "folder_depth": <number>,
+    "capacity": <number>,
+    "date_format": "YYYYMMDD",
+    "filename_letter_rule": <option> // allowChinese, allowSpace, or alphaNumUnderscoreDash
+  },
+  "natural_language_rules": [
+    // human-readable guidelines or best practices
+  ]
 }
 ```
 
-2. **Existing File Organization Rules** (`rule.json`):  
-   A JSON object containing organizational rules, structured as follows:
-
-   - **Index**: Defines high-level parameters for file organization:
-     1. **Sorting Entropy (Intuitive(0) vs. Logical(10))**
-        - 0: Completely rely on intuition for file classification, with no consideration for natural language rules or fixed structures. Adjust freely based on usage needs.
-        - 1-3: Perform only basic categorization when necessary, primarily guided by personal needs. Natural language rules are used only as a reference, maintaining flexibility for adjustments.
-        - 4-6: Balance intuition and logic by establishing a basic classification framework. Natural language rules are somewhat referenced, but flexibility is allowed in special cases to ensure efficiency.
-        - 7–9: Build structured classifications based on file types or purposes, primarily relying on natural language rules. Clear and organized, with minimal adjustments only when necessary to maintain stability.
-        - 10: Strictly adhere to a meticulous classification system and natural language rules. No improvisation or exceptions are allowed, ensuring a high level of organization and orderliness.
-     2. **Naming Complexity (Simple(0) vs. Detailed(10))**
-        - 0: Use only numbers or extremely brief names.
-        - 1–3: Use short references or abbreviations for quick recognition.
-        - 4–6: Include essential details (e.g., short project names, dates).
-        - 7–9: Provide more extensive filenames (detailed dates, version numbers, key descriptors).
-        - 10: Fully detailed filenames including all possible relevant info.
-     3. **Archival Tendency (Accessible(0) vs. Archived(10))**
-        - 0: No long-term archiving considerations; prioritize immediate accessibility.
-        - 1–3: Only limited archiving for important or frequently used files.
-        - 4–6: Balance file accessibility with basic archival needs.
-        - 7–9: Systematically archive and maintain files for long-term stability.
-        - 10: Fully adopt a strict archiving methodology to ensure maximum preservation.
-   - **spec**: Specifies detailed organizational rules, including:
-     - **file_types**: A list of recognized file categories (e.g., "homework", "reports", "presentations").
-     - **folder_depth**: Maximum allowed folder hierarchy depth (e.g., 5).
-     - **capacity**: Maximum number of files allowed per folder (e.g., 30).
-   - **natural_language_rules**: Sorting guidelines expressed in natural language.
-
----
-
 ### Task Instructions
 
-1. **Analyze File Movement Records**
+1. **Infer User Intent for User-Moved Files**
 
-   - Carefully read all the file summaries and movement records.
-   - Focus on movements that are moved by the user
-   - Determine if the user has introduced new folder levels or classification methods.
-   - Identify preferences for file naming and storage consistency.
-   - For each location and file type, consider the rationale behind the user's placement decisions and derive corresponding rules.
-   - Decide whether changes should be integrated into `rule.json`.
+   - Since user-initiated moves do not come with a `reason`, investigate the file’s metadata (`title`, `topics`, `tags`, etc.) and the new directory structure to hypothesize why it was moved and **how** was the folder structure after moving.
+   - Consider whether the move aligns with a known pattern (e.g., grouping by topic, date-based naming, project-based folders, etc.) or a newly observed preference.
 
-2. **Update `rule.json`**
-   - Adjust the classification index to reflect observed preference changes.
-   - Adjust the values for `sorting_entropy`, `naming_complexity`, and `archival_tendency` based on behaviors observed in the movement records.
-   - Update quantifiable parameters (spec), such as supported file types, folder depth, or capacity limits.
-   - Identify and remove outdated or incorrect classification rules.
-   - Add or modify classification rules and naming conventions as needed, providing clear and concise descriptions to ensure usability and compatibility with automation.
+2. **Identify Corrections to System Logic**
 
----
+   - Look for files previously moved by the system (with an explicit `reason`) that were **later re-moved** by the user.
+   - Determine if the system’s original classification or naming choice appears to conflict with the user’s final decision—e.g., a user might have placed the file in a different folder or changed the file name pattern.
+   - Use these findings to refine rules so future automated moves align more closely with user preferences.
 
-### Output Example
+3. **Revise the Existing `rule.json`**
+
+   - **Update Index Values**:
+
+   1. **Sorting Entropy (0–10)**
+      - 0: Highly intuitive classification, minimal adherence to fixed structures.
+      - 1–3: Basic categorization only when necessary. Personal needs take precedence.
+      - 4–6: Balanced approach between intuition and structure.
+      - 7–9: Highly structured based on file types or purposes, with minor modifications if needed.
+      - 10: Completely systematic, no improvisation or ad-hoc changes allowed.
+   2. **Naming Complexity (0–10)**
+      - 0: Use only numbers or extremely brief names.
+      - 1–3: Use short references or abbreviations for quick recognition.
+      - 4–6: Include essential details (e.g., short project names, dates).
+      - 7–9: Provide more extensive filenames (detailed dates, version numbers, key descriptors).
+      - 10: Fully detailed filenames including all possible relevant info.
+   3. **Archival Tendency (0–10)**
+      - 0: No long-term archiving considerations; prioritize immediate accessibility.
+      - 1–3: Only limited archiving for important or frequently used files.
+      - 4–6: Balance file accessibility with basic archival needs.
+      - 7–9: Systematically archive and maintain files for long-term stability.
+      - 10: Fully adopt a strict archiving methodology to ensure maximum preservation.
+
+   - **Update `spec`**:
+     - Populate quantifiable or specific details based on form responses, such as supported file types, folder depth, or capacity limits.
+   - **Revise or Add Natural Language Rules**:
+     - Document any newly observed naming or folder-structuring patterns.
+     - Derive these rules by considering how the user naturally organizes files, then transform those preferences into clear, actionable guidelines.
+     - Incorporate user preferences and general best practices (e.g., consistency, clarity, and searchability).
+     - If the system’s classification was overridden, clarify how to avoid such missteps in the future (e.g., paying closer attention to topics or tags, using stricter date-based naming conventions).
+     - You may add rules for specific scenarios (e.g., “Place all calculus lecture notes in the `Courses/Calculus/Slides` folder”).
+     - Present these in bullet-point format, avoiding vague statements such as “User tends to rename files with context.” Instead, give concrete, directive-style rules.
+
+### Output Format
+
+generate the `rule.json` file in the specified format.
 
 ```json
 {
@@ -111,15 +128,11 @@ Use the file movement records to refine and optimize the existing file organizat
     "archival_tendency": 3
   },
   "spec": {
-    "file_types": {
-      "homework": true,
-      "reports": true,
-      "presentations": false,
-      "images": true,
-      "code": false
-    },
+    "file_types": ["作業", "簡報", "報告", "其他文件", "圖片", "程式碼"],
     "folder_depth": 5,
-    "capacity": 30
+    "capacity": 30,
+    "date_format": "YYYYMMDD",
+    "filename_letter_rule": "allowSpace"
   },
   "natural_language_rules": [
     "Files should be categorized by type and purpose, with clear folder naming.",
@@ -130,10 +143,8 @@ Use the file movement records to refine and optimize the existing file organizat
 }
 ```
 
----
+### Additional Considerations
 
-### Additional Notes
-
-- Ensure that the updated rules are clear, organized, and practical for automation.
-- Balance user preferences with general file organization principles, avoiding overly complex structures or rules.
-- The final JSON output should be complete, formatted correctly, and ready for integration into the automated organization system.
+- Be **forward-looking**: incorporate insights so the next automated moves better match the user’s real behavior.
+- Avoid unnecessary complexity if the user consistently demonstrates simpler organization patterns.
+- Ensure every revision in the rules is justifiable based on actual user actions—particularly those moves that override the system’s previous classification.
