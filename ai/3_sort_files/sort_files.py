@@ -43,7 +43,7 @@ def sort_files(
     save_json(output_path, response_text)
 
 def main():
-    # 检查是否传入足够的参数（sys.argv[0] 是脚本名）
+    # 檢查是否傳入足夠的參數
     if len(sys.argv) < 8:
         print("Usage: sort_files.py <system_prompt> <user_prompt> <path_to_sort> <rule_path> <file_summary_path> <history_file_movements_path> <output_file>")
         print("    - Note: The GEMINI_API_KEY environment variable must be set.")

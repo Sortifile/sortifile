@@ -128,7 +128,7 @@ def summarize_files(
         files["uploaded_files"][0].delete()
 
 def main():
-    # 檢查是否傳入足夠的參數（sys.argv[0] 是腳本名）
+    # 檢查是否傳入足夠的參數
     if len(sys.argv) < 6:
         print("Usage: summarize_files.py <system_prompt> <user_prompt> <root_path> <file_path> <output_file>")
         print("    - Note: The GEMINI_API_KEY environment variable must be set.")
