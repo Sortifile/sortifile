@@ -51,7 +51,7 @@ def generate_rules(
     save_json(output_path, response_text)
 
 def main():
-    # 检查是否传入足够的参数（sys.argv[0] 是脚本名）
+    # 檢查是否傳入足夠的參數
     if len(sys.argv) < 5:
         print("Usage: process_json.py <system_prompt> <question_file> <response_file> <output_file>")
         print("    - Note: The GEMINI_API_KEY environment variable must be set.")
