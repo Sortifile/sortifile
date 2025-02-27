@@ -11,7 +11,9 @@
         <el-button plain @click="handleReset"> Reset </el-button>
       </el-col>
     </el-row>
-    <el-text class="mx-1" type="info">Some description</el-text>
+    <el-text class="mx-1" type="info">
+      Check if all the rules match your preference
+    </el-text>
 
     <!-- 分類指標 -->
     <h3>分類指標</h3>
