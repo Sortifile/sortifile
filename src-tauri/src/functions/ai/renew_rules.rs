@@ -24,11 +24,10 @@ use chrono::{DateTime, Utc};
 /// so that we can spawn the proper sidecar.
 
 #[tauri::command]
-pub async fn ai_sort(
+pub async fn ai_renew_rules(
     app: tauri::AppHandle,
     zone_name: &str,
     zone_path: &str,
-    path_to_sort: &str,
 ) -> Result<String, String> {
     // Step 1: Update file summaries.
     // Here you would update the summaries so that files under path_to_sort have
@@ -43,7 +42,7 @@ pub async fn ai_sort(
     let mut file_summary: Vec<String> = Vec::new(); 
     let mut history_file_movements: Vec<String> = Vec::new();
 
-    process_directory_recursively(zone_path.to_string(), zone_name, path_to_sort, &mut file_summary, &mut history_file_movements).await.unwrap();
+    process_directory_recursively(zone_path.to_string(), zone_name, zone_path, &mut file_summary, &mut history_file_movements).await.unwrap();
     // serialize file_summary to a string
     let file_summary_str = serde_json::to_string(&file_summary).unwrap();
     let history_file_movement_str = serde_json::to_string(&history_file_movements).unwrap();
@@ -64,28 +63,19 @@ pub async fn ai_sort(
         .args(&[
             // system prompt for sort_files (from resource folder)
             app.path()
-                .resolve("resources/3_sort_files/system_prompt.json", BaseDirectory::Resource)
+                .resolve("resources/4_renew_rules/system_prompt.json", BaseDirectory::Resource)
                 .unwrap()
                 .as_os_str()
                 .to_str()
                 .unwrap(),
-            // user prompt for sort_files
-            app.path()
-                .resolve("resources/3_sort_files/user_prompt.json", BaseDirectory::Resource)
-                .unwrap()
-                .as_os_str()
-                .to_str()
-                .unwrap(),
-            // path to sort (i.e. the folder to be reorganized)
-            path_to_sort,
             // rule file
+            format!("zone_{}_history_file_movements_tmp.json", zone_name).as_str(),
+            format!("zone_{}_file_summary_tmp.json", zone_name).as_str(),
             format!("{}/.sortifile.conf", zone_path).as_str(),
             // file summary file (should be prepared by your logic)
-            format!("zone_{}_file_summary_tmp.json", zone_name).as_str(),
             // history file movements file
-            format!("zone_{}_history_file_movements_tmp.json", zone_name).as_str(),
             // output file where move steps are written
-            format!("zone_{}_move_steps_tmp.json", zone_name).as_str(),
+            format!("zone_{}_renewed_rules.json", zone_name).as_str(),
         ]);
     let (mut rx, _child) = sort_command.spawn().map_err(|e| e.to_string())?;
     tauri::async_runtime::spawn(async move {
@@ -97,7 +87,7 @@ pub async fn ai_sort(
         }
     });
     // read from move_steps file to string
-    let result = fs::read_to_string(format!("zone_{}_move_steps_tmp.json", zone_name)).unwrap();
+    let result = fs::read_to_string(format!("zone_{}_renewed_rules.json", zone_name)).unwrap();
     Ok(result)
 }
 
