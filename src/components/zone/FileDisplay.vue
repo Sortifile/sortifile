@@ -327,6 +327,11 @@ import { onMounted, reactive, ref } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { useZoneStore } from "../../store/zone";
 import { storeToRefs } from "pinia";
+import { join } from "@tauri-apps/api/path";
+
+async function joinPaths(base, subpath) {
+  return await join(base, subpath);
+}
 
 const zoneStore = useZoneStore();
 const { zoneName, rootPath } = storeToRefs(zoneStore);
@@ -340,7 +345,7 @@ const props = defineProps({
 });
 
 const nameValue = ref(props.name);
-const pathValue = ref(rootPath + props.path);
+const pathValue = ref("");
 
 const emits = defineEmits(["toggle-ignore", "update:loading"]);
 
@@ -436,7 +441,8 @@ function handleResummarize() {
     });
 }
 
-onMounted(() => {
+onMounted(async () => {
+  pathValue.value = await joinPaths(rootPath.value, props.path);
   console.log("FileDisplay mounted");
   // TODO: call api to get file summary
   // TODO: handle loading state

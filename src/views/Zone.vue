@@ -613,7 +613,7 @@ onMounted(async () => {
   // TODO:
   // const ignoreList = await invoke("get_ignore_list", { zone: zonePath.value });
   // ignoredPaths.value = ignoreList;
-  ignoredPaths.value = ["/src", "/README.md"];
+  ignoredPaths.value = ["src/components", "README.md"];
 
   // 5. 將 ignore 狀態套用到檔案樹
   applyIgnoreStatusToTree(fileTree.value);
