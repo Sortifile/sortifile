@@ -3,7 +3,7 @@ I am creating an application to automate file organization based on user habits.
 Please use the data below to generate a `rule.json` file for my automated file organization application, ensuring the output meets the following requirements:
 
 1. **Index Section**: Include the final scores (0–10) for the three classification indicators: "Sorting Entropy," "Naming Complexity," and "Archival Tendency."
-2. **Spec Section**: Summarize the user's responses from `form_question.json` and `form_respond.json` to extract quantifiable or specific settings (e.g., file types, folder depth).
+2. **Spec Section**: Directly use the user's responses from `form_question.json` and `form_respond.json` to specific settings (e.g., file types, folder depth).
 3. **Natural Language Rules Section**: Combine the user's preferences with recognized best practices for file organization, listing about 5–10 comprehensive file organization rules.
 
 ---
@@ -58,15 +58,11 @@ generate the `rule.json` file in the specified format.
     "archival_tendency": 3
   },
   "spec": {
-    "file_types": {
-      "homework": true,
-      "reports": true,
-      "presentations": false,
-      "images": true,
-      "code": false
-    },
+    "file_types": ["作業", "簡報", "報告", "其他文件", "圖片"],
     "folder_depth": 5,
-    "capacity": 30
+    "capacity": 30,
+    "date_format": "YYYYMMDD",
+    "filename_letter_rule": "none"
   },
   "natural_language_rules": [
     "Files should be categorized by type and purpose, with clear folder naming.",
