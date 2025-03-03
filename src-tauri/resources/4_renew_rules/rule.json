@@ -1,0 +1,29 @@
+{
+  "index": {
+    "sorting_entropy": 8,
+    "naming_complexity": 2,
+    "archival_tendency": 10
+  },
+  "spec": {
+    "file_types": {
+      "作業": true,
+      "報告": true,
+      "簡報": true,
+      "圖片": false,
+      "程式碼": false
+    },
+    "sort_struct": ["學期", "科目", "用途"],
+    "folder_depth": 5,
+    "capacity": 30,
+    "naming_style": ["name", "version"]
+  },
+  "natural_language_rules": [
+    "Files should be primarily categorized by '學期', then by '科目', and finally by '用途'.",
+    "File names should incorporate the 'name' and 'version' to ensure clarity and version control.",
+    "Maintain a maximum folder depth of 5 to prevent overly complex structures.",
+    "Limit the number of files within a single folder to 30 before creating subfolders.",
+    "Prioritize a logical file organization based on type and purpose, aligning with the user's preference for structured archiving.",
+    "Ensure consistent naming conventions across all files and folders.",
+    "Focus on creating a well-defined and complete file structure suitable for long-term archiving."
+  ]
+}

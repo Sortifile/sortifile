@@ -1,6 +1,7 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { ElButton } from "element-plus";
+import { invoke } from "@tauri-apps/api/core";
 import { onMounted } from "vue";
 import { useZoneStore } from "../store/zone";
 import { useRuleStore } from "../store/rule";
@@ -14,6 +15,7 @@ const router = useRouter();
 function navigateTo(page) {
   router.push(`/${page}`);
 }
+
 
 function goToGithub() {
   window.open("https://github.com/sortifile/sortifile");
@@ -48,6 +50,20 @@ onMounted(() => {
       </el-button>
       <el-button class="button" type="primary" @click="goToGithub">
         Docs
+      </el-button>
+      <el-button
+        class="button"
+        type="primary"
+        @click="navigateTo('invoketesting')"
+      >
+        invoke
+      </el-button>
+      <el-button
+        class="button"
+        type="primary"
+        @click="invoke('call_api', { content: '祝烏鴉倫新年快樂' })"
+      >
+        greet
       </el-button>
     </div>
   </main>

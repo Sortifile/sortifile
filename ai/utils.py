@@ -8,6 +8,11 @@ def load_environment():
     load_dotenv()
     genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
+def setAPIKey(api_key):
+    genai.configure(api_key=api_key)
+
+def setAPIKeyFromEnv():
+    genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
 def configure_generation_model(system_prompt_path, model_name, generation_config):
     with open(system_prompt_path, "r", encoding="utf-8") as file:
