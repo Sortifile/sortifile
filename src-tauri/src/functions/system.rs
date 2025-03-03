@@ -1,5 +1,5 @@
 use std::env;
-use std::path;
+use std::path::PathBuf;
 
 use dirs;
 
@@ -18,16 +18,12 @@ pub fn get_appdata_dir() -> Result<String, std::env::VarError> {
     }
 }
 
-pub fn get_tmp_dir() -> Result<String, std::env::VarError> {
-    match std::env::var("TEMP") {
-        Ok(appdata) => {
-            //println!("APPDATA is: {}", appdata);
-            Ok(appdata)
-        }
-        Err(e) => {
-            //println!("Couldn't read APPDATA: {}", e);
-            Err(e)
-        }
+pub fn get_tmp_dir() -> Result<String, String> {
+    let temp_path: PathBuf = env::temp_dir(); // 跨平台獲取 temp 目錄
+
+    match temp_path.to_str() {
+        Some(path) => Ok(path.to_string()),
+        None => Err("Failed to retrieve temp directory".to_string()),
     }
 }
 

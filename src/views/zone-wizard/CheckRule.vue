@@ -5,7 +5,9 @@
         <h1>Confirming Zone Rules</h1>
       </el-col>
       <el-col :span="4">
-        <el-button type="warning" @click=""> Regenerate Rules </el-button>
+        <el-button type="warning" @click="handleRegenerate">
+          Regenerate Rules
+        </el-button>
       </el-col>
       <el-col :span="2">
         <el-button plain @click="handleReset"> Reset </el-button>
@@ -149,10 +151,19 @@ const handleRulesChange = (value) => {
 };
 
 const handleRegenerate = () => {
-  // TODO: call API to regenerate rules
-  // TODO: store new rules to ruleStore
-  // TODO: update ruleData
-  console.log("Regenerate rules");
+  const ruleJson = await invoke("ai_create_rule", {
+    zone_name: zoneStore.zoneName,
+    zone_path: zoneStore.rootPath,
+    create_from_structure: false,
+    form_response: formResponse.value,
+  });
+
+  // 存入 Pinia 的 ruleData
+  ruleStore.setRule(ruleJson);
+  console.log("AI 生成的規則：", ruleStore.rule);
+
+  // 顯示成功訊息並跳轉
+  ElMessage.success("AI 生成規則成功！");
 };
 
 const handleReset = () => {
@@ -172,19 +183,26 @@ const handleSubmit = () => {
   console.log("Index 部分:", ruleData.value.index);
   console.log("選擇的規則:", selectedRules.value);
 
-  // 自行處理 ruleJson 的 spec 區塊
-  ruleData.value.spec = {
-    // TODO: 這裡 file_types 格式要改，目前是陣列，應該要是物件
-    file_types: formResponse.value.file_types,
-    sort_struct: formResponse.value.sort_struct,
-    folder_depth: formResponse.value.folder_depth,
-    capacity: formResponse.value.capacity,
-    naming_style: formResponse.value.naming,
-  };
   ruleStore.setRule(ruleData.value);
 
   try {
     // TODO: call API to save and create zone
+    let config = {
+      name: zoneName.value,
+      form_question: formQuestion.value,
+      form_response: formResponse.value,
+      rules: ruleData.value,
+      create_from_structure: false,
+    }
+
+    await invoke("create_zone", {
+      zoneName: zoneName.value,
+      zonePath: rootPath.value,
+      config: config,
+      ignore: [],
+      rules: ruleData.value,
+    });
+
     navigateTo("zone");
   } catch (error) {
     ElMessage.error("Error when submitting zone rules", error);

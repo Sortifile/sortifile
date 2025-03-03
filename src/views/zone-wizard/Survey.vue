@@ -100,18 +100,15 @@ const submitForm = async () => {
     ruleStore.resetRule();
 
     // 2. 呼叫 Tauri API 生成 rule.json
-    // const ruleJson = await invoke("ai_create_rule", {
-    //   zone_name: zoneStore.zoneName,
-    //   zone_path: zoneStore.rootPath,
-    //   create_from_structure: false,
-    //   form_question: formStore.formQuestion,
-    //   form_response: formResponse.value,
-    // });
-    const ruleJson = ruleStore.rule; // TO BE REMOVED
+    const ruleJson = await invoke("ai_create_rule", {
+      zoneName: zoneStore.zoneName,
+      zonePath: zoneStore.rootPath,
+      createFromStructure: false,
+      formResponse: JSON.stringify(formResponse.value),
+    });
 
     // 存入 Pinia 的 ruleData
     ruleStore.setRule(ruleJson);
-    ruleStore.resetRule();
     console.log("AI 生成的規則：", ruleStore.rule);
 
     // 顯示成功訊息並跳轉

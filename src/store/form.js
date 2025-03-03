@@ -15,7 +15,7 @@ const initialFormState = {
 export const useFormStore = defineStore("form", {
   state: () => ({
     formResponse: initialFormState,
-    formQuestion: {}, // TODO: Implement this by invoking the Tauri resource API
+    formQuestion: FixFormQuestion, // TODO: Implement this by invoking the Tauri resource API
   }),
   actions: {
     setFormResponse(response) {
@@ -29,3 +29,203 @@ export const useFormStore = defineStore("form", {
     },
   },
 });
+
+const FixFormQuestion = {
+  questions: [
+    {
+      question_id: "file_types",
+      question_text: "你的檔案中包含哪些類型的內容？",
+      type: "multi-select",
+      options: ["作業", "簡報", "報告", "其他文件", "圖片", "程式碼"],
+      rule_mapping: "maps to spec.file_types as boolean flags",
+      design_purpose: "用於了解使用者檔案的主要類型，為 AI 提供基礎分類方向。",
+    },
+    {
+      question_id: "logic_habit",
+      question_text: "當你需要整理工作檔案時，會傾向以下哪種分類?",
+      type: "single-choice",
+      options: [
+        "A. 按檔案類型或用途分類，例如「報告」、「調查」、「客戶資料」等。",
+        "B. 根據當下需求分類，例如「需要優先完成」、「稍後查看」等",
+        "C. 混合或無特定形式",
+      ],
+      rule_mapping:
+        "maps to index.sorting_entropy, with A is more Logical, B is more Intuitive, C is middle",
+      design_purpose:
+        "評估使用者分類邏輯的直覺性與規律性，決定分類方式的自由度。",
+    },
+    {
+      question_id: "sort_struct",
+      question_text: "你希望大概如何來建立你的檔案樹?",
+      type: "drag-and-drop",
+      options: [
+        {
+          key: "time",
+          name: "時間",
+          description:
+            "依時間（學期、年份、日期或時間戳記）分類。ex: 分為 2025/2024/2023",
+        },
+        {
+          key: "source",
+          name: "來源",
+          description:
+            "檔案的來源，如某堂課程或特定資料庫。ex: 分爲 微積分/物理科/駕訓班",
+        },
+        {
+          key: "usage",
+          name: "用途",
+          description: "依據用途分類。ex:分為 程式/作業/專案/報告",
+        },
+        {
+          key: "topic",
+          name: "檔案主題",
+          description:
+            "依據檔案的主題或內容分類。ex: Sortifile專案/上課程式/個人網頁",
+        },
+        {
+          key: "version_order",
+          name: "版本/次序",
+          description: "不同版本的管理。ex: 分爲 v1.0/v2.0",
+        },
+        {
+          key: "tags",
+          name: "關鍵字標籤",
+          description: "透過個人化的標籤進行分類。ex: 分為 重要/草稿/私人",
+        },
+        {
+          key: "file_format",
+          name: "檔案格式類型",
+          description: "按照檔案格式分類。ex: 分為 PDF/Word/Excel",
+        },
+        {
+          key: "index",
+          name: "編號",
+          description: "屬於某項特定編號的檔案。ex: 分為 01/02/03",
+        },
+      ],
+      rule_mapping:
+        "maps to spec.sort_struct and natural_language_rules with user-defined hierarchy",
+      design_purpose:
+        "了解用戶檔案分類的偏好，用於設計最符合需求的檔案樹結構。",
+    },
+    {
+      question_id: "folder_depth",
+      question_text: "你希望檔案層次最多幾層?",
+      type: "slider",
+
+      range: { min: 3, max: 10 },
+      default: 5,
+      rule_mapping: "maps to spec.folder_depth as an integer",
+      design_purpose:
+        "確定使用者對於檔案樹層次深度的接受程度，避免過於複雜的結構。",
+    },
+    {
+      question_id: "capacity",
+      question_text:
+        "你希望一個資料夾最多裝多少資料之後，需要建立子資料夾來分類？",
+      type: "slider",
+      range: { min: 10, max: 150, step: 10 },
+      default: 30,
+      rule_mapping: "maps to spec.capacity as an integer",
+      design_purpose: "控制單一資料夾的容量，確保使用者在瀏覽檔案時的便利性。",
+    },
+    {
+      question_id: "naming",
+      question_text: "你習慣如何命名檔案?",
+      type: "multi-select",
+      options: [
+        { key: "date", name: "日期", description: "標記該版本日期" },
+        {
+          key: "timestamp",
+          name: "時間戳",
+          description: "標記時間戳記，如 20250211-153045",
+        },
+        {
+          key: "id",
+          name: "編號/代號",
+          description: "簡短編號或代號，如 hw1、lab2",
+        },
+        {
+          key: "content",
+          name: "檔案內容",
+          description:
+            "簡述檔案的標題和主要內容，如『期末報告-氣候變遷』、『營隊第三次籌會記錄』",
+        },
+        {
+          key: "source",
+          name: "來源",
+          description:
+            "檔案的來源，如檔案的來源，如某科目、某堂課程或特定資料庫",
+        },
+        {
+          key: "usage",
+          name: "用途",
+          description: "檔案的用途，如收藏、研究、報告或參考資料",
+        },
+        {
+          key: "version",
+          name: "版本編號",
+          description: "不同版本或修訂次序的管理，如 v1.0, v2.1、draft、final",
+        },
+        {
+          key: "author_info",
+          name: "作者資訊",
+          description: "文件創建者的相關資訊，如作者姓名、學號或團隊名稱",
+        },
+        {
+          key: "language",
+          name: "語言",
+          description: "如『EN』『ZH-TW』",
+        },
+      ],
+      rule_mapping:
+        "corresponds to the spec.naming_style field and determines the factors to consider when naming files.",
+      design_purpose:
+        "儲存使用者檔案命名會包含哪些項目，作為未來自動命名的參考依據。",
+    },
+    {
+      question_id: "date_format",
+      question_text: "你習慣在檔名中使用哪種日期格式?",
+      type: "single-choice",
+      options: [
+        { value: "YYYYMMDD", example: "20250212" },
+        { value: "YYYY-MM-DD", example: "2025-02-12" },
+        { value: "MM-DD-YYYY", example: "02-12-2025" },
+        { value: "DD-MM-YYYY", example: "12-02-2025" },
+        { value: "DD MMMM YYYY", example: "12 February 2025" },
+        { value: "DD MMM YYYY", example: "12 Feb 2025" },
+      ],
+      rule_mapping: "maps to spec.date_format ",
+      design_purpose:
+        "確定使用者對於日期格式的偏好，以便未來自動命名檔案時的參考。",
+    },
+    {
+      question_id: "fileNameRules",
+      question_text: "可選擇的檔名用字規則",
+      type: "single-choice",
+      options: [
+        { key: "allowChinese", name: "允許任何字符與中文名稱" },
+        { key: "allowSpace", name: "允許空格" },
+        {
+          key: "alphaNumUnderscoreDash",
+          name: "僅允許英文、數字、底線 (_)、破折號 (-)",
+        },
+      ],
+      rule_mapping: "maps to spec.fileNameRules and natural_language_rules",
+      design_purpose:
+        "確定使用者對於檔名的字元限制與規則，以便未來自動命名檔案時的參考。",
+    },
+    {
+      question_id: "archival_tendency",
+      question_text: "下列何者較符合你的想法？",
+      type: "single-choice",
+      options: [
+        "A. 我重視長期存檔與保存，對文件的檔案結構更關心。",
+        "B. 我重視經常使用的檔案，並傾向於放在容易訪問的位置。",
+      ],
+      rule_mapping: "maps to index.archival_tendency with 1=10, 2=0",
+      design_purpose:
+        "理解使用者的存檔優先級別，以設計更貼合需求的檔案結構與排序。",
+    },
+  ],
+};

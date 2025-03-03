@@ -3,7 +3,7 @@ use sqlx::{
     sqlx_macros, Column, Error, Row, Sqlite, SqlitePool,
 };
 use std::sync::Arc;
-use tauri::State;
+
 use tokio::time::{self, Duration};
 
 pub struct Database {

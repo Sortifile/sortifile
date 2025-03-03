@@ -3,7 +3,6 @@ use dirs::data_dir;
 use sqlx::{Error, SqlitePool};
 use std::env;
 use std::sync::Arc;
-use tauri::State;
 
 use functions::sql::Database;
 use std::path::PathBuf;
@@ -40,7 +39,9 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![
+            functions::ai::generate_rules::ai_create_rule
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
