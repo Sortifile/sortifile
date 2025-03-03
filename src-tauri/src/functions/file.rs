@@ -244,23 +244,28 @@ pub fn get_file_tree(root_path: String) -> Result<String, io::Error> {
 }
 
 use std::fs::File;
-use std::os::windows::io::AsRawHandle;
-use winapi::um::fileapi::GetFileInformationByHandle;
-use winapi::um::fileapi::BY_HANDLE_FILE_INFORMATION;
+// use std::os::windows::io::AsRawHandle;
+// use winapi::um::fileapi::GetFileInformationByHandle;
+// use winapi::um::fileapi::BY_HANDLE_FILE_INFORMATION;
+use std::hash::{DefaultHasher, Hash, Hasher};
 
 #[tauri::command]
 pub fn get_file_id(file_path: &str) -> Result<u64, String> {
-    let file = File::open(file_path).map_err(|e| e.to_string())?;
-    // Cast the handle from std::ffi::c_void to winapi::ctypes::c_void
-    let handle = file.as_raw_handle() as *mut winapi::ctypes::c_void;
+    let mut s = DefaultHasher::new();
+    file_path.hash(&mut s);
+    Ok(s.finish())
 
-    unsafe {
-        let mut info: BY_HANDLE_FILE_INFORMATION = std::mem::zeroed();
-        if GetFileInformationByHandle(handle, &mut info) == 0 {
-            return Err("Failed to get file information".to_string());
-        }
-        // Combine the high and low parts of the file index.
-        let file_index = ((info.nFileIndexHigh as u64) << 32) | (info.nFileIndexLow as u64);
-        Ok(file_index)
-    }
+    // let file = File::open(file_path).map_err(|e| e.to_string())?;
+    // // Cast the handle from std::ffi::c_void to winapi::ctypes::c_void
+    // let handle = file.as_raw_handle() as *mut winapi::ctypes::c_void;
+
+    // unsafe {
+    //     let mut info: BY_HANDLE_FILE_INFORMATION = std::mem::zeroed();
+    //     if GetFileInformationByHandle(handle, &mut info) == 0 {
+    //         return Err("Failed to get file information".to_string());
+    //     }
+    //     // Combine the high and low parts of the file index.
+    //     let file_index = ((info.nFileIndexHigh as u64) << 32) | (info.nFileIndexLow as u64);
+    //     Ok(file_index)
+    // }
 }
