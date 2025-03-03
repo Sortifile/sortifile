@@ -27,3 +27,4 @@ watcher/*.o
 watcher/*.exe
 watcher/*.db
 watcher/test/*
+*.exe
