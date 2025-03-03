@@ -2,13 +2,20 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "main-user-files-write",
   "description": "Capability for the main window",
-  "windows": ["main"],
+  "windows": [
+    "main"
+  ],
   "permissions": [
     "core:default",
     {
       "identifier": "core:default",
-      "allow": [{ "path": "/" }]
+      "allow": [
+        {
+          "path": "/"
+        }
+      ]
     },
-    "opener:default"
+    "opener:default",
+    "dialog:default"
   ]
 }
