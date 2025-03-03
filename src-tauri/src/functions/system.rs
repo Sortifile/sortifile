@@ -31,6 +31,7 @@ pub fn write_to_temp_file(file_name: String, data: String) -> std::io::Result<()
     // Get the temporary directory path
     let mut temp_path = get_tmp_dir().unwrap();
     // Append your desired file name
+    temp_path.push_str("/sortifile/");
     temp_path.push_str(file_name.as_str());
     // Write text content into the file
     std::fs::write(&temp_path, data.as_str())?;
