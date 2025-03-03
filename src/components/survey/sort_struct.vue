@@ -15,6 +15,7 @@
         class="drop-area"
         item-key="key"
         :component-data="{ tag: 'span' }"
+        :force-fallback="true"
       >
         <template #item="{ element, index }">
           <span>
@@ -68,8 +69,8 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
-import draggable from "vuedraggable";
+import { ref, watch, onMounted } from "vue";
+import draggable from "vuedraggable/src/vuedraggable";
 
 const props = defineProps({ modelValue: Array });
 const emit = defineEmits(["update:modelValue"]);
@@ -114,6 +115,12 @@ watch(
   },
   { deep: true },
 );
+
+onMounted(() => {
+  document.addEventListener("dragover", (event) => {
+    event.preventDefault();
+  });
+});
 </script>
 
 <style scoped>
