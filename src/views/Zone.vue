@@ -42,7 +42,7 @@
         style="max-width: 100%"
       >
         <el-col :span="14" style="display: flex">
-          <el-button type="warning">
+          <el-button type="warning" @click="handleDeleteZone">
             <el-icon><DeleteFilled /></el-icon>
           </el-button>
           <el-button @click="handleShowHistory">Show History</el-button>
@@ -176,6 +176,18 @@ const mockFileTree = [
 /**
  * 右上方按鈕
  */
+function handleDeleteZone() {
+  try {
+    invoke("delete_zone", {
+      zoneName: zoneName.value,
+    });
+    navigateTo("/home");
+  } catch (error) {
+    console.error("API call failed:", error);
+    ElMessage.error("Failed to delete zone");
+  }
+}
+
 const isHistoryDialogVisible = ref(false);
 function handleShowHistory() {
   console.log("Show History");
@@ -227,7 +239,7 @@ function handleRenewRules() {
   )
     .then(() => {
       // call API to renew all the rules
-      let result = invoke("renew_rules", {
+      let result = invoke("ai_renew_rules", {
         zoneName: zoneName.value,
         zonePath: rootPath.value,
       });
@@ -503,7 +515,7 @@ function toggleIgnore(path, shouldIgnore) {
   applyIgnoreStatusToTree(fileTree.value);
 
   // 呼叫後端 API 更新後端 ignore 狀態
-  invoke("update_ignore_list", {
+  invoke("set_ignore_list", {
     zonePath: rootPath.value,
     ignoredPaths: ignoredPaths.value,
   }).catch((err) => {

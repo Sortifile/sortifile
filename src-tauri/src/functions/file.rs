@@ -152,7 +152,7 @@ pub async fn move_file(
 }
 
 #[tauri::command]
-pub fn get_igonore_list(zone_path: &str) -> Result<String, std::io::Error> {
+pub fn get_ignore_list(zone_path: &str) -> Result<String, std::io::Error> {
     let ignore_list = fs::read_to_string(format!("{}/.sortifile-ignore", zone_path));
     match ignore_list {
         Ok(list) => Ok(list),
