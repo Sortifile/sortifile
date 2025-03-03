@@ -68,7 +68,7 @@ pub async fn ai_sort(
     .unwrap();
     let sort_command = app
         .shell()
-        .sidecar("process_json")
+        .sidecar("sort_files")
         .map_err(|e| e.to_string())?
         .args(&[
             // system prompt for sort_files (from resource folder)
