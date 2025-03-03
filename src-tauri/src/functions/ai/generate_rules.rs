@@ -39,8 +39,6 @@ pub fn ai_create_rule(
             form_response.to_string(),
         );
 
-        print!("ffffffffuck\n\n\n\n\n\n\n\n\n\n\n");
-
         let generate_rules_command = app
             .shell()
             .sidecar("generate_rules")

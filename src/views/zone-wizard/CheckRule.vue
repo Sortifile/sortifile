@@ -151,19 +151,23 @@ const handleRulesChange = (value) => {
 };
 
 const handleRegenerate = () => {
-  const ruleJson = await invoke("ai_create_rule", {
+  invoke("ai_create_rule", {
     zone_name: zoneStore.zoneName,
     zone_path: zoneStore.rootPath,
     create_from_structure: false,
     form_response: formResponse.value,
-  });
+  })
+    .then((ruleJson) => {
+      ruleStore.setRule(ruleJson);
+      console.log("AI 生成的規則：", ruleStore.rule);
 
-  // 存入 Pinia 的 ruleData
-  ruleStore.setRule(ruleJson);
-  console.log("AI 生成的規則：", ruleStore.rule);
-
-  // 顯示成功訊息並跳轉
-  ElMessage.success("AI 生成規則成功！");
+      // 顯示成功訊息並跳轉
+      ElMessage.success("AI 生成規則成功！");
+    })
+    .catch((error) => {
+      ElMessage.error("AI 生成規則失敗！");
+      console.error("AI 生成規則失敗：", error);
+    });
 };
 
 const handleReset = () => {
@@ -175,7 +179,7 @@ const handleReset = () => {
 };
 
 // 提交邏輯
-const handleSubmit = () => {
+const handleSubmit = async () => {
   if (selectedRules.value.length < MIN_REQUIRED) {
     ElMessage.error(`至少需要選擇 ${MIN_REQUIRED} 項規則！`);
     return;
@@ -194,7 +198,7 @@ const handleSubmit = () => {
       form_response: formResponse.value,
       rules: ruleData.value,
       create_from_structure: false,
-    }
+    };
 
     await invoke("create_zone", {
       zoneName: zoneName.value,
