@@ -47,22 +47,15 @@ onMounted(() => {
       <el-button class="button" type="primary" @click="navigateTo('settings')">
         Settings
       </el-button>
-      <el-button class="button" type="primary" @click="goToGithub">
+      <!-- <el-button class="button" type="primary" @click="goToGithub">
         Docs
-      </el-button>
+      </el-button> -->
       <el-button
         class="button"
         type="primary"
         @click="navigateTo('invoketesting')"
       >
         invoke
-      </el-button>
-      <el-button
-        class="button"
-        type="primary"
-        @click="invoke('call_api', { content: '祝烏鴉倫新年快樂' })"
-      >
-        greet
       </el-button>
     </div>
   </main>
