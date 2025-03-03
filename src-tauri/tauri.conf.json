@@ -31,12 +31,14 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
+    "resources": {
+      "resources/**/*": "resources/"
+    },
     "externalBin": [
-      "resources/1_generate_rules/generate_rules.exe",
-      "resources/2_summarize_files/summarize_files.exe",
-      "resources/3_sort_files/sort_files.exe",
-      "resources/4_renew_rules/renew_rules.exe"
-
+      "resources/1_generate_rules/generate_rules",
+      "resources/2_summarize_files/summarize_files",
+      "resources/3_sort_files/sort_files",
+      "resources/4_renew_rules/renew_rules"
     ]
   },
   "plugins": {

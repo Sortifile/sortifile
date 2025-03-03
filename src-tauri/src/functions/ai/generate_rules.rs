@@ -38,6 +38,9 @@ pub fn ai_create_rule(
             format!("zone_{}_form_response_tmp.json", zone_name),
             form_response.to_string(),
         );
+
+        print!("ffffffffuck\n\n\n\n\n\n\n\n\n\n\n");
+
         let generate_rules_command = app
             .shell()
             .sidecar("generate_rules")
@@ -45,7 +48,7 @@ pub fn ai_create_rule(
             .args(&[
                 app.path()
                     .resolve(
-                        "resources/1_generate_rules/system_prompt.json",
+                        "resources/1_generate_rules/system_prompt.md",
                         BaseDirectory::Resource,
                     )
                     .unwrap()

@@ -28,3 +28,7 @@ watcher/*.exe
 watcher/*.db
 watcher/test/*
 *.exe
+src-tauri/resources/1_generate_rules/generate_rules-aarch64-apple-darwin
+src-tauri/resources/2_summarize_files/summarize_files-aarch64-apple-darwin
+src-tauri/resources/3_sort_files/sort_files-aarch64-apple-darwin
+src-tauri/resources/4_renew_rules/renew_rules-aarch64-apple-darwin
