@@ -9,6 +9,6 @@
       "identifier": "core:default",
       "allow": [{ "path": "/" }]
     },
- "opener:default", "dialog:default"
+    "opener:default"
   ]
 }

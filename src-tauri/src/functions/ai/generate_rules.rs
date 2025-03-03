@@ -1,23 +1,23 @@
 use crate::functions;
 use crate::functions::ai::utils;
 use crate::functions::file;
-use crate::functions::zone;
 use crate::functions::sql;
+use crate::functions::system::get_appdata_dir;
+use crate::functions::zone;
+use async_recursion::async_recursion;
+use chrono::{DateTime, Utc};
 use glob::Pattern;
 use serde_json::to_string;
+use serde_json::{json, Value};
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
-use tauri::command;
-use tauri_plugin_shell::ShellExt;
-use tauri_plugin_shell::process::CommandEvent;
-use crate::functions::system::get_appdata_dir;
-use tauri::Manager;
-use tauri::path::BaseDirectory;
-use async_recursion::async_recursion;
-use serde_json::{json, Value};
 use std::time::SystemTime;
-use chrono::{DateTime, Utc};
+use tauri::command;
+use tauri::path::BaseDirectory;
+use tauri::Manager;
+use tauri_plugin_shell::process::CommandEvent;
+use tauri_plugin_shell::ShellExt;
 
 #[tauri::command]
 pub fn ai_create_rule(
@@ -44,13 +44,19 @@ pub fn ai_create_rule(
             .map_err(|e| e.to_string())?
             .args(&[
                 app.path()
-                    .resolve("resources/1_generate_rules/system_prompt.json", BaseDirectory::Resource)
+                    .resolve(
+                        "resources/1_generate_rules/system_prompt.json",
+                        BaseDirectory::Resource,
+                    )
                     .unwrap()
                     .as_os_str()
                     .to_str()
                     .unwrap(),
                 app.path()
-                    .resolve("resources/1_generate_rules/form_question.json", BaseDirectory::Resource)
+                    .resolve(
+                        "resources/1_generate_rules/form_question.json",
+                        BaseDirectory::Resource,
+                    )
                     .unwrap()
                     .as_os_str()
                     .to_str()

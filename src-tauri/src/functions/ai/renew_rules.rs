@@ -1,24 +1,23 @@
 use crate::functions;
 use crate::functions::ai::utils;
 use crate::functions::file;
-use crate::functions::zone;
 use crate::functions::sql;
+use crate::functions::system::get_appdata_dir;
+use crate::functions::zone;
+use async_recursion::async_recursion;
+use chrono::{DateTime, Utc};
 use glob::Pattern;
 use serde_json::to_string;
+use serde_json::{json, Value};
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
-use tauri::command;
-use tauri_plugin_shell::ShellExt;
-use tauri_plugin_shell::process::CommandEvent;
-use crate::functions::system::get_appdata_dir;
-use tauri::Manager;
-use tauri::path::BaseDirectory;
-use async_recursion::async_recursion;
-use serde_json::{json, Value};
 use std::time::SystemTime;
-use chrono::{DateTime, Utc};
-
+use tauri::command;
+use tauri::path::BaseDirectory;
+use tauri::Manager;
+use tauri_plugin_shell::process::CommandEvent;
+use tauri_plugin_shell::ShellExt;
 
 /// For ai_sort and ai_renew_rules we now include the AppHandle parameter
 /// so that we can spawn the proper sidecar.
@@ -39,10 +38,18 @@ pub async fn ai_renew_rules(
 
     // Step 2: Call the Python sidecar for sorting.
     let db = sql::get_db().await;
-    let mut file_summary: Vec<String> = Vec::new(); 
+    let mut file_summary: Vec<String> = Vec::new();
     let mut history_file_movements: Vec<String> = Vec::new();
 
-    process_directory_recursively(zone_path.to_string(), zone_name, zone_path, &mut file_summary, &mut history_file_movements).await.unwrap();
+    process_directory_recursively(
+        zone_path.to_string(),
+        zone_name,
+        zone_path,
+        &mut file_summary,
+        &mut history_file_movements,
+    )
+    .await
+    .unwrap();
     // serialize file_summary to a string
     let file_summary_str = serde_json::to_string(&file_summary).unwrap();
     let history_file_movement_str = serde_json::to_string(&history_file_movements).unwrap();
@@ -51,19 +58,24 @@ pub async fn ai_renew_rules(
     functions::system::write_to_temp_file(
         format!("zone_{}_file_summary_tmp.json", zone_name),
         file_summary_str,
-    ).unwrap();
+    )
+    .unwrap();
     functions::system::write_to_temp_file(
         format!("zone_{}_history_file_movement_tmp.json", zone_name),
         history_file_movement_str,
-    ).unwrap();
+    )
+    .unwrap();
     let sort_command = app
         .shell()
-        .sidecar("process_json")    
+        .sidecar("process_json")
         .map_err(|e| e.to_string())?
         .args(&[
             // system prompt for sort_files (from resource folder)
             app.path()
-                .resolve("resources/4_renew_rules/system_prompt.json", BaseDirectory::Resource)
+                .resolve(
+                    "resources/4_renew_rules/system_prompt.json",
+                    BaseDirectory::Resource,
+                )
                 .unwrap()
                 .as_os_str()
                 .to_str()
@@ -91,16 +103,21 @@ pub async fn ai_renew_rules(
     Ok(result)
 }
 
-
 /// The rest of the functions below are helper functions for processing directories and files.
 
 #[command]
-async fn process_directory_recursively(dir_path: String, zone_name: &str, path_to_sort: &str,file_summary: &mut Vec<String>, history_file_movements: &mut Vec<String>) -> Result<(), String> {
+async fn process_directory_recursively(
+    dir_path: String,
+    zone_name: &str,
+    path_to_sort: &str,
+    file_summary: &mut Vec<String>,
+    history_file_movements: &mut Vec<String>,
+) -> Result<(), String> {
     let base = Path::new(&dir_path);
     if !base.exists() {
         return Err(format!("Path '{}' does not exist.", dir_path));
     }
-    
+
     // Load ignore patterns from a ".sortifile-ignore" file in the root directory, if present.
     let ignore_file = base.join(".sortifile-ignore");
     let ignore_patterns = if ignore_file.exists() {
@@ -111,7 +128,16 @@ async fn process_directory_recursively(dir_path: String, zone_name: &str, path_t
     };
 
     // Process the directory recursively.
-    process_path(base, base, &ignore_patterns, zone_name, path_to_sort, file_summary, history_file_movements).await;
+    process_path(
+        base,
+        base,
+        &ignore_patterns,
+        zone_name,
+        path_to_sort,
+        file_summary,
+        history_file_movements,
+    )
+    .await;
     Ok(())
 }
 
@@ -147,7 +173,6 @@ fn should_ignore(path: &Path, base: &Path, ignore_patterns: &Vec<Pattern>) -> bo
 
 /// Recursively process the given path.
 
-
 #[async_recursion]
 async fn process_path(
     path: &Path,
@@ -166,23 +191,32 @@ async fn process_path(
         for entry in fs::read_dir(path)? {
             let entry = entry?;
             let entry_path = entry.path();
-            process_path(&entry_path, base, ignore_patterns, zone_name, path_to_sort, file_summary, history_file_movements).await?;
+            process_path(
+                &entry_path,
+                base,
+                ignore_patterns,
+                zone_name,
+                path_to_sort,
+                file_summary,
+                history_file_movements,
+            )
+            .await?;
         }
     } else if path.is_file() {
         // Process each file by summarizing it.
         // Note: Any error from get_summary_of_one_file is unwrapped for brevity.
-        let summary = functions::file::get_summary_of_one_file(zone_name, path.to_str().unwrap()).await.unwrap();
+        let summary = functions::file::get_summary_of_one_file(zone_name, path.to_str().unwrap())
+            .await
+            .unwrap();
         let fileID = functions::file::get_file_id(path.to_str().unwrap()).unwrap();
         // Append missing fields using the file path and the given sort path.
-        let updated_summary = append_missing_fields_with_path(summary.as_str(), path.to_str().unwrap(), path_to_sort).unwrap();
+        let updated_summary =
+            append_missing_fields_with_path(summary.as_str(), path.to_str().unwrap(), path_to_sort)
+                .unwrap();
         file_summary.push(updated_summary);
     }
     Ok(())
 }
-
-
-
-
 
 /// Returns a JSON object containing file metadata.
 /// Attempts to get the file's creation and modification times.
@@ -191,10 +225,14 @@ fn get_file_metadata(path: &str) -> Value {
     let metadata = fs::metadata(path);
     match metadata {
         Ok(meta) => {
-            let created = meta.created().ok()
+            let created = meta
+                .created()
+                .ok()
                 .and_then(|t| Some(DateTime::<Utc>::from(t).to_rfc3339()))
                 .unwrap_or_else(|| "".to_string());
-            let modified = meta.modified().ok()
+            let modified = meta
+                .modified()
+                .ok()
                 .and_then(|t| Some(DateTime::<Utc>::from(t).to_rfc3339()))
                 .unwrap_or_else(|| "".to_string());
             json!({
@@ -203,7 +241,7 @@ fn get_file_metadata(path: &str) -> Value {
                 "last_sorted_date": "",
                 "last_summarized_date": ""
             })
-        },
+        }
         Err(_) => {
             json!({
                 "created_date": "",
@@ -220,14 +258,14 @@ fn get_file_metadata(path: &str) -> Value {
 /// the function appends them automatically. In particular, "src_path"
 /// will be set to the provided `path` argument and metadata is gathered from the file system.
 fn append_missing_fields_with_path(
-    json_str: &str, 
-    path: &str, 
-    path_to_sort: &str
+    json_str: &str,
+    path: &str,
+    path_to_sort: &str,
 ) -> Result<String, serde_json::Error> {
     // Parse the input JSON string.
     let mut data: Value = serde_json::from_str(json_str)?;
-    
-    // Determine the value for allow_move.  
+
+    // Determine the value for allow_move.
     let chc: bool = path.starts_with(path_to_sort);
 
     // Closure to update a single summary object.
@@ -254,10 +292,10 @@ fn append_missing_fields_with_path(
                     update_summary(summary, path);
                 }
             }
-        },
+        }
         Value::Object(ref mut _obj) => {
             update_summary(&mut data, path);
-        },
+        }
         _ => {
             // If it's not an object or array, do nothing.
         }
@@ -266,6 +304,5 @@ fn append_missing_fields_with_path(
     // Serialize the updated JSON back to a pretty-printed string.
     serde_json::to_string_pretty(&data)
 }
-
 
 // Example usage:

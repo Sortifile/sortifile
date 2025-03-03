@@ -1,5 +1,5 @@
-use std::path;
 use std::env;
+use std::path;
 
 use dirs;
 
@@ -11,7 +11,7 @@ pub fn get_appdata_dir() -> Result<String, std::env::VarError> {
             //println!("APPDATA is: {}", appdata);
             Ok(appdata)
         }
-        Err(e ) => {
+        Err(e) => {
             //println!("Couldn't read APPDATA: {}", e);
             Err(e)
         }
@@ -24,7 +24,7 @@ pub fn get_tmp_dir() -> Result<String, std::env::VarError> {
             //println!("APPDATA is: {}", appdata);
             Ok(appdata)
         }
-        Err(e ) => {
+        Err(e) => {
             //println!("Couldn't read APPDATA: {}", e);
             Err(e)
         }

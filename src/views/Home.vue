@@ -16,7 +16,6 @@ function navigateTo(page) {
   router.push(`/${page}`);
 }
 
-
 function goToGithub() {
   window.open("https://github.com/sortifile/sortifile");
 }

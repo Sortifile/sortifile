@@ -1,12 +1,12 @@
 mod functions;
-use sqlx::{SqlitePool, Error};
-use tauri::State;
-use std::sync::Arc;
 use dirs::data_dir;
+use sqlx::{Error, SqlitePool};
 use std::env;
+use std::sync::Arc;
+use tauri::State;
 
-use std::path::PathBuf;
 use functions::sql::Database;
+use std::path::PathBuf;
 use tokio::runtime::Runtime; // Import tokio runtime
 
 #[tauri::command]
@@ -21,14 +21,16 @@ pub fn run() {
     let rt = Runtime::new().expect("Failed to create Tokio runtime");
 
     rt.block_on(async {
-        let path: PathBuf = data_dir().unwrap_or_else(|| ".".into()).join("my_database.db");
+        let path: PathBuf = data_dir()
+            .unwrap_or_else(|| ".".into())
+            .join("my_database.db");
         let mut db_url = format!("sqlite://{}", path.display());
-        db_url="sqlite://my_database.db".to_string();
+        db_url = "sqlite://my_database.db".to_string();
         println!("Database URL: {}", db_url);
         let db = Database::new(&db_url).await; // Await the async new function
         db.get_pool(); // Call the synchronous get_pool function
         db.create_zone_table("test").await.unwrap(); // Await the async create_zone_table function
-        //db.listen_for_changes().await; // Await the async listen_for_changes function
+                                                     //db.listen_for_changes().await; // Await the async listen_for_changes function
     });
     match env::var("APPDATA") {
         Ok(appdata) => println!("APPDATA is: {}", appdata),

@@ -1,11 +1,15 @@
-use tauri::async_runtime;
+use crate::functions::sql;
+use serde::{Deserialize, Serialize};
+use serde_json;
+use sqlx::{
+    any,
+    sqlite::{SqliteQueryResult, SqliteRow},
+    sqlx_macros, Column, Error, Row, Sqlite, SqlitePool,
+};
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
-use serde::{Serialize, Deserialize};
-use serde_json;
-use crate::functions::sql;
-use sqlx::{any, sqlite::{SqliteQueryResult, SqliteRow}, sqlx_macros, Column, Error, Row, Sqlite, SqlitePool};
+use tauri::async_runtime;
 #[derive(Debug, Serialize, Deserialize)]
 struct move_history {
     src_path: String,
@@ -15,13 +19,20 @@ struct move_history {
     reason: String,
 }
 #[tauri::command]
-pub async fn get_summary_of_one_file(zone_name: &str, file_path: &str) -> Result<String, sqlx::Error> {
+pub async fn get_summary_of_one_file(
+    zone_name: &str,
+    file_path: &str,
+) -> Result<String, sqlx::Error> {
     let db = sql::get_db().await;
     let summary = db.get_file_summary(zone_name, file_path).await.unwrap();
     Ok(summary)
 }
 #[tauri::command]
-pub async fn set_summary_of_one_file(zone_name: &str, file_path: &str, summary: &str) -> Result<(), sqlx::Error>{
+pub async fn set_summary_of_one_file(
+    zone_name: &str,
+    file_path: &str,
+    summary: &str,
+) -> Result<(), sqlx::Error> {
     let db = sql::get_db().await;
     let table_name = format!("zone_{}", zone_name);
     db.exec(
@@ -38,12 +49,15 @@ WHERE file_path = {}
     )
     .await
     .unwrap();
-Ok(())
+    Ok(())
 }
 #[tauri::command]
-pub async fn get_move_history(num: u64) -> Result<String, sqlx::Error>{
+pub async fn get_move_history(num: u64) -> Result<String, sqlx::Error> {
     let db = sql::get_db().await;
-    let result=db.exec_select(format!("SELECT * FROM move_history LIMIT {};", num).as_str()).await.unwrap();
+    let result = db
+        .exec_select(format!("SELECT * FROM move_history LIMIT {};", num).as_str())
+        .await
+        .unwrap();
     let mut move_histories = Vec::new();
     for row in result {
         let mut move_history = move_history {
@@ -75,9 +89,18 @@ pub async fn get_move_history(num: u64) -> Result<String, sqlx::Error>{
 }
 
 #[tauri::command]
-pub async fn get_move_history_with_fileid(num: u64, fileID: String) -> Result<String, sqlx::Error>{
+pub async fn get_move_history_with_fileid(num: u64, fileID: String) -> Result<String, sqlx::Error> {
     let db = sql::get_db().await;
-    let result=db.exec_select(format!("SELECT * FROM move_history LIMIT {} WHERE fileID={};", num, fileID).as_str()).await.unwrap();
+    let result = db
+        .exec_select(
+            format!(
+                "SELECT * FROM move_history LIMIT {} WHERE fileID={};",
+                num, fileID
+            )
+            .as_str(),
+        )
+        .await
+        .unwrap();
     let mut move_histories = Vec::new();
     for row in result {
         let mut move_history = move_history {
@@ -109,7 +132,13 @@ pub async fn get_move_history_with_fileid(num: u64, fileID: String) -> Result<St
 }
 
 #[tauri::command]
-pub async fn move_file(zone_path: &str, src_path: &str, new_path: &str, moved_by: &str, reason: &str) -> Result<(), sqlx::Error>{
+pub async fn move_file(
+    zone_path: &str,
+    src_path: &str,
+    new_path: &str,
+    moved_by: &str,
+    reason: &str,
+) -> Result<(), sqlx::Error> {
     let db = sql::get_db().await;
     fs::rename(src_path, new_path).unwrap();
     db.exec(
@@ -209,14 +238,15 @@ fn gen_file_tree(root: &Path) -> io::Result<Vec<FileNode>> {
 pub fn get_file_tree(root_path: String) -> Result<String, io::Error> {
     let path = PathBuf::from(root_path);
     let file_tree = gen_file_tree(&path).unwrap();
-    let json = serde_json::to_string_pretty(&file_tree).expect("Failed to serialize file tree to JSON");
+    let json =
+        serde_json::to_string_pretty(&file_tree).expect("Failed to serialize file tree to JSON");
     Ok(json)
 }
 
 use std::fs::File;
 use std::os::windows::io::AsRawHandle;
-use winapi::um::fileapi::BY_HANDLE_FILE_INFORMATION;
 use winapi::um::fileapi::GetFileInformationByHandle;
+use winapi::um::fileapi::BY_HANDLE_FILE_INFORMATION;
 
 #[tauri::command]
 pub fn get_file_id(file_path: &str) -> Result<u64, String> {
