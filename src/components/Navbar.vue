@@ -1,10 +1,10 @@
 <template>
-  <nav class="navbar">
+  <el-header class="navbar" height="50px">
     <ul>
       <li><router-link to="/">Home</router-link></li>
       <li><router-link to="/about">About</router-link></li>
     </ul>
-  </nav>
+  </el-header>
 </template>
 
 <script>
@@ -27,6 +27,8 @@ export default {
   display: flex; /* 橫向排列 */
   margin: 0; /* 移除外邊距 */
   padding: 0; /* 移除內邊距 */
+  align-self: center;
+  justify-self: start;
 }
 
 .navbar li {
@@ -42,6 +44,6 @@ export default {
 }
 
 .navbar a:hover {
-  color: #007bff; /* 滑鼠懸停變為藍色 */
+  color: #54b9ac; /* 滑鼠懸停變為藍色 */
 }
 </style>

@@ -2,27 +2,37 @@
 import { useRouter } from "vue-router";
 import { ElButton } from "element-plus";
 import { invoke } from "@tauri-apps/api/core";
+import { onMounted } from "vue";
+import { useZoneStore } from "../store/zone";
+import { useRuleStore } from "../store/rule";
+import { useFormStore } from "../store/form";
 
+const zoneStore = useZoneStore();
+const ruleStore = useRuleStore();
+const formStore = useFormStore();
 const router = useRouter();
 
 function navigateTo(page) {
   router.push(`/${page}`);
 }
 
-async function greet() {
-  try {
-    const response = await invoke("greet", { name: "Tauri" });
-    console.log(response);
-  } catch (error) {
-    console.error("Error invoking greet:", error);
-  }
+
+function goToGithub() {
+  window.open("https://github.com/sortifile/sortifile");
 }
+
+onMounted(() => {
+  console.log("Home page mounted");
+  // clear all store data
+  zoneStore.resetZone();
+  ruleStore.resetRule();
+  formStore.resetForm();
+});
 </script>
 
 <template>
   <main class="container">
-    <h1>Welcome to Sortifile</h1>
-
+    <img src="/sortifile.png" alt="sortifile logo" />
     <div class="grid">
       <el-tooltip content="New Zone..." placement="left-start">
         <el-button class="button" type="primary" @click="navigateTo('create')">
@@ -38,8 +48,8 @@ async function greet() {
       <el-button class="button" type="primary" @click="navigateTo('settings')">
         Settings
       </el-button>
-      <el-button class="button" type="primary" @click="navigateTo('help')">
-        Help
+      <el-button class="button" type="primary" @click="goToGithub">
+        Docs
       </el-button>
       <el-button
         class="button"
@@ -60,9 +70,16 @@ async function greet() {
 </template>
 
 <style scoped>
+img {
+  height: 30vh;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
 .container {
+  height: 100%;
+  width: 100%;
   margin: 0;
-  padding-top: 10vh;
   display: flex;
   flex-direction: column;
   justify-content: center;

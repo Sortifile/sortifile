@@ -1,70 +1,62 @@
-<!-- Select.vue -->
-<!-- This is the temporary template file for adding a new page. -->
-
 <template>
-  <div class="select-container">
-    <!-- 左側滑桿欄 -->
-    <div class="sidebar">
-      <h2>Browse Zones</h2>
-      <el-scrollbar height="calc(100vh - 100px)" class="zone-scrollbar">
-        <p v-for="zone in zones" :key="zone" class="scrollbar-demo-item">
-          {{ zone }}
-        </p>
-      </el-scrollbar>
-    </div>
-
-    <!-- 內容顯示區域 -->
-    <div class="content-display">
-      <h2>Zone Details</h2>
-      <el-skeleton :rows="5" animated />
+  <div style="max-width: 800px; margin: 0 auto">
+    <h1>選擇最近的 Zone</h1>
+    <div class="zone-list">
+      <el-table
+        :data="zones"
+        width="100%"
+        @row-click="handleRowClick"
+        highlight-current-row
+      >
+        <el-table-column prop="zone_name" label="Zone" width="200" />
+        <el-table-column prop="root_path" label="路徑" />
+      </el-table>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import { useZoneStore } from "../store/zone";
+import { useFormStore } from "../store/form";
+import { useRuleStore } from "../store/rule";
+import { useRouter } from "vue-router";
 
-// 模擬的檔案清單
-const zones = ref(["Zone 1", "Zone 2", "Zone 3", "Zone 4", "Zone 5"]);
+const zones = ref([]);
+const zoneStore = useZoneStore();
+const formStore = useFormStore();
+const ruleStore = useRuleStore();
+const router = useRouter();
+
+const navigateTo = (path) => {
+  router.push(path);
+};
+
+const handleRowClick = (row) => {
+  zoneStore.setZone(row.zone_name, row.root_path);
+  console.log("selectedZone", zoneStore.zoneName, zoneStore.rootPath);
+  // TODO: 呼叫 Tauri API 取得 rule.json 以及 form.json
+
+  navigateTo("/zone");
+};
+
+onMounted(async () => {
+  zoneStore.resetZone();
+  // TODO: 呼叫 Tauri API 取得 zone 清單
+  // const response = await window.__TAURI__.invoke('get_zones');
+  // zones.value = response;
+
+  // 目前使用假資料測試
+  zones.value = [
+    { zone_name: "Zone 1", root_path: "Path 1" },
+    { zone_name: "Zone 2", root_path: "Path 2" },
+    { zone_name: "Zone 3", root_path: "Path 3" },
+  ];
+});
 </script>
 
 <style scoped>
-.select-container {
-  display: flex;
-  gap: 20px;
-  overflow: hidden;
-}
-
-.sidebar {
-  width: 200px;
-  border-right: 1px solid #dcdcdc;
-  padding: 10px;
-  max-height: 300px;
-  overflow: hidden;
-  position: sticky;
-  top: 0;
-}
-
-.zone-scrollbar {
-  max-height: calc(100vh - 100px);
-  overflow-y: auto;
-}
-
-.scrollbar-demo-item {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 50px;
-  margin: 10px;
-  text-align: center;
-  border-radius: 4px;
-  background: var(--el-color-primary-light-9);
-  color: var(--el-color-primary);
-}
-
-.content-display {
-  flex: 1;
-  padding: 10px;
-  overflow: hidden;
+.zone-list {
+  padding: 0px;
 }
 </style>
