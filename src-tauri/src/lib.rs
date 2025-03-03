@@ -17,6 +17,7 @@ fn greet(name: &str) -> String {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     // Create a Tokio runtime to execute async functions
+    /* 
     let rt = Runtime::new().expect("Failed to create Tokio runtime");
 
     rt.block_on(async {
@@ -35,6 +36,7 @@ pub fn run() {
         Ok(appdata) => println!("APPDATA is: {}", appdata),
         Err(e) => println!("Couldn't read APPDATA: {}", e),
     }
+    */
     // Tauri application initialization
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
