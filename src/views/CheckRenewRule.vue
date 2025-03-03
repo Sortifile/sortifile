@@ -112,7 +112,8 @@ function navigateTo(page) {
 // 表單數據
 const { zoneName, rootPath } = storeToRefs(zoneStore);
 const { formResponse, formQuestion } = storeToRefs(formStore);
-import { cloneDeep } from "lodash";
+import { cloneDeep, invoke } from "lodash";
+import { ru, tr } from "element-plus/es/locales.mjs";
 const ruleData = ref(cloneDeep(ruleStore.rule));
 
 // 全選和部分選邏輯
@@ -165,6 +166,22 @@ const handleSubmit = () => {
   }
   console.log("Index 部分:", ruleData.value.index);
   console.log("選擇的規則:", selectedRules.value);
+  ruleData.value.natural_language_rules = selectedRules.value;
+
+  // 1. 存入 Pinia 的 ruleData
+  ruleStore.setRule(ruleData.value);
+
+  try {
+    invoke("set_zone_rules", {
+      zonePath: rootPath.value,
+      rules: ruleData.value,
+    });
+    ElMessage.success("Zone 規則已更新！");
+  } catch (error) {
+    console.error("API 調用失敗:", error);
+    ElMessage.error("更新規則時發生錯誤");
+  }
+
   navigateTo("zone");
 };
 </script>

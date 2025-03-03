@@ -25,6 +25,7 @@
 <script setup>
 import { defineProps, defineEmits, ref, onMounted } from "vue";
 import FileMoveItem from "./FileMoveItem.vue";
+import { invoke } from "lodash";
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -39,22 +40,26 @@ const updateVisible = (value) => {
 };
 
 onMounted(() => {
-  // TODO: fetch history moves from backend
-  // invoke ...
-  historyMoves.value = [
-    {
-      src_path: "報告_改.pdf",
-      new_path: "113-1/國文/報告/",
-      moved_by: "system",
-      reason: "blablabla",
-    },
-    {
-      src_path: "報告_改.pdf",
-      new_path: "113-1/國文/報告/",
-      moved_by: "system",
-      reason: "blablabla",
-    },
-  ];
+  // fetch history moves from backend
+  try {
+    const result = invoke("get_move_history", { num: 30 });
+    historyMoves.value = JSON.parse(result);
+  } catch (error) {
+    historyMoves.value = [
+      {
+        src_path: "報告_改.pdf",
+        new_path: "113-1/國文/報告/",
+        moved_by: "system",
+        reason: "blablabla",
+      },
+      {
+        src_path: "報告_改.pdf",
+        new_path: "113-1/國文/報告/",
+        moved_by: "system",
+        reason: "blablabla",
+      },
+    ];
+  }
 });
 </script>
 

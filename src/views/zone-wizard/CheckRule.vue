@@ -182,11 +182,12 @@ const handleSubmit = () => {
   }
   console.log("Index 部分:", ruleData.value.index);
   console.log("選擇的規則:", selectedRules.value);
+  ruleData.value.natural_language_rules = selectedRules.value;
 
   ruleStore.setRule(ruleData.value);
 
   try {
-    // TODO: call API to save and create zone
+    // call API to save and create zone
     let config = {
       name: zoneName.value,
       form_question: formQuestion.value,

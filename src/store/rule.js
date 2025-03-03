@@ -34,9 +34,6 @@ export const useRuleStore = defineStore("rule", {
     setRule(new_rule) {
       this.rule = new_rule;
     },
-    async loadRule() {
-      // TODO: Implement this by invoking the Tauri API
-    },
     resetRule() {
       this.rule = initialRuleState;
     },

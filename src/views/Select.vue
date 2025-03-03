@@ -21,6 +21,8 @@ import { useZoneStore } from "../store/zone";
 import { useFormStore } from "../store/form";
 import { useRuleStore } from "../store/rule";
 import { useRouter } from "vue-router";
+import { invoke } from "@tauri-apps/api/core";
+import { ElMessage } from "element-plus";
 
 const zones = ref([]);
 const zoneStore = useZoneStore();
@@ -35,23 +37,24 @@ const navigateTo = (path) => {
 const handleRowClick = (row) => {
   zoneStore.setZone(row.zone_name, row.root_path);
   console.log("selectedZone", zoneStore.zoneName, zoneStore.rootPath);
-  // TODO: 呼叫 Tauri API 取得 rule.json 以及 form.json
-
   navigateTo("/zone");
 };
 
 onMounted(async () => {
   zoneStore.resetZone();
-  // TODO: 呼叫 Tauri API 取得 zone 清單
-  // const response = await window.__TAURI__.invoke('get_zones');
-  // zones.value = response;
 
-  // 目前使用假資料測試
-  zones.value = [
-    { zone_name: "Zone 1", root_path: "Path 1" },
-    { zone_name: "Zone 2", root_path: "Path 2" },
-    { zone_name: "Zone 3", root_path: "Path 3" },
-  ];
+  try {
+    const zonesStr = await invoke("get_zone_list");
+    zones.value = JSON.parse(zonesStr);
+  } catch (error) {
+    console.error(error);
+    ElMessage.error("無法取得 Zone 列表");
+    zones.value = [
+      { zone_name: "Zone 1", root_path: "Path 1" },
+      { zone_name: "Zone 2", root_path: "Path 2" },
+      { zone_name: "Zone 3", root_path: "Path 3" },
+    ];
+  }
 });
 </script>
 

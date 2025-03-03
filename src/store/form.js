@@ -15,7 +15,7 @@ const initialFormState = {
 export const useFormStore = defineStore("form", {
   state: () => ({
     formResponse: initialFormState,
-    formQuestion: FixFormQuestion, // TODO: Implement this by invoking the Tauri resource API
+    formQuestion: FixFormQuestion,
   }),
   actions: {
     setFormResponse(response) {

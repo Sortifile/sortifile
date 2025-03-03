@@ -328,6 +328,8 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { useZoneStore } from "../../store/zone";
 import { storeToRefs } from "pinia";
 import { join } from "@tauri-apps/api/path";
+import { emit } from "@tauri-apps/api/event";
+import { invoke } from "lodash";
 
 async function joinPaths(base, subpath) {
   return await join(base, subpath);
@@ -352,7 +354,8 @@ const emits = defineEmits(["toggle-ignore", "update:loading"]);
 function onSwitchChange(val) {
   emits("toggle-ignore", props.path, val);
 }
-// TODO: Get initial data from API
+
+// Mock data
 const summaryData = reactive({
   title: "Project Report for Tauri Integration",
   version: "v1.0",
@@ -427,7 +430,12 @@ function handleResummarize() {
     },
   )
     .then(() => {
-      // TODO: call API to resummarize the file
+      // call API to resummarize the file
+      invoke("ai_summarize_one_file", {
+        zoneName: zoneName.value,
+        path: props.path,
+      });
+
       ElMessage({
         type: "success",
         message: "Resummarize completed",
@@ -444,8 +452,21 @@ function handleResummarize() {
 onMounted(async () => {
   pathValue.value = await joinPaths(rootPath.value, props.path);
   console.log("FileDisplay mounted");
-  // TODO: call api to get file summary
-  // TODO: handle loading state
+  emit("update:loading", true);
+  invoke("get_summary_of_one_file", {
+    zonePath: rootPath.value,
+    filePath: props.path,
+  })
+    .then((data) => {
+      console.log("Summary data:", data);
+      Object.assign(summaryData, JSON.parse(data));
+      emit("update:loading", false);
+    })
+    .catch((error) => {
+      console.error("API call failed:", error);
+      ElMessage.error("Failed to get summary data");
+      emit("update:loading", false);
+    });
 });
 </script>
 
