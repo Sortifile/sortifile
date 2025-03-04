@@ -103,7 +103,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { ElMessage } from "element-plus";
 import { ArrowRight, ArrowLeft } from "@element-plus/icons-vue";
 import { useRouter } from "vue-router";
@@ -128,7 +128,7 @@ import { cloneDeep } from "lodash";
 const ruleData = ref(cloneDeep(ruleStore.rule));
 
 // 全選和部分選邏輯
-const selectedRules = ref([...ruleData.value.natural_language_rules]);
+const selectedRules = ref([]);
 const checkAll = ref(true);
 const isIndeterminate = ref(false);
 const isWarn = ref(false);
@@ -213,6 +213,10 @@ const handleSubmit = async () => {
     ElMessage.error("Error when submitting zone rules", error);
   }
 };
+
+onMounted(() => {
+  selectedRules.value = [...ruleData.value.natural_language_rules];
+});
 </script>
 
 <style scoped>
