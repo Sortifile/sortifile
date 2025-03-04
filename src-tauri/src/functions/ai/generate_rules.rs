@@ -2,6 +2,7 @@ use crate::functions;
 use crate::functions::ai::utils;
 use crate::functions::file;
 use crate::functions::sql;
+use crate::functions::system;
 use crate::functions::system::get_appdata_dir;
 use crate::functions::system::wrap_tmp_dir;
 use crate::functions::zone;
@@ -52,11 +53,11 @@ pub async fn ai_create_rule(
             .shell()
             .sidecar("generate_rules")
             .map_err(|e| e.to_string())?
-            .env("GEMINI_API_KEY", "AIzaSyDRZIn2cBCpPRvRYh-VG9Hh0ITRu979tOs")
+            .env("GEMINI_API_KEY", system::get_api_key().unwrap())
             .args(&[
                 app.path()
                     .resolve(
-                        "resources/system_prompt.md",
+                        "resources/1_system_prompt.md",
                         BaseDirectory::Resource,
                     )
                     .unwrap()

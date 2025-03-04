@@ -3,6 +3,7 @@ use crate::functions::ai::utils;
 use crate::functions::file;
 use crate::functions::sql;
 use crate::functions::system::get_appdata_dir;
+use crate::functions::system;
 use crate::functions::zone;
 use async_recursion::async_recursion;
 use chrono::{DateTime, Utc};
@@ -155,7 +156,7 @@ pub async fn ai_summarize_one(
             // system prompt for sort_files (from resource folder)
             app.path()
                 .resolve(
-                    "resources/2_summarize_files/system_prompt.json",
+                    "resources/2_system_prompt.json",
                     BaseDirectory::Resource,
                 )
                 .unwrap()
@@ -165,7 +166,7 @@ pub async fn ai_summarize_one(
             // user prompt for sort_files
             app.path()
                 .resolve(
-                    "resources/2_summarize_files/user_prompt.json",
+                    "resources/2_user_prompt.json",
                     BaseDirectory::Resource,
                 )
                 .unwrap()
@@ -186,13 +187,15 @@ pub async fn ai_summarize_one(
         }
     });
     // read from move_steps file to string
-    let result = fs::read_to_string(format!("{}_{}", root_path, file_path)).unwrap();
+    let result = fs::read_to_string(system::wrap_tmp_dir(format!("{}_{}.json", root_path, file_path).as_str()).unwrap()).unwrap();
     // get db
     let db = sql::get_db().await;
     let fileID: u64 =
         functions::file::get_file_id(format!("{}/{}", root_path, file_path).as_str()).unwrap();
     db.exec(&format!(
-        "UPDATE {} SET summary = ? WHERE fileID = ?;",
+        "UPDATE {} SET summary = {} WHERE fileID = {};",
+        format!("zone_{}", zone_name),
+        result,
         fileID
     ))
     .await

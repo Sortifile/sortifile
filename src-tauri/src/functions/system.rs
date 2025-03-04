@@ -7,8 +7,10 @@ use crate::functions::file;
 //#[tauri::command]
 pub fn get_appdata_dir() -> Result<String, std::env::VarError> {
     match std::env::var("APPDATA") {
-        Ok(appdata) => {
+        Ok(mut appdata) => {
             //println!("APPDATA is: {}", appdata);
+            //append appdata with sortifile
+            appdata.push_str("/sortifile/");
             Ok(appdata)
         }
         Err(e) => {
@@ -59,6 +61,7 @@ pub fn get_api_key() -> Result<String, std::io::Error> {
     match get_appdata_dir() {
         Ok(appdata) => {
             let api_key_path = std::path::Path::new(&appdata).join(".key");
+            println!("api_key_path: {}", api_key_path.display());
             let api_key = std::fs::read_to_string(api_key_path);
             match api_key {
                 Ok(key) => Ok(key),
