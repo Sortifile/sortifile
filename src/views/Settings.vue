@@ -55,7 +55,7 @@ onMounted(async () => {
 
 // 儲存設定
 async function saveSettings() {
-  invoke("set_api_key", apiKey.value)
+  invoke("set_api_key", { apiKey: apiKey.value })
     .then(() => {
       ElMessage.success("API key saved successfully");
     })

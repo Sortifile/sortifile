@@ -239,17 +239,31 @@ function handleRenewRules() {
   )
     .then(() => {
       // call API to renew all the rules
+      let loadingInstance;
+      loadingInstance = ElLoading.service({
+        lock: true,
+        text: "Sorting...",
+        background: "rgba(0, 0, 0, 0.7)",
+      });
+
       let result = invoke("ai_renew_rules", {
         zoneName: zoneName.value,
         zonePath: rootPath.value,
-      });
+      })
+        .then((result) => {
+          if (loadingInstance) loadingInstance.close();
+          // save the new rules to store
+          const renewed_rules = JSON.parse(result);
+          ruleStore.setRule(renewed_rules);
 
-      // save the new rules to store
-      const renewed_rules = JSON.parse(result);
-      ruleStore.setRule(renewed_rules);
-
-      // 重新導向至規則檢視頁面
-      navigateTo("/checkRenewRule");
+          // 重新導向至規則檢視頁面
+          navigateTo("/checkRenewRule");
+        })
+        .catch((error) => {
+          loadingInstance.close();
+          console.error("API call failed:", error);
+          ElMessage.error("Failed to renew rules");
+        });
     })
     .catch(() => {
       ElMessage({
@@ -515,9 +529,11 @@ function toggleIgnore(path, shouldIgnore) {
   applyIgnoreStatusToTree(fileTree.value);
 
   // 呼叫後端 API 更新後端 ignore 狀態
+  const formattedOutput = ignoredPaths.value.join("\n");
+
   invoke("set_ignore_list", {
     zonePath: rootPath.value,
-    ignoredPaths: ignoredPaths.value,
+    ignoredPaths: formattedOutput,
   }).catch((err) => {
     console.error("Ignore 更新失敗", err);
     // 回復舊狀態
@@ -651,7 +667,7 @@ onMounted(async () => {
     const ignoreListStr = await invoke("get_ignore_list", {
       zone: rootPath.value,
     });
-    const ignoreList = JSON.parse(ignoreListStr);
+    const ignoreList = ignoreListStr.split("\n").filter((x) => x);
     ignoredPaths.value = ignoreList;
   } catch (error) {
     console.error("API call failed:", error);
