@@ -216,7 +216,7 @@ const handleSubmit = async () => {
       rootPath: rootPath.value,
       config: JSON.stringify(config),
       ignore: "",
-      rules: ruleData.value,
+      rules: JSON.stringify(ruleData.value),
     }).then((res) => {
       console.log("API response:", res);
       ElMessage.success("Created rules successfully!");
