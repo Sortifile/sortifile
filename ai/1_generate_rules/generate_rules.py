@@ -65,15 +65,14 @@ def main():
     print(f"question_file_path: {question_file_path}")
     print(f"response_file_path: {response_file_path}")
     print(f"output_file_path: {output_file_path}")
-    
-    
     generate_rules(
         system_prompt_path=system_prompt_path,
         form_respond_path=response_file_path,
         form_question_path=question_file_path,
         output_path=output_file_path,
     )
-    print("Done.")
+    print("Done...")
 
 if __name__ == "__main__":
+    print("Generating rules...")
     main()

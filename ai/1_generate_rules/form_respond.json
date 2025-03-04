@@ -1,11 +1,13 @@
 {
   "responses": {
     "file_types": ["作業", "報告", "簡報"],
-    "logic_habit": "A",
+    "logic_habit": "B",
     "sort_struct": ["學期", "科目", "用途"],
-    "deep": 5,
+    "folder_depth": 4,
     "capacity": 30,
-    "naming": ["name", "version"],
-    "archival_tendency": "A"
+    "naming": ["name", "version", "date", "file_extension"],
+    "date_format": "YYYYMMDD",
+    "filename_letter_rule": "allowSpace",
+    "archival_tendency": "B"
   }
 }
