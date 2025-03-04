@@ -126,6 +126,7 @@ const { zoneName, rootPath } = storeToRefs(zoneStore);
 const { formResponse, formQuestion } = storeToRefs(formStore);
 import { cloneDeep } from "lodash";
 import { invoke } from "@tauri-apps/api/core";
+const { ruleRRR } = storeToRefs(ruleStore);
 
 const ruleData = ref({
   index: {
@@ -142,14 +143,7 @@ const ruleData = ref({
     date_format: "YYYYMMDD",
     filename_letter_rule: "none",
   },
-  natural_language_rules: [
-    "blah",
-    "blah blah",
-    "blah blah blah",
-    "blah blah blah blah",
-    "blah blah blah blah blah",
-    "blah blah blah blah blah blah",
-  ],
+  natural_language_rules: [],
 });
 
 // 全選和部分選邏輯
@@ -196,7 +190,7 @@ const handleRegenerate = () => {
 };
 
 const handleReset = () => {
-  ruleData.value = cloneDeep(ruleStore.rule);
+  ruleData.value = cloneDeep(ruleRRR.value);
   selectedRules.value = [...ruleData.value.natural_language_rules];
   checkAll.value = true;
   isIndeterminate.value = false;
@@ -245,10 +239,12 @@ onMounted(() => {
     ruleStore.resetRule();
   }
 
-  ruleData.value = cloneDeep(ruleStore.rule);
+  ruleData.value = cloneDeep(ruleRRR.value);
 
   if (ruleData.value.natural_language_rules) {
-    selectedRules.value = cloneDeep(ruleData.value.natural_language_rules);
+    selectedRules.value = JSON.parse(
+      JSON.stringify(ruleData.value.natural_language_rules),
+    );
   } else {
     selectedRules.value = []; // 避免 undefined 錯誤
   }
