@@ -8,7 +8,6 @@ const initialRuleState = () => ({
   },
   spec: {
     file_types: [],
-    sort_struct: ["學期", "科目", "用途"],
     folder_depth: 5,
     capacity: 30,
     naming_style: ["name", "version"],
@@ -32,6 +31,7 @@ export const useRuleStore = defineStore("rule", {
   actions: {
     setRule(new_rule) {
       Object.assign(this.rule, new_rule);
+      console.log(this.rule);
     },
     resetRule() {
       this.rule = initialRuleState();

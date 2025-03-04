@@ -103,7 +103,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { ElMessage } from "element-plus";
 import { ArrowRight, ArrowLeft } from "@element-plus/icons-vue";
 import { useRouter } from "vue-router";
@@ -126,7 +126,7 @@ const { zoneName, rootPath } = storeToRefs(zoneStore);
 const { formResponse, formQuestion } = storeToRefs(formStore);
 import { cloneDeep } from "lodash";
 import { invoke } from "@tauri-apps/api/core";
-const { ruleRRR } = storeToRefs(ruleStore);
+const { rule } = storeToRefs(ruleStore);
 
 const ruleData = ref({
   index: {
@@ -189,14 +189,6 @@ const handleRegenerate = () => {
     });
 };
 
-const handleReset = () => {
-  ruleData.value = cloneDeep(ruleRRR.value);
-  selectedRules.value = [...ruleData.value.natural_language_rules];
-  checkAll.value = true;
-  isIndeterminate.value = false;
-  isWarn.value = false;
-};
-
 // 提交邏輯
 const handleSubmit = async () => {
   if (selectedRules.value.length < MIN_REQUIRED) {
@@ -221,35 +213,61 @@ const handleSubmit = async () => {
 
     await invoke("create_zone", {
       zoneName: zoneName.value,
-      zonePath: rootPath.value,
-      config: config,
-      ignore: [],
+      rootPath: rootPath.value,
+      config: JSON.stringify(config),
+      ignore: "",
       rules: ruleData.value,
+    }).then((res) => {
+      console.log("API response:", res);
+      ElMessage.success("Created rules successfully!");
+      navigateTo("zone");
+    }).catch((error) => {
+      console.error("API error:", error);
+      ElMessage.error("Error when submitting");
     });
-
-    navigateTo("zone");
   } catch (error) {
     ElMessage.error("Error when submitting zone rules", error);
   }
 };
 
+// 確保 `ruleStore.rule` 載入後更新 `ruleData`
+watch(
+  rule,
+  (newRule) => {
+    if (newRule && Object.keys(newRule).length > 0) {
+      ruleData.value = cloneDeep(newRule);
+      selectedRules.value = [...ruleData.value.natural_language_rules];
+      console.log("Updated ruleData:", ruleData.value);
+    }
+  },
+  { immediate: true }
+);
+
+// `handleReset` 使用正確的 `rule`
+const handleReset = () => {
+  ruleData.value = cloneDeep(rule.value);
+  selectedRules.value = [...ruleData.value.natural_language_rules];
+  checkAll.value = true;
+  isIndeterminate.value = false;
+  isWarn.value = false;
+};
+
+// `onMounted` 初始化
 onMounted(() => {
   if (!ruleStore.rule) {
     console.warn("ruleStore.rule is undefined, fallback to default.");
     ruleStore.resetRule();
   }
 
-  ruleData.value = cloneDeep(ruleRRR.value);
+  ruleData.value = cloneDeep(rule.value);
 
   if (ruleData.value.natural_language_rules) {
-    selectedRules.value = JSON.parse(
-      JSON.stringify(ruleData.value.natural_language_rules),
-    );
+    selectedRules.value = [...ruleData.value.natural_language_rules];
   } else {
     selectedRules.value = []; // 避免 undefined 錯誤
   }
 
-  console.log("Rule Data:", ruleData.value);
+  console.log("Rule Data on mounted:", ruleData.value);
 });
 </script>
 

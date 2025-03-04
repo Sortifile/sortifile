@@ -100,20 +100,22 @@ const submitForm = async () => {
     ruleStore.resetRule();
 
     // 2. 呼叫 Tauri API 生成 rule.json
-    const ruleJson = await invoke("ai_create_rule", {
+  invoke("ai_create_rule", {
       zoneName: zoneStore.zoneName,
       zonePath: zoneStore.rootPath,
       createFromStructure: false,
       formResponse: JSON.stringify(formResponse.value),
+    }).then((ruleJson) => {
+      // 存入 Pinia 的 ruleData
+      ruleStore.setRule(JSON.parse(ruleJson));
+      console.log("AI 生成的規則：", ruleStore.rule);
+
+      // 顯示成功訊息並跳轉
+      ElMessage.success("AI 生成規則成功！");
+      navigateTo("zone-wizard/CheckRule");
+      loading.value = false;
+
     });
-
-    // 存入 Pinia 的 ruleData
-    ruleStore.setRule(ruleJson);
-    console.log("AI 生成的規則：", ruleStore.rule);
-
-    // 顯示成功訊息並跳轉
-    ElMessage.success("AI 生成規則成功！");
-    router.push("/zone-wizard/CheckRule");
   } catch (error) {
     console.error("API 調用失敗:", error);
     ElMessage.error("生成規則時發生錯誤");
