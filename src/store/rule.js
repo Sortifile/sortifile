@@ -1,7 +1,6 @@
 import { defineStore } from "pinia";
-import { invoke } from "@tauri-apps/api/core";
 
-const initialRuleState = {
+const initialRuleState = () => ({
   index: {
     sorting_entropy: 8,
     naming_complexity: 6,
@@ -24,18 +23,18 @@ const initialRuleState = {
     "blah blah blah blah blah",
     "blah blah blah blah blah blah",
   ],
-};
+});
 
 export const useRuleStore = defineStore("rule", {
   state: () => ({
-    rule: initialRuleState,
+    rule: initialRuleState(),
   }),
   actions: {
     setRule(new_rule) {
-      this.rule = new_rule;
+      Object.assign(this.rule, new_rule);
     },
     resetRule() {
-      this.rule = initialRuleState;
+      this.rule = initialRuleState();
     },
   },
 });

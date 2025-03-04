@@ -127,8 +127,7 @@ const { formResponse, formQuestion } = storeToRefs(formStore);
 import { cloneDeep } from "lodash";
 import { invoke } from "@tauri-apps/api/core";
 
-const ruleData = ref(
-  {
+const ruleData = ref({
   index: {
     sorting_entropy: 8,
     naming_complexity: 6,
@@ -151,8 +150,7 @@ const ruleData = ref(
     "blah blah blah blah blah",
     "blah blah blah blah blah blah",
   ],
-}
-);
+});
 
 // 全選和部分選邏輯
 const selectedRules = ref([]);
@@ -242,9 +240,20 @@ const handleSubmit = async () => {
 };
 
 onMounted(() => {
+  if (!ruleStore.rule) {
+    console.warn("ruleStore.rule is undefined, fallback to default.");
+    ruleStore.resetRule();
+  }
+
   ruleData.value = cloneDeep(ruleStore.rule);
+
+  if (ruleData.value.natural_language_rules) {
+    selectedRules.value = cloneDeep(ruleData.value.natural_language_rules);
+  } else {
+    selectedRules.value = []; // 避免 undefined 錯誤
+  }
+
   console.log("Rule Data:", ruleData.value);
-  selectedRules.value = [...ruleData.value.natural_language_rules];
 });
 </script>
 
