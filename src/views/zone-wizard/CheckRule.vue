@@ -125,7 +125,34 @@ function navigateTo(page) {
 const { zoneName, rootPath } = storeToRefs(zoneStore);
 const { formResponse, formQuestion } = storeToRefs(formStore);
 import { cloneDeep } from "lodash";
-const ruleData = ref(cloneDeep(ruleStore.rule));
+import { invoke } from "@tauri-apps/api/core";
+
+const ruleData = ref(
+  {
+  index: {
+    sorting_entropy: 8,
+    naming_complexity: 6,
+    archival_tendency: 10,
+  },
+  spec: {
+    file_types: [],
+    sort_struct: ["學期", "科目", "用途"],
+    folder_depth: 5,
+    capacity: 30,
+    naming_style: ["name", "version"],
+    date_format: "YYYYMMDD",
+    filename_letter_rule: "none",
+  },
+  natural_language_rules: [
+    "blah",
+    "blah blah",
+    "blah blah blah",
+    "blah blah blah blah",
+    "blah blah blah blah blah",
+    "blah blah blah blah blah blah",
+  ],
+}
+);
 
 // 全選和部分選邏輯
 const selectedRules = ref([]);
@@ -215,6 +242,8 @@ const handleSubmit = async () => {
 };
 
 onMounted(() => {
+  ruleData.value = cloneDeep(ruleStore.rule);
+  console.log("Rule Data:", ruleData.value);
   selectedRules.value = [...ruleData.value.natural_language_rules];
 });
 </script>

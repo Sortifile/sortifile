@@ -44,7 +44,33 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
-            functions::ai::generate_rules::ai_create_rule
+            functions::ai::generate_rules::ai_create_rule,
+            functions::ai::summarize::ai_summarize_all,
+            functions::ai::summarize::ai_summarize_one,
+            functions::ai::sort::ai_sort,
+            functions::ai::renew_rules::ai_renew_rules,
+            functions::file::get_summary_of_one_file,
+            functions::file::set_summary_of_one_file,
+            functions::file::get_move_history,
+            functions::file::get_file_tree,
+            functions::system::get_api_key,
+            functions::system::set_api_key,
+            functions::zone::create_zone,
+            functions::zone::get_zone_list,
+            functions::file::get_summary_of_one_file,
+            functions::file::set_summary_of_one_file,
+            functions::zone::get_zone_rules,
+            functions::zone::set_zone_rules,
+            functions::file::move_file,
+            functions::file::get_ignore_list,
+            functions::file::set_ignore_list,
+            functions::system::get_api_key,
+            functions::system::set_api_key,
+            functions::file::get_move_history,
+            functions::zone::delete_zone,
+            functions::file::get_project_file,
+            functions::file::set_project_file,
+            greet
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

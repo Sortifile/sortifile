@@ -22,7 +22,7 @@ struct move_history {
 pub async fn get_summary_of_one_file(
     zone_name: &str,
     file_path: &str,
-) -> Result<String, sqlx::Error> {
+) -> Result<String, String> {
     let db = sql::get_db().await;
     let summary = db.get_file_summary(zone_name, file_path).await.unwrap();
     Ok(summary)
@@ -32,7 +32,7 @@ pub async fn set_summary_of_one_file(
     zone_name: &str,
     file_path: &str,
     summary: &str,
-) -> Result<(), sqlx::Error> {
+) -> Result<(), String> {
     let db = sql::get_db().await;
     let table_name = format!("zone_{}", zone_name);
     db.exec(
@@ -51,8 +51,9 @@ WHERE file_path = {}
     .unwrap();
     Ok(())
 }
+
 #[tauri::command]
-pub async fn get_move_history(num: u64) -> Result<String, sqlx::Error> {
+pub async fn get_move_history(num: u64) -> Result<String, String> {
     let db = sql::get_db().await;
     let result = db
         .exec_select(format!("SELECT * FROM move_history LIMIT {};", num).as_str())
@@ -138,7 +139,7 @@ pub async fn move_file(
     new_path: &str,
     moved_by: &str,
     reason: &str,
-) -> Result<(), sqlx::Error> {
+) -> Result<(), String> {
     let db = sql::get_db().await;
     fs::rename(src_path, new_path).unwrap();
     db.exec(
@@ -152,32 +153,32 @@ pub async fn move_file(
 }
 
 #[tauri::command]
-pub fn get_ignore_list(zone_path: &str) -> Result<String, std::io::Error> {
+pub fn get_ignore_list(zone_path: &str) -> Result<String, String> {
     let ignore_list = fs::read_to_string(format!("{}/.sortifile-ignore", zone_path));
     match ignore_list {
         Ok(list) => Ok(list),
-        Err(e) => Err(e),
+        Err(e) => Err(e.to_string()),
     }
 }
 
 #[tauri::command]
-pub fn set_ignore_list(zone_path: &str, ignore_list: &str) -> Result<(), std::io::Error> {
-    fs::write(format!("{}/.sortifile-ignore", zone_path), ignore_list)?;
+pub fn set_ignore_list(zone_path: &str, ignore_list: &str) -> Result<(), String> {
+    fs::write(format!("{}/.sortifile-ignore", zone_path), ignore_list);
     Ok(())
 }
 
 #[tauri::command]
-pub fn get_project_file(zone_path: &str) -> Result<String, std::io::Error> {
+pub fn get_project_file(zone_path: &str) -> Result<String, String> {
     let project_file = fs::read_to_string(format!("{}/.sortifile.conf", zone_path));
     match project_file {
         Ok(file) => Ok(file),
-        Err(e) => Err(e),
+        Err(e) => Err(e.to_string()),
     }
 }
 
 #[tauri::command]
-pub fn set_project_file(zone_path: &str, project_file: &str) -> Result<(), std::io::Error> {
-    fs::write(format!("{}/.sortifile.conf", zone_path), project_file)?;
+pub fn set_project_file(zone_path: &str, project_file: &str) -> Result<(), String> {
+    fs::write(format!("{}/.sortifile.conf", zone_path), project_file);
     Ok(())
 }
 
@@ -235,7 +236,7 @@ fn gen_file_tree(root: &Path) -> io::Result<Vec<FileNode>> {
 }
 
 #[tauri::command]
-pub fn get_file_tree(root_path: String) -> Result<String, io::Error> {
+pub fn get_file_tree(root_path: String) -> Result<String, String> {
     let path = PathBuf::from(root_path);
     let file_tree = gen_file_tree(&path).unwrap();
     let json =

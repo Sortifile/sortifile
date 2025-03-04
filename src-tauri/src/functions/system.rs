@@ -57,7 +57,7 @@ pub fn write_to_temp_file(file_name: String, data: String) -> std::io::Result<()
 }
 
 #[tauri::command]
-pub fn get_api_key() -> Result<String, std::io::Error> {
+pub fn get_api_key() -> Result<String, String> {
     match get_appdata_dir() {
         Ok(appdata) => {
             let api_key_path = std::path::Path::new(&appdata).join(".key");
@@ -65,24 +65,24 @@ pub fn get_api_key() -> Result<String, std::io::Error> {
             let api_key = std::fs::read_to_string(api_key_path);
             match api_key {
                 Ok(key) => Ok(key),
-                Err(e) => Err(e),
+                Err(e) => Err(e.to_string()),
             }
         }
-        Err(e) => Err(std::io::Error::new(std::io::ErrorKind::Other, e)),
+        Err(e) => Err("Oops".to_string()),
     }
 }
 
 #[tauri::command]
-pub fn set_api_key(api_key: String) -> Result<(), std::io::Error> {
+pub fn set_api_key(api_key: String) -> Result<(), String> {
     match get_appdata_dir() {
         Ok(appdata) => {
             let api_key_path = std::path::Path::new(&appdata).join(".key");
             let api_key = std::fs::write(api_key_path, api_key);
             match api_key {
                 Ok(_) => Ok(()),
-                Err(e) => Err(e),
+                Err(e) => Err(e.to_string()),
             }
         }
-        Err(e) => Err(std::io::Error::new(std::io::ErrorKind::Other, e)),
+        Err(e) => Err("Oops".to_string()),
     }
 }

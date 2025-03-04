@@ -22,7 +22,7 @@ pub async fn create_zone(
     config: String,
     ignore: String,
     rules: &str,
-) -> Result<(), sqlx::Error> {
+) -> Result<String, String> {
     let db = sql::get_db().await;
     // Create zone table with the additional file_id column.
     db.exec(
@@ -53,7 +53,7 @@ pub async fn create_zone(
     std::fs::write(format!("{}/.sortifile.conf", root_path), config).unwrap();
     std::fs::write(format!("{}/.sortifile-ignore", root_path), ignore).unwrap();
     // dfs and add all files to the database
-    Ok(())
+    Ok("Ok".to_string())
 }
 
 #[tauri::command]
@@ -85,7 +85,7 @@ pub async fn get_zone_list() -> String {
 }
 
 #[tauri::command]
-pub async fn get_zone_rules(zone_name: &str) -> Result<String, Error> {
+pub async fn get_zone_rules(zone_name: &str) -> Result<String, String> {
     let db = sql::get_db().await;
     let zone_rules = db
         .exec_select(
@@ -102,7 +102,7 @@ pub async fn get_zone_rules(zone_name: &str) -> Result<String, Error> {
 }
 
 #[tauri::command]
-pub async fn set_zone_rules(zone_name: &str, rules: &str) -> Result<(), Error> {
+pub async fn set_zone_rules(zone_name: &str, rules: &str) -> Result<(), String> {
     let db = sql::get_db().await;
     db.exec(
         format!(
@@ -117,7 +117,7 @@ pub async fn set_zone_rules(zone_name: &str, rules: &str) -> Result<(), Error> {
 }
 
 #[tauri::command]
-pub async fn delete_zone(zone_name: &str) -> Result<(), Error> {
+pub async fn delete_zone(zone_name: &str) -> Result<(), String> {
     let db = sql::get_db().await;
     db.exec(format!("DROP TABLE zone_{};", zone_name).as_str())
         .await

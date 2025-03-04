@@ -25,13 +25,13 @@ use tauri_plugin_shell::ShellExt;
 
 #[tauri::command]
 pub async fn ai_summarize_all(
-    app: &tauri::AppHandle,
+    app: tauri::AppHandle,
     zone_name: &str,
     zone_path: &str,
     path_to_sort: &str,
 ) -> Result<String, String> {
     let db = sql::get_db().await;
-    process_directory_recursively(&app, zone_path.to_string(), zone_name, path_to_sort)
+    process_directory_recursively(app, zone_path.to_string(), zone_name, path_to_sort)
         .await
         .unwrap();
     Ok("good".to_string())
@@ -41,7 +41,7 @@ pub async fn ai_summarize_all(
 
 #[command]
 async fn process_directory_recursively(
-    app: &tauri::AppHandle,
+    app: tauri::AppHandle,
     dir_path: String,
     zone_name: &str,
     path_to_sort: &str,
@@ -59,7 +59,6 @@ async fn process_directory_recursively(
     } else {
         Vec::new()
     };
-
     // Process the directory recursively.
     process_path(app, base, base, &ignore_patterns, zone_name, path_to_sort).await;
     Ok(())
@@ -99,7 +98,7 @@ fn should_ignore(path: &Path, base: &Path, ignore_patterns: &Vec<Pattern>) -> bo
 
 #[async_recursion]
 async fn process_path(
-    app: &tauri::AppHandle,
+    app: tauri::AppHandle,
     path: &Path,
     base: &Path,
     ignore_patterns: &Vec<Pattern>,
@@ -114,8 +113,9 @@ async fn process_path(
         for entry in fs::read_dir(path)? {
             let entry = entry?;
             let entry_path = entry.path();
+            let appc= app.clone();
             process_path(
-                &app,
+                appc,
                 &entry_path,
                 base,
                 ignore_patterns,
@@ -137,7 +137,7 @@ async fn process_path(
 
 #[tauri::command]
 pub async fn ai_summarize_one(
-    app: &tauri::AppHandle,
+    app: tauri::AppHandle,
     zone_name: &str,
     root_path: &str,
     file_path: &str,
