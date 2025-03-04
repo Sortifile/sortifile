@@ -27,14 +27,30 @@ pub fn get_tmp_dir() -> Result<String, String> {
     }
 }
 
+pub fn wrap_tmp_dir(rel: &str) -> Result<String, String>{
+    let mut temp_path = get_tmp_dir().unwrap();
+    temp_path.push_str("sortifile\\");
+
+    temp_path.push_str(rel);
+    Ok(temp_path)
+}
+
+use std::path::Path;
+
 pub fn write_to_temp_file(file_name: String, data: String) -> std::io::Result<()> {
     // Get the temporary directory path
     let mut temp_path = get_tmp_dir().unwrap();
     // Append your desired file name
-    temp_path.push_str("/sortifile/");
+    temp_path.push_str("sortifile\\");
     temp_path.push_str(file_name.as_str());
+    //print the path
+    println!("temp_path: {}", temp_path);
+    let path = Path::new(&temp_path);
     // Write text content into the file
-    std::fs::write(&temp_path, data.as_str())?;
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+    std::fs::write(&path, data.as_str())?;
     Ok(())
 }
 

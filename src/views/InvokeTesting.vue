@@ -31,7 +31,12 @@ import { invoke } from "@tauri-apps/api/core";
 import { ref } from "vue";
 const returnContent = ref("");
 
-function fun01() {}
+function fun01() {
+    invoke("ai_create_rule", { zoneName: "test", zonePath: "C:\Users\jimts\ytp\www" , createFromStructure: false, formResponse: "hehe"}).then((response) => {
+    returnContent.value = response;
+  });
+}
+
 function fun02() {}
 function fun03() {}
 function fun04() {}
