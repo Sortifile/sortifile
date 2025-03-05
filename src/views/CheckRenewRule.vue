@@ -219,18 +219,19 @@ const handleSubmit = async () => {
   // 1. 存入 Pinia 的 ruleData
   ruleStore.setRule(ruleData.value);
 
-  try {
-    await invoke("set_zone_rules", {
-      zonePath: rootPath.value,
-      rules: ruleData.value,
+  // 2. 呼叫 Tauri API 更新 zone 規則
+  invoke("set_zone_rules", {
+    zonePath: rootPath.value,
+    rules: ruleData.value,
+  })
+    .then(() => {
+      ElMessage.success("Zone 規則已更新！");
+      navigateTo("zone");
+    })
+    .catch((error) => {
+      console.error("API 調用失敗:", error);
+      ElMessage.error("更新規則時發生錯誤");
     });
-    ElMessage.success("Zone 規則已更新！");
-  } catch (error) {
-    console.error("API 調用失敗:", error);
-    ElMessage.error("更新規則時發生錯誤");
-  }
-
-  navigateTo("zone");
 };
 </script>
 
