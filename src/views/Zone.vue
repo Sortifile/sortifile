@@ -193,7 +193,7 @@ function handleShowHistory() {
   isHistoryDialogVisible.value = true;
 }
 
-function handleSummarizeAll() {
+async function handleSummarizeAll() {
   console.log("Summarize All");
 
   ElMessageBox.confirm(
@@ -225,7 +225,7 @@ function handleSummarizeAll() {
     });
 }
 
-function handleRenewRules() {
+async function handleRenewRules() {
   console.log("Renew Rules");
   ElMessageBox.confirm(
     "All old rules will be replaced. Continue?",
@@ -509,7 +509,7 @@ const ignoreSwitch = computed({
 });
 
 // 切換某個 path 是否要被「顯式忽略」
-function toggleIgnore(path, shouldIgnore) {
+async function toggleIgnore(path, shouldIgnore) {
   // 暫存舊的 ignoredPaths，用於發生錯誤時回復
   const oldIgnoredPaths = [...ignoredPaths.value];
 
