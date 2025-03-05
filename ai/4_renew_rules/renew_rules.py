@@ -16,7 +16,7 @@ def renew_rules(
     # match_movements_path="4_renew_rules/match_movements.json",
     rule_path="4_renew_rules/rule.json",
     output_path="4_renew_rules/respond.json",
-    model_name="gemini-exp-1206",
+    model_name="gemini-2.0-flash",
     generation_config=None,
 ):
     if generation_config is None:

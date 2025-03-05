@@ -15,7 +15,7 @@ def sort_files(
     file_summary_path="3_sort_files/file_summary.json",
     history_file_movements_path="3_sort_files/history_file_movements.json",
     output_path="3_sort_files/respond.json",
-    model_name="gemini-exp-1206",
+    model_name="gemini-2.0-flash",
     generation_config=None,
 ):
     if generation_config is None:

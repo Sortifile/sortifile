@@ -63,7 +63,7 @@ def summarize_files(
     rule_path="2_summarize_files/rule.json",
     file_path="",
     output_path="2_summarize_files/respond.json",
-    model_name="gemini-exp-1206",
+    model_name="gemini-2.0-flash",
     generation_config=None,
 ):
     """

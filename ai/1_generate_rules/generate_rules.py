@@ -12,7 +12,7 @@ def generate_rules(
     form_respond_path="1_generate_rules/form_respond.json",
     form_question_path="1_generate_rules/form_question.json",
     output_path="1_generate_rules/respond.json",
-    model_name="gemini-exp-1206",
+    model_name="gemini-2.0-flash",
     generation_config=None,
 ):
     if generation_config is None:
