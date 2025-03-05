@@ -124,6 +124,7 @@ impl Database {
     }
 
     pub async fn exec(&self, input: &str) -> Result<SqliteQueryResult, Error> {
+        println!("Executing query: {}", input);
         let changes = sqlx::query(&input).execute(&self.pool).await;
         Ok(changes.unwrap())
     }

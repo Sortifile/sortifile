@@ -4,6 +4,7 @@ use crate::functions::file;
 use crate::functions::sql;
 use crate::functions::system::get_appdata_dir;
 use crate::functions::zone;
+use crate::functions::system;
 use async_recursion::async_recursion;
 use chrono::{DateTime, Utc};
 use glob::Pattern;
@@ -62,7 +63,7 @@ pub async fn ai_sort(
     )
     .unwrap();
     functions::system::write_to_temp_file(
-        format!("zone_{}_history_file_movement_tmp.json", zone_name),
+        format!("zone_{}_history_file_movements_tmp.json", zone_name),
         history_file_movement_str,
     )
     .unwrap();
@@ -70,11 +71,12 @@ pub async fn ai_sort(
         .shell()
         .sidecar("sort_files")
         .map_err(|e| e.to_string())?
+        .env("GEMINI_API_KEY", system::get_api_key().unwrap())
         .args(&[
             // system prompt for sort_files (from resource folder)
             app.path()
                 .resolve(
-                    "resources/3_sort_files/system_prompt.json",
+                    "resources/3_system_prompt.md",
                     BaseDirectory::Resource,
                 )
                 .unwrap()
@@ -84,7 +86,7 @@ pub async fn ai_sort(
             // user prompt for sort_files
             app.path()
                 .resolve(
-                    "resources/3_sort_files/user_prompt.json",
+                    "resources/3_user_prompt.txt",
                     BaseDirectory::Resource,
                 )
                 .unwrap()
@@ -96,14 +98,15 @@ pub async fn ai_sort(
             // rule file
             format!("{}/.sortifile.conf", zone_path).as_str(),
             // file summary file (should be prepared by your logic)
-            format!("zone_{}_file_summary_tmp.json", zone_name).as_str(),
+            system::wrap_tmp_dir(format!("zone_{}_file_summary_tmp.json", zone_name).as_str()).unwrap().as_str(),
             // history file movements file
-            format!("zone_{}_history_file_movements_tmp.json", zone_name).as_str(),
+            system::wrap_tmp_dir(format!("zone_{}_history_file_movements_tmp.json", zone_name).as_str()).unwrap().as_str(),
             // output file where move steps are written
-            format!("zone_{}_move_steps_tmp.json", zone_name).as_str(),
+            system::wrap_tmp_dir(format!("zone_{}_move_steps_tmp.json", zone_name).as_str()).unwrap().as_str(),
         ]);
+    println!("ai_sort command: {:?}", sort_command);
     let (mut rx, _child) = sort_command.spawn().map_err(|e| e.to_string())?;
-    tauri::async_runtime::spawn(async move {
+    let task = tauri::async_runtime::spawn(async move {
         while let Some(event) = rx.recv().await {
             if let CommandEvent::Stdout(line_bytes) = event {
                 let line = String::from_utf8_lossy(&line_bytes);
@@ -111,8 +114,11 @@ pub async fn ai_sort(
             }
         }
     });
+    task.await.map_err(|e| e.to_string())?;
+
     // read from move_steps file to string
-    let result = fs::read_to_string(format!("zone_{}_move_steps_tmp.json", zone_name)).unwrap();
+    let result = fs::read_to_string(system::wrap_tmp_dir(format!("zone_{}_move_steps_tmp.json", zone_name).as_str()).unwrap()).unwrap();
+    println!("ai_sort result: {}", result);
     Ok(result)
 }
 
@@ -216,6 +222,7 @@ async fn process_path(
             .await?;
         }
     } else if path.is_file() {
+        println!("Processing file: {}", path.to_string_lossy());
         // Process each file by summarizing it.
         // Note: Any error from get_summary_of_one_file is unwrapped for brevity.
         let summary = functions::file::get_summary_of_one_file(zone_name, path.to_str().unwrap())
@@ -223,8 +230,9 @@ async fn process_path(
             .unwrap();
         let fileID = functions::file::get_file_id(path.to_str().unwrap()).unwrap();
         // Append missing fields using the file path and the given sort path.
+        let base_str = base.to_str().unwrap();
         let updated_summary =
-            append_missing_fields_with_path(summary.as_str(), path.to_str().unwrap(), path_to_sort)
+            append_missing_fields_with_path(base_str, summary.as_str(), path.to_str().unwrap(), path_to_sort)
                 .unwrap();
         file_summary.push(updated_summary);
     }
@@ -271,15 +279,20 @@ fn get_file_metadata(path: &str) -> Value {
 /// the function appends them automatically. In particular, "src_path"
 /// will be set to the provided `path` argument and metadata is gathered from the file system.
 fn append_missing_fields_with_path(
+    base: &str,
     json_str: &str,
     path: &str,
     path_to_sort: &str,
 ) -> Result<String, serde_json::Error> {
+
     // Parse the input JSON string.
     let mut data: Value = serde_json::from_str(json_str)?;
 
     // Determine the value for allow_move.
     let chc: bool = path.starts_with(path_to_sort);
+
+    // relative path and remove leading  backslash  
+    let rel_path = path.strip_prefix(base).unwrap().trim_start_matches('\\');
 
     // Closure to update a single summary object.
     let update_summary = |summary: &mut Value, file_path: &str| {
@@ -302,12 +315,12 @@ fn append_missing_fields_with_path(
         Value::Array(ref mut arr) => {
             for summary in arr.iter_mut() {
                 if summary.is_object() {
-                    update_summary(summary, path);
+                    update_summary(summary, rel_path);
                 }
             }
         }
         Value::Object(ref mut _obj) => {
-            update_summary(&mut data, path);
+            update_summary(&mut data, rel_path);
         }
         _ => {
             // If it's not an object or array, do nothing.

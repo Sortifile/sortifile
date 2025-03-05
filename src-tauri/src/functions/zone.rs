@@ -30,7 +30,7 @@ pub async fn create_zone(
             "CREATE TABLE IF NOT EXISTS zone_{} (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         file_path TEXT NOT NULL,
-        file_id INTEGER,
+        file_id INTEGER UNIQUE,
         summary TEXT,
         last_modified_date TEXT,
         last_summary_date TEXT
@@ -44,7 +44,7 @@ pub async fn create_zone(
     db.exec(
         format!(
             "INSERT INTO zone_list (zone_name, root_path, zone_rules) VALUES ('{}', '{}', '{}');",
-            zone_name, root_path, rules
+            zone_name, root_path, rules.replace("'", "''")
         )
         .as_str(),
     )

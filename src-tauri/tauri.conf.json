@@ -36,7 +36,8 @@
     },
     "externalBin": [
       "resources/generate_rules",
-      "resources/summarize_files"
+      "resources/summarize_files",
+      "resources/sort_files"
     ]
   },
   "plugins": {
