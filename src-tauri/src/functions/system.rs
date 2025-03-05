@@ -28,32 +28,43 @@ pub fn get_tmp_dir() -> Result<String, String> {
         None => Err("Failed to retrieve temp directory".to_string()),
     }
 }
+use std::path::Path;
 
 pub fn wrap_tmp_dir(rel: &str) -> Result<String, String>{
+    let path = Path::new(rel);
+    let ptt = path
+    .file_name()                          // Option<&OsStr>
+    .and_then(|name| name.to_str())        // Option<&str>
+    .unwrap_or("default.txt");         
     let mut temp_path = get_tmp_dir().unwrap();
     temp_path.push_str("sortifile\\");
 
-    temp_path.push_str(rel);
+    temp_path.push_str(ptt);
+    println!("wtemp_path: {}", temp_path);
     Ok(temp_path)
 }
 
-use std::path::Path;
 
-pub fn write_to_temp_file(file_name: String, data: String) -> std::io::Result<()> {
+pub fn write_to_temp_file(file_name: String, data: String) -> Result<String, String> {
     // Get the temporary directory path
-    let mut temp_path = get_tmp_dir().unwrap();
+    let pt = Path::new(&file_name);
+    let ptt = pt
+    .file_name()                          // Option<&OsStr>
+    .and_then(|name| name.to_str())        // Option<&str>
+    .unwrap_or("default.txt");             // fallback value if conversion fails
+    // Write text content into the file
+    let mut temp_path = get_tmp_dir().unwrap();    
     // Append your desired file name
     temp_path.push_str("sortifile\\");
-    temp_path.push_str(file_name.as_str());
+    temp_path.push_str(ptt);
     //print the path
     println!("temp_path: {}", temp_path);
     let path = Path::new(&temp_path);
-    // Write text content into the file
     if let Some(parent) = path.parent() {
-        std::fs::create_dir_all(parent)?;
+        std::fs::create_dir_all(parent);
     }
-    std::fs::write(&path, data.as_str())?;
-    Ok(())
+    std::fs::write(&path, data.as_str());
+    Ok(temp_path.to_string())
 }
 
 #[tauri::command]

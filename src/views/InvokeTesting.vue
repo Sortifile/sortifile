@@ -32,14 +32,26 @@ import { ref } from "vue";
 const returnContent = ref("");
 
 function fun01() {
-    invoke("ai_create_rule", { zoneName: "test", zonePath: "C:\Users\jimts\ytp\www" , createFromStructure: false, formResponse: "hehe"}).then((response) => {
+    invoke("ai_create_rule", { zoneName: "test", zonePath: "C:\\Users\\jimts\\ytp\\www" , createFromStructure: false, formResponse: "hehe"}).then((response) => {
     returnContent.value = response;
   });
 }
 
-function fun02() {}
-function fun03() {}
-function fun04() {}
+function fun02() {
+  invoke("ai_summarize_all", { zoneName: "ttest" , zonePath: "C:\\Users\\jimts\\ytp\\www", pathToSort: ""}).then((response) => {
+    returnContent.value = response;
+  });
+}
+function fun03() {
+  invoke("create_zone", {zoneName: "ttest" , rootPath: "C:\\Users\\jimts\\ytp\\www", config: "{}", ignore: "{}", rules: "{}"}).then((response) => {
+    returnContent.value = response;
+  });
+}
+function fun04() {
+  invoke("ai_sort", {zoneName: "ttest", zonePath: "C:\\Users\\jimts\\ytp\\www", pathToSort: ""}).then((response) => {
+    returnContent.value = response;
+  });
+}
 function fun05() {}
 function fun06() {}
 
