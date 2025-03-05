@@ -453,7 +453,7 @@ onMounted(async () => {
   pathValue.value = await joinPaths(rootPath.value, props.path);
   console.log("FileDisplay mounted");
   emit("update:loading", true);
-  invoke("get_summary_of_one_file", {
+  await invoke("get_summary_of_one_file", {
     zonePath: rootPath.value,
     filePath: props.path,
   })
