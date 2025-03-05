@@ -112,12 +112,30 @@ function navigateTo(page) {
 // 表單數據
 const { zoneName, rootPath } = storeToRefs(zoneStore);
 const { formResponse, formQuestion } = storeToRefs(formStore);
-import { cloneDeep, invoke } from "lodash";
-import { ru, tr } from "element-plus/es/locales.mjs";
-const ruleData = ref(cloneDeep(ruleStore.rule));
+import { cloneDeep } from "lodash";
+import { invoke } from "@tauri-apps/api/core";
+const { rule } = storeToRefs(ruleStore);
+
+const ruleData = ref({
+  index: {
+    sorting_entropy: 8,
+    naming_complexity: 6,
+    archival_tendency: 10,
+  },
+  spec: {
+    file_types: [],
+    sort_struct: ["學期", "科目", "用途"],
+    folder_depth: 5,
+    capacity: 30,
+    naming_style: ["name", "version"],
+    date_format: "YYYYMMDD",
+    filename_letter_rule: "none",
+  },
+  natural_language_rules: [],
+});
 
 // 全選和部分選邏輯
-const selectedRules = ref([...ruleData.value.natural_language_rules]);
+const selectedRules = ref([]);
 const checkAll = ref(true);
 const isIndeterminate = ref(false);
 const isWarn = ref(false);
@@ -151,15 +169,45 @@ const handleCancel = () => {
 };
 
 const handleReset = () => {
-  ruleData.value = cloneDeep(ruleStore.rule);
+  ruleData.value = cloneDeep(rule.value);
   selectedRules.value = [...ruleData.value.natural_language_rules];
   checkAll.value = true;
   isWarn.value = false;
   isIndeterminate.value = false;
 };
 
+// 確保 `ruleStore.rule` 載入後更新 `ruleData`
+watch(
+  rule,
+  (newRule) => {
+    if (newRule && Object.keys(newRule).length > 0) {
+      ruleData.value = cloneDeep(newRule);
+      selectedRules.value = [...ruleData.value.natural_language_rules];
+      console.log("Updated ruleData:", ruleData.value);
+    }
+  },
+  { immediate: true },
+);
+
+// `onMounted` 初始化
+onMounted(() => {
+  if (!ruleStore.rule) {
+    console.warn("ruleStore.rule is undefined, fallback to default.");
+    ruleStore.resetRule();
+  }
+
+  ruleData.value = cloneDeep(rule.value);
+
+  if (ruleData.value.natural_language_rules) {
+    selectedRules.value = [...ruleData.value.natural_language_rules];
+  } else {
+    selectedRules.value = []; // 避免 undefined 錯誤
+  }
+
+  console.log("Rule Data on mounted:", ruleData.value);
+});
 // 提交邏輯
-const handleSubmit = () => {
+const handleSubmit = async () => {
   if (selectedRules.value.length < MIN_REQUIRED) {
     ElMessage.error(`至少需要選擇 ${MIN_REQUIRED} 項規則！`);
     return;
@@ -172,7 +220,7 @@ const handleSubmit = () => {
   ruleStore.setRule(ruleData.value);
 
   try {
-    invoke("set_zone_rules", {
+    await invoke("set_zone_rules", {
       zonePath: rootPath.value,
       rules: ruleData.value,
     });

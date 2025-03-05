@@ -175,9 +175,9 @@ const mockFileTree = [
 /**
  * 右上方按鈕
  */
-function handleDeleteZone() {
+async function handleDeleteZone() {
   try {
-    invoke("delete_zone", {
+    await invoke("delete_zone", {
       zoneName: zoneName.value,
     });
     navigateTo("/home");
@@ -207,7 +207,7 @@ function handleSummarizeAll() {
   )
     .then(() => {
       // call API to resummarize all the files
-      invoke("ai_summarize_all_files", {
+      await invoke("ai_summarize_all_files", {
         zoneName: zoneName.value,
         zonePath: rootPath.value,
       });
@@ -245,7 +245,7 @@ function handleRenewRules() {
         background: "rgba(0, 0, 0, 0.7)",
       });
 
-      let result = invoke("ai_renew_rules", {
+      invoke("ai_renew_rules", {
         zoneName: zoneName.value,
         zonePath: rootPath.value,
       })
@@ -396,12 +396,13 @@ async function handleSortFolder(folderPath, folderName) {
   }
 }
 
-const handleConfirmedMoves = (selectedMoves) => {
+const handleConfirmedMoves = async (selectedMoves) => {
+  loading.value = true;
   console.log("Confirmed Moves:", selectedMoves);
   for (const move of selectedMoves) {
     console.log("Move:", move.src_path, "=>", move.new_path);
     try {
-      invoke("move_file", {
+      await invoke("move_file", {
         zonePath: rootPath.value,
         srcPath: move.src_path,
         newPath: move.new_path,
@@ -416,6 +417,7 @@ const handleConfirmedMoves = (selectedMoves) => {
       });
     }
   }
+  loading.value = false;
 };
 
 /**
