@@ -3,6 +3,11 @@ import sys
 import mimetypes
 import json
 import time
+import os
+import tempfile
+from docx import Document
+from pptx import Presentation
+
 
 
 # 將專案根目錄添加到 sys.path
@@ -56,6 +61,32 @@ DEFAULT_GENERATION_CONFIG = {
 #     file_list = [{"path": file_path, "extension": Path(file_path).suffix.lower()} for file_path in file_list]
 #     return file_list
 
+
+def extract_text_from_docx(docx_path):
+    """ 讀取 DOCX 內的所有文字並合併 """
+    doc = Document(docx_path)
+    text_list = [para.text.strip() for para in doc.paragraphs if para.text.strip()]
+    return "\n".join(text_list)
+
+def extract_text_from_pptx(pptx_path):
+    """ 讀取 PPTX 內的所有文字並合併 """
+    prs = Presentation(pptx_path)
+    text_list = []
+
+    for slide in prs.slides:
+        for shape in slide.shapes:
+            if hasattr(shape, "text") and shape.text.strip():
+                text_list.append(shape.text.strip())
+
+    return "\n".join(text_list)
+
+def save_to_temp_file(content):
+    """ 將內容寫入暫存檔案並返回檔案路徑 """
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".txt", mode="w", encoding="utf-8")
+    temp_file.write(content)
+    temp_file.close()
+    return temp_file.name
+
 def summarize_files(
     system_prompt_path="2_summarize_files/system_prompt.md",
     user_prompt_path="2_summarize_files/user_prompt.txt",
@@ -96,7 +127,20 @@ def summarize_files(
         path = files["path"]
         extension = files["extension"]
         print(f"Processing {path} with extension {extension}")
-        files["uploaded_files"] = upload_files(os.path.join(root_path, path), mime_type=mimetypes.types_map.get(extension, "application/octet-stream"))
+
+        if extension == ".docx":
+            content = extract_text_from_docx(os.path.join(root_path, path))
+            content = "THIS IS TEXTS EXTRACTED FROM DOCX FILE:\n\n" + content
+            tmp_path = save_to_temp_file(content)
+            files["uploaded_files"] = upload_files(tmp_path, mime_type="text/plain")
+        elif extension == ".pptx":
+            content = extract_text_from_pptx(os.path.join(root_path, path))
+            content = "THIS IS TEXTS EXTRACTED FROM PPTX FILE:\n\n" + content
+            tmp_path = save_to_temp_file(content)
+            files["uploaded_files"] = upload_files(tmp_path, mime_type="text/plain")
+        else:
+            files["uploaded_files"] = upload_files(os.path.join(root_path, path), mime_type=mimetypes.types_map.get(extension, "application/octet-stream"))
+
         message_components = [user_prompt, "\nfile_summary: ", files["uploaded_files"][0]]
         
         # 嘗試多次獲取回應
