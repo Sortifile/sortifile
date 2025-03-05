@@ -52,7 +52,11 @@ function fun04() {
     returnContent.value = response;
   });
 }
-function fun05() {}
+function fun05() {
+  invoke('get_file_tree', {zonePath: "C:\\Users\\jimts\\ytp\\tttttt"}).then((response) => {
+    returnContent.value = response;
+  });
+}
 function fun06() {}
 
 function fun07() {

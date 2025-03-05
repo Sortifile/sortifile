@@ -119,6 +119,7 @@ impl Database {
     }
 
     pub async fn exec_select(&self, input: &str) -> Result<Vec<SqliteRow>, Error> {
+        println!("Executing query: {}", input);
         let rows = sqlx::query(&input).fetch_all(&self.pool).await;
         Ok(rows.unwrap())
     }

@@ -3,6 +3,7 @@ use crate::functions::ai::utils;
 use crate::functions::file;
 use crate::functions::sql;
 use crate::functions::system::get_appdata_dir;
+use crate::functions::system;
 use crate::functions::zone;
 use async_recursion::async_recursion;
 use chrono::{DateTime, Utc};
@@ -69,11 +70,12 @@ pub async fn ai_renew_rules(
         .shell()
         .sidecar("renew_rules")
         .map_err(|e| e.to_string())?
+        .env("GEMINI_API_KEY", system::get_api_key().unwrap())
         .args(&[
             // system prompt for sort_files (from resource folder)
             app.path()
                 .resolve(
-                    "resources/4_renew_rules/system_prompt.json",
+                    "resources/4_system_prompt.md",
                     BaseDirectory::Resource,
                 )
                 .unwrap()
@@ -81,16 +83,16 @@ pub async fn ai_renew_rules(
                 .to_str()
                 .unwrap(),
             // rule file
-            format!("zone_{}_history_file_movements_tmp.json", zone_name).as_str(),
-            format!("zone_{}_file_summary_tmp.json", zone_name).as_str(),
+            system::wrap_tmp_dir(format!("zone_{}_history_file_movements_tmp.json", zone_name).as_str()).unwrap().as_str(),
+            system::wrap_tmp_dir(format!("zone_{}_file_summary_tmp.json", zone_name).as_str()).unwrap().as_str(),
             format!("{}/.sortifile.conf", zone_path).as_str(),
             // file summary file (should be prepared by your logic)
             // history file movements file
             // output file where move steps are written
-            format!("zone_{}_renewed_rules.json", zone_name).as_str(),
+            system::wrap_tmp_dir(format!("zone_{}_renewed_rules.json", zone_name).as_str()).unwrap().as_str(),
         ]);
     let (mut rx, _child) = sort_command.spawn().map_err(|e| e.to_string())?;
-    tauri::async_runtime::spawn(async move {
+    let task = tauri::async_runtime::spawn(async move {
         while let Some(event) = rx.recv().await {
             if let CommandEvent::Stdout(line_bytes) = event {
                 let line = String::from_utf8_lossy(&line_bytes);

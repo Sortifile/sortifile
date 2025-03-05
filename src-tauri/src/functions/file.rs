@@ -154,9 +154,12 @@ pub async fn move_file(
 
 #[tauri::command]
 pub fn get_ignore_list(zone_path: &str) -> Result<String, String> {
+    println!("zone_path: {}", zone_path);
     let ignore_list = fs::read_to_string(format!("{}/.sortifile-ignore", zone_path));
     match ignore_list {
-        Ok(list) => Ok(list),
+        Ok(list) => {
+            println!("ignore_list: {}", list);
+            Ok(list)},
         Err(e) => Err(e.to_string()),
     }
 }
@@ -171,7 +174,9 @@ pub fn set_ignore_list(zone_path: &str, ignore_list: &str) -> Result<(), String>
 pub fn get_project_file(zone_path: &str) -> Result<String, String> {
     let project_file = fs::read_to_string(format!("{}/.sortifile.conf", zone_path));
     match project_file {
-        Ok(file) => Ok(file),
+        Ok(file) => {
+            println!("project_file: {}", file);
+            Ok(file)},
         Err(e) => Err(e.to_string()),
     }
 }
@@ -203,7 +208,8 @@ fn build_file_node(path: &Path) -> io::Result<FileNode> {
         .unwrap_or_else(|| path.to_string_lossy().into_owned());
 
     let path_str = path.to_string_lossy().into_owned();
-    let file_id = get_file_id(&name).unwrap();
+    println!("path_str: {}", path_str);
+    let file_id: u64 = get_file_id(&path.to_string_lossy()).unwrap();
     let children = if is_directory {
         // Read the directory entries and recursively build child nodes.
         let mut nodes = Vec::new();
@@ -236,26 +242,24 @@ fn gen_file_tree(root: &Path) -> io::Result<Vec<FileNode>> {
 }
 
 #[tauri::command]
-pub fn get_file_tree(root_path: String) -> Result<String, String> {
-    let path = PathBuf::from(root_path);
+pub fn get_file_tree(zone_path: String) -> Result<String, String> {
+    let path = PathBuf::from(zone_path);
     let file_tree = gen_file_tree(&path).unwrap();
     let json =
         serde_json::to_string_pretty(&file_tree).expect("Failed to serialize file tree to JSON");
     Ok(json)
 }
-
 use std::fs::File;
 use std::os::windows::io::AsRawHandle;
-use winapi::um::fileapi::GetFileInformationByHandle;
 use winapi::um::fileapi::BY_HANDLE_FILE_INFORMATION;
-use std::hash::{DefaultHasher, Hash, Hasher};
+use winapi::um::fileapi::GetFileInformationByHandle;
 
 #[tauri::command]
 pub fn get_file_id(file_path: &str) -> Result<u64, String> {
-    // let mut s = DefaultHasher::new();
-    // file_path.hash(&mut s);
-    // Ok(s.finish())
-
+    //pass if the path is a dir
+    if Path::new(file_path).is_dir() {
+        return Ok(0);
+    }
     let file = File::open(file_path).map_err(|e| e.to_string())?;
     // Cast the handle from std::ffi::c_void to winapi::ctypes::c_void
     let handle = file.as_raw_handle() as *mut winapi::ctypes::c_void;

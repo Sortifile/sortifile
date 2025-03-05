@@ -310,8 +310,9 @@ async function handleSortAll() {
         });
         return;
       }
-
-      if (typeof result === "object" && result !== null) {
+      // convert result to object
+      result = JSON.parse(result);
+      if (result !== null) {
         sortResult.value = result; // 確保 Vue 直接接收物件
       } else {
         console.error("Unexpected API response:", result);

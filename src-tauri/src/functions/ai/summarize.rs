@@ -24,14 +24,13 @@ use tauri_plugin_shell::ShellExt;
 /// so that we can spawn the proper sidecar.
 
 #[tauri::command]
-pub async fn ai_summarize_all(
+pub async fn ai_summarize_all_files(
     app: tauri::AppHandle,
     zone_name: &str,
     zone_path: &str,
-    path_to_sort: &str,
 ) -> Result<String, String> {
     let db = sql::get_db().await;
-    process_directory_recursively(app, zone_path.to_string(), zone_name, path_to_sort)
+    process_directory_recursively(app, zone_path.to_string(), zone_name, "")
         .await
         .unwrap();
     Ok("good".to_string())
@@ -129,7 +128,7 @@ async fn process_path(
         }
     } else if path.is_file() {
         //println!("Processing file: {}", path.display());
-        ai_summarize_one(
+        ai_summarize_one_file(
             app,
             zone_name,
             base.to_str().unwrap(),
@@ -142,7 +141,7 @@ async fn process_path(
 use chrono::{Local};
 
 #[tauri::command]
-pub async fn ai_summarize_one(
+pub async fn ai_summarize_one_file(
     app: tauri::AppHandle,
     zone_name: &str,
     root_path: &str,
@@ -152,7 +151,7 @@ pub async fn ai_summarize_one(
     // Create tmp file for file_summary
     let opp=functions::system::write_to_temp_file(
         format!("{}.json", file_path),
-        "xxx".to_string(),
+        "{}".to_string(),
     )
     .unwrap();
 println!("opp: {}", opp);

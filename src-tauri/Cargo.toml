@@ -30,6 +30,6 @@ tauri-plugin-shell = "2"
 glob = "0.3"
 chrono = { version = "0.4", features = ["serde"] }
 async-recursion = "1.0"
-winapi = { version = "0.3", features = ["minwinbase", "fileapi"] }
+winapi = { version = "0.3", features = ["fileapi", "handleapi", "winnt", "minwinbase"] }
 tauri-plugin-dialog = "2"
 tauri-plugin-fs = "2"

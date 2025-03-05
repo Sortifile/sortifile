@@ -45,8 +45,8 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             functions::ai::generate_rules::ai_create_rule,
-            functions::ai::summarize::ai_summarize_all,
-            functions::ai::summarize::ai_summarize_one,
+            functions::ai::summarize::ai_summarize_all_files,
+            functions::ai::summarize::ai_summarize_one_file,
             functions::ai::sort::ai_sort,
             functions::ai::renew_rules::ai_renew_rules,
             functions::file::get_summary_of_one_file,

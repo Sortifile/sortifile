@@ -90,14 +90,15 @@ pub async fn get_zone_rules(zone_name: &str) -> Result<String, String> {
     let zone_rules = db
         .exec_select(
             format!(
-                "SELECT zone_rules FROM zone_list WHERE zone_name={};",
+                "SELECT zone_rules FROM zone_list WHERE zone_name='{}';",
                 zone_name
             )
             .as_str(),
         )
         .await
         .unwrap();
-    let rule: String = get_value_as_string(&zone_rules[0], 3);
+    let rule: String = get_value_as_string(&zone_rules[0], 0);
+    println!("rule: {}", rule);
     Ok(rule)
 }
 

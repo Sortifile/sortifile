@@ -179,6 +179,10 @@ fn load_ignore_patterns(ignore_file: &Path) -> io::Result<Vec<Pattern>> {
 
 /// Checks if the given path should be ignored.
 fn should_ignore(path: &Path, base: &Path, ignore_patterns: &Vec<Pattern>) -> bool {
+    // return true if file name starts with a dot
+    if path.file_name().unwrap().to_str().unwrap().starts_with(".") {
+        return true;
+    }
     if let Ok(relative) = path.strip_prefix(base) {
         let relative_str = relative.to_string_lossy();
         for pattern in ignore_patterns {
