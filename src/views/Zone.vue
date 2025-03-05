@@ -205,7 +205,7 @@ async function handleSummarizeAll() {
       type: "warning",
     },
   )
-    .then(() => {
+    .then(async () => {
       // call API to resummarize all the files
       await invoke("ai_summarize_all_files", {
         zoneName: zoneName.value,
