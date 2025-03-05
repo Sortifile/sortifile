@@ -249,6 +249,7 @@ async function handleRenewRules() {
         background: "rgba(0, 0, 0, 0.7)",
       });
 
+      // TODO: 這裡如果出事我明天再處理
       await invoke("ai_renew_rules", {
         zoneName: zoneName.value,
         zonePath: rootPath.value,
@@ -361,6 +362,7 @@ async function handleSortFolder(folderPath, folderName) {
       });
 
       // 呼叫 Rust API
+      // TODO: 這裡如果出事我明天再處理
       let result;
       try {
         result = await invoke("ai_sort", {
