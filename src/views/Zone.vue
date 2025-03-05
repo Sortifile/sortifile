@@ -623,58 +623,68 @@ onMounted(async () => {
   /**
    * 呼叫後端 API，根據 zonePath 取得檔案樹資料
    */
-  try {
-    const treeData = await invoke("get_file_tree", {
-      zonePath: rootPath.value,
+
+  invoke("get_file_tree", {
+    zonePath: rootPath.value,
+  })
+    .then((treeData) => {
+      fileTree.value = JSON.parse(treeData);
+    })
+    .catch((error) => {
+      console.error("API call failed:", error);
+      ElMessage.error("Failed to get file tree data");
+      fileTree.value = [
+        {
+          name: zoneName,
+          path: "",
+          isDirectory: true,
+          children: mockFileTree,
+        },
+      ];
     });
-    fileTree.value = JSON.parse(treeData);
-  } catch (error) {
-    console.error("API call failed:", error);
-    ElMessage.error("Failed to get file tree data");
-    fileTree.value = [
-      {
-        name: zoneName,
-        path: "",
-        isDirectory: true,
-        children: mockFileTree,
-      },
-    ];
-  }
 
   /**
    * 呼叫後端 API，取得 rules 和 form data，並存到 store
    */
-  try {
-    const rules_str = await invoke("get_zone_rules", {
-      zoneName: zoneName.value,
+  invoke("get_zone_rules", {
+    zoneName: zoneName.value,
+  })
+    .then((rules_str) => {
+      const rules = JSON.parse(rules_str);
+      ruleStore.setRule(rules);
+    })
+    .catch((error) => {
+      console.error("API call failed:", error);
+      ElMessage.error("Failed to get rules or form data");
     });
-    const project_file_str = await invoke("get_project_file", {
-      zonePath: rootPath.value,
-    });
-    const rules = JSON.parse(rules_str);
-    const project_file_data = JSON.parse(project_file_str);
 
-    ruleStore.setRule(rules);
-    formStore.setFormResponse(project_file_data["form_response"]);
-  } catch (error) {
-    console.error("API call failed:", error);
-    ElMessage.error("Failed to get rules or form data");
-  }
+  invoke("get_project_file", {
+    zonePath: rootPath.value,
+  })
+    .then((project_file_str) => {
+      const project_file_data = JSON.parse(project_file_str);
+      formStore.setFormResponse(project_file_data["form_response"]);
+    })
+    .catch((error) => {
+      console.error("API call failed:", error);
+      ElMessage.error("Failed to get project_file");
+    });
 
   /**
    * 呼叫後端 API，取得該 zone 下的 ignore 清單
    */
-  try {
-    const ignoreListStr = await invoke("get_ignore_list", {
-      zonePath: rootPath.value,
+  invoke("get_ignore_list", {
+    zonePath: rootPath.value,
+  })
+    .then((ignoreListStr) => {
+      const ignoreList = ignoreListStr.split("\n").filter((x) => x);
+      ignoredPaths.value = ignoreList;
+    })
+    .catch((error) => {
+      console.error("API call failed:", error);
+      ElMessage.error("Failed to get ignore list");
+      ignoredPaths.value = ["src/components", "README.md"];
     });
-    const ignoreList = ignoreListStr.split("\n").filter((x) => x);
-    ignoredPaths.value = ignoreList;
-  } catch (error) {
-    console.error("API call failed:", error);
-    ElMessage.error("Failed to get ignore list");
-    ignoredPaths.value = ["src/components", "README.md"];
-  }
 
   // 將 ignore 狀態套用到檔案樹
   applyIgnoreStatusToTree(fileTree.value);
