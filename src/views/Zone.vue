@@ -534,7 +534,7 @@ async function toggleIgnore(path, shouldIgnore) {
 
   invoke("set_ignore_list", {
     zonePath: rootPath.value,
-    ignoredPaths: formattedOutput,
+    ignoredList: formattedOutput,
   }).catch((err) => {
     console.error("Ignore 更新失敗", err);
     // 回復舊狀態
@@ -649,7 +649,7 @@ onMounted(async () => {
       zoneName: zoneName.value,
     });
     const project_file_str = await invoke("get_project_file", {
-      zone: rootPath.value,
+      zonePath: rootPath.value,
     });
     const rules = JSON.parse(rules_str);
     const project_file_data = JSON.parse(project_file_str);
@@ -666,7 +666,7 @@ onMounted(async () => {
    */
   try {
     const ignoreListStr = await invoke("get_ignore_list", {
-      zone: rootPath.value,
+      zonePath: rootPath.value,
     });
     const ignoreList = ignoreListStr.split("\n").filter((x) => x);
     ignoredPaths.value = ignoreList;
