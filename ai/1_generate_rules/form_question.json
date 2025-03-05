@@ -43,7 +43,7 @@
         {
           "key": "topic",
           "name": "檔案主題",
-          "description": "依據檔案的主題或內容分類。ex: Sortifile專案/上課程式/個人網頁"
+          "description": "依據檔案的主題或內容分類。ex: YTP專案/學校教材/個人網頁"
         },
         {
           "key": "version_order",
