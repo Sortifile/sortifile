@@ -177,7 +177,7 @@ const handleRegenerate = () => {
     form_response: formResponse.value,
   })
     .then((ruleJson) => {
-      ruleStore.setRule(ruleJson);
+      ruleStore.setRule(JSON.parse(ruleJson));
       console.log("AI 生成的規則：", ruleStore.rule);
 
       // 顯示成功訊息並跳轉
@@ -217,14 +217,16 @@ const handleSubmit = async () => {
       config: JSON.stringify(config),
       ignore: "",
       rules: JSON.stringify(ruleData.value),
-    }).then((res) => {
-      console.log("API response:", res);
-      ElMessage.success("Created rules successfully!");
-      navigateTo("zone");
-    }).catch((error) => {
-      console.error("API error:", error);
-      ElMessage.error("Error when submitting");
-    });
+    })
+      .then((res) => {
+        console.log("API response:", res);
+        ElMessage.success("Created rules successfully!");
+        navigateTo("zone");
+      })
+      .catch((error) => {
+        console.error("API error:", error);
+        ElMessage.error("Error when submitting");
+      });
   } catch (error) {
     ElMessage.error("Error when submitting zone rules", error);
   }
@@ -240,7 +242,7 @@ watch(
       console.log("Updated ruleData:", ruleData.value);
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 // `handleReset` 使用正確的 `rule`

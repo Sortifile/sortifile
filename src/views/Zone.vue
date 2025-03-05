@@ -92,7 +92,7 @@ import { ref, computed, onMounted } from "vue";
 import { DeleteFilled } from "@element-plus/icons-vue";
 import { ElMessageBox, ElMessage, ElLoading } from "element-plus";
 import { useRouter } from "vue-router";
-// import { invoke } from "@tauri-apps/api"; // 若需呼叫後端 API，可解除註解
+import { invoke } from "@tauri-apps/api/core";
 
 // 右側區塊大元件
 import ZoneDisplay from "../components/zone/ZoneDisplay.vue";
@@ -107,7 +107,6 @@ import { useZoneStore } from "../store/zone";
 import { useRuleStore } from "../store/rule";
 import { useFormStore } from "../store/form";
 import { storeToRefs } from "pinia";
-import { invoke } from "lodash";
 
 const router = useRouter();
 
