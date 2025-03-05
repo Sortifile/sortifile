@@ -100,7 +100,7 @@ const submitForm = async () => {
     ruleStore.resetRule();
 
     // 2. 呼叫 Tauri API 生成 rule.json
-    const rulejson = invoke("ai_create_rule", {
+    const ruleJson = invoke("ai_create_rule", {
       zoneName: zoneStore.zoneName,
       zonePath: zoneStore.rootPath,
       createFromStructure: false,
