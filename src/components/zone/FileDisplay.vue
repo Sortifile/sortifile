@@ -323,7 +323,7 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, reactive, ref, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { useZoneStore } from "../../store/zone";
 import { storeToRefs } from "pinia";
