@@ -228,7 +228,7 @@ const handleSubmit = async () => {
 
   // 2. 呼叫 Tauri API 更新 zone 規則
   invoke("set_zone_rules", {
-    zonePath: rootPath.value,
+    zoneName: zoneName.value,
     rules: ruleData.value,
   })
     .then(() => {

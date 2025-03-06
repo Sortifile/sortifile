@@ -104,6 +104,8 @@ pub async fn get_zone_rules(zone_name: &str) -> Result<String, String> {
 
 #[tauri::command]
 pub async fn set_zone_rules(zone_name: &str, rules: &str) -> Result<(), String> {
+    // get project file
+    
     let db = sql::get_db().await;
     db.exec(
         format!(
