@@ -92,7 +92,11 @@
           </el-button>
         </el-col>
         <el-col :span="3">
-          <el-button type="primary" @click="handleSubmit">
+          <el-button
+            type="primary"
+            @click="handleSubmit"
+            v-loading.fullscreen.lock="loading"
+          >
             Confirm
             <el-icon class="el-icon--right"><ArrowRight /></el-icon>
           </el-button>
@@ -152,6 +156,7 @@ const checkAll = ref(true);
 const isIndeterminate = ref(false);
 const isWarn = ref(false);
 const MIN_REQUIRED = 4;
+const loading = ref(false);
 
 // 全選 / 全不選
 const handleCheckAllChange = (val) => {
@@ -170,6 +175,7 @@ const handleRulesChange = (value) => {
 };
 
 const handleRegenerate = () => {
+  loading.value = true;
   invoke("ai_create_rule", {
     zone_name: zoneStore.zoneName,
     zone_path: zoneStore.rootPath,
@@ -182,10 +188,12 @@ const handleRegenerate = () => {
 
       // 顯示成功訊息並跳轉
       ElMessage.success("AI 生成規則成功！");
+      loading.value = false;
     })
     .catch((error) => {
       ElMessage.error("AI 生成規則失敗！");
       console.error("AI 生成規則失敗：", error);
+      loading.value = false;
     });
 };
 
@@ -195,6 +203,7 @@ const handleSubmit = async () => {
     ElMessage.error(`至少需要選擇 ${MIN_REQUIRED} 項規則！`);
     return;
   }
+  loading.value = true;
   console.log("Index 部分:", ruleData.value.index);
   console.log("選擇的規則:", selectedRules.value);
   ruleData.value.natural_language_rules = selectedRules.value;
@@ -222,13 +231,16 @@ const handleSubmit = async () => {
         console.log("API response:", res);
         ElMessage.success("Created rules successfully!");
         navigateTo("zone");
+        loading.value = false;
       })
       .catch((error) => {
         console.error("API error:", error);
         ElMessage.error("Error when submitting");
+        loading.value = false;
       });
   } catch (error) {
     ElMessage.error("Error when submitting zone rules", error);
+    loading.value = false;
   }
 };
 

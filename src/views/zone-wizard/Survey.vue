@@ -65,7 +65,7 @@ import folder_depth from "../../components/survey/folder_depth.vue";
 import capacity from "../../components/survey/capacity.vue";
 import naming_style from "../../components/survey/naming_style.vue";
 import archival_tendency from "../../components/survey/archival_tendency.vue";
-import { cloneDeep } from "lodash";
+import { cloneDeep, set } from "lodash";
 
 const router = useRouter();
 const formStore = useFormStore();
