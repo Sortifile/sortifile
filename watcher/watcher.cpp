@@ -251,8 +251,9 @@ void WINAPI ServiceCtrlHandler(DWORD CtrlCode) {
 }
 
 // Service Main Function
+// Service Main Function
 void WINAPI ServiceMain(DWORD argc, LPTSTR* argv) {
-    ServiceStatus.dwServiceType = SERVICE_WIN32;
+    ServiceStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
     ServiceStatus.dwCurrentState = SERVICE_START_PENDING;
     ServiceStatus.dwControlsAccepted = SERVICE_ACCEPT_STOP;
     ServiceStatus.dwWin32ExitCode = 0;
@@ -261,16 +262,25 @@ void WINAPI ServiceMain(DWORD argc, LPTSTR* argv) {
     ServiceStatus.dwWaitHint = 0;
 
     hStatus = RegisterServiceCtrlHandler("FileWatcherService", ServiceCtrlHandler);
-    if (!hStatus) return;
+    if (!hStatus) {
+        return;
+    }
 
+    // Initialize the service and set it to running.
     ServiceStatus.dwCurrentState = SERVICE_RUNNING;
     SetServiceStatus(hStatus, &ServiceStatus);
 
-    WatchDirectory(directoryToWatch);
+    // Start the directory watching in a separate thread.
+    std::thread watcherThread(WatchDirectory, directoryToWatch);
+    watcherThread.detach();  // Detach the thread to allow it to run independently.
 
-    ServiceStatus.dwCurrentState = SERVICE_STOPPED;
-    SetServiceStatus(hStatus, &ServiceStatus);
+    // Keep the main thread running to prevent the service from exiting.
+    // You can use a condition variable or another synchronization mechanism here.
+    while (ServiceStatus.dwCurrentState == SERVICE_RUNNING) {
+        Sleep(1000);  // Sleep to reduce CPU usage.
+    }
 }
+
 
 int main(int argc, char* argv[]) {
     if (argc == 3) {
@@ -278,7 +288,7 @@ int main(int argc, char* argv[]) {
         db_path = argv[2];
     }
     Sqlite db(db_path);
-    db.exec("CREATE TABLE IF NOT EXISTS lis ("
+    db.exec("CREATE TABLE IF NOT EXISTS move_history ("
             "id INTEGER PRIMARY KEY, "
             "src_path TEXT, "
             "new_path TEXT, "

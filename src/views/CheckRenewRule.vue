@@ -229,7 +229,7 @@ const handleSubmit = async () => {
   // 2. 呼叫 Tauri API 更新 zone 規則
   invoke("set_zone_rules", {
     zoneName: zoneName.value,
-    rules: ruleData.value,
+    rules: JSON.stringify(ruleData.value),
   })
     .then(() => {
       ElMessage.success("Zone 規則已更新！");

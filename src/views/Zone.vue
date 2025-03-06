@@ -16,7 +16,7 @@
           :allow-drop="allowDrop"
           @node-drop="handleDrop"
           @node-click="handleNodeClick"
-          class="force-fallback"
+          class="sortable-fallback"
         >
           <template #default="{ node, data }">
             <!-- 若 data.ignored 為 true，代表被忽略（無論 explicit or inherited） -->
@@ -630,10 +630,12 @@ function allowDrag(node) {
 }
 
 function allowDrop(draggingNode, dropNode, type) {
+  console.log("RRR", dropNode.data);
   // 只允許拖曳到資料夾或根目錄，並且是放入 (inner)
+  console.log((type==="inner")&&(dropNode.data.isDirectory||dropNode.data.path===""));
   return (
     type === "inner" &&
-    (dropNode.data.isDirectory || dropNode.data.path === "/")
+    (dropNode.data.isDirectory || dropNode.data.path === "")
   );
 }
 

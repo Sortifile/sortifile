@@ -153,14 +153,16 @@ pub async fn move_file(
         fs::create_dir_all(parent);
     }
     fs::rename(&abs_src_path, &abs_new_path).unwrap();
-    /* 
+    // replace quuoates with double quotes
+    let reason = reason.replace("'", "''");
+    
     db.exec(
         format!(
             "INSERT INTO move_history (zone_path, src_path, new_path, moved_by, reason) VALUES ('{}', '{}', '{}', '{}', '{}');",
             zone_path, abs_src_path, abs_new_path, moved_by, reason
         )
         .as_str(),
-    ).await.unwrap();*/
+    ).await.unwrap();
     Ok(())
 }
 
