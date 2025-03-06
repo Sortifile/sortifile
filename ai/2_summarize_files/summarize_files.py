@@ -139,7 +139,10 @@ def summarize_files(
             tmp_path = save_to_temp_file(content)
             files["uploaded_files"] = upload_files(tmp_path, mime_type="text/plain")
         else:
-            files["uploaded_files"] = upload_files(os.path.join(root_path, path), mime_type=mimetypes.types_map.get(extension, "application/octet-stream"))
+            ext = mimetypes.types_map.get(extension, "application/octet-stream");
+            if ext.startswith("text/"):
+                ext = "text/plain"
+            files["uploaded_files"] = upload_files(os.path.join(root_path, path), mime_type=ext)
 
         message_components = [user_prompt, "\nfile_summary: ", files["uploaded_files"][0]]
         
