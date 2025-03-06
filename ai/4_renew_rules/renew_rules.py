@@ -32,7 +32,7 @@ def renew_rules(
     model = configure_generation_model(system_prompt_path, model_name, generation_config)
     with open(file_movements_path, "r", encoding="utf-8") as file:
         file_movements = file.read()
-        file_movements = json.loads(file_movements)["file_movements"]
+        file_movements = json.loads(file_movements)
 
     with open(file_summary_path, "r", encoding="utf-8") as file:
         file_summary = json.loads(file.read())

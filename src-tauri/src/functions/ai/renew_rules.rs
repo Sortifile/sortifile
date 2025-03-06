@@ -91,6 +91,7 @@ pub async fn ai_renew_rules(
             // output file where move steps are written
             system::wrap_tmp_dir(format!("zone_{}_renewed_rules.json", zone_name).as_str()).unwrap().as_str(),
         ]);
+        println!("sort_command: {:?}", sort_command);
     let (mut rx, _child) = sort_command.spawn().map_err(|e| e.to_string())?;
     let task = tauri::async_runtime::spawn(async move {
         while let Some(event) = rx.recv().await {

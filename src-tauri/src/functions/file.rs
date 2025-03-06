@@ -23,8 +23,11 @@ pub async fn get_summary_of_one_file(
     zone_name: &str,
     file_path: &str,
 ) -> Result<String, String> {
+    println!("zone_name: {}", zone_name);
+    println!("file_path: {}", file_path);
     let db = sql::get_db().await;
     let summary = db.get_file_summary(zone_name, file_path).await.unwrap();
+    println!("summary: {}", summary);
     Ok(summary)
 }
 #[tauri::command]
@@ -141,14 +144,23 @@ pub async fn move_file(
     reason: &str,
 ) -> Result<(), String> {
     let db = sql::get_db().await;
-    fs::rename(src_path, new_path).unwrap();
+    //replace src and new from relative to absolute by adding zone_path
+    let abs_src_path = format!("{}/{}", zone_path, src_path);
+    let abs_new_path = format!("{}/{}", zone_path, new_path);
+    // create directory if it doesn't exist
+    let new_path_p = Path::new(abs_new_path.as_str());
+    if let Some(parent) = new_path_p.parent() {
+        fs::create_dir_all(parent);
+    }
+    fs::rename(&abs_src_path, &abs_new_path).unwrap();
+    /* 
     db.exec(
         format!(
             "INSERT INTO move_history (zone_path, src_path, new_path, moved_by, reason) VALUES ('{}', '{}', '{}', '{}', '{}');",
-            zone_path, src_path, new_path, moved_by, reason
+            zone_path, abs_src_path, abs_new_path, moved_by, reason
         )
         .as_str(),
-    ).await.unwrap();
+    ).await.unwrap();*/
     Ok(())
 }
 

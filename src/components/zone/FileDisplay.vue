@@ -473,7 +473,7 @@ async function loadFileSummary() {
     })
       .then((data) => {
         console.log("get_summary_of_one_file call success");
-        // 取回後更新 reactive 物件
+        console.log("data:",data);
         Object.assign(summaryData, JSON.parse(data));
         emits("update:loading", false);
       })

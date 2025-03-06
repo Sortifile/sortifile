@@ -109,7 +109,8 @@ impl Database {
         file_path: &str,
     ) -> Result<String, Error> {
         let table_name = format!("zone_{}", zone_name);
-        let query = format!("SELECT summary FROM {} WHERE file_path = ?;", table_name);
+        let file_id=crate::functions::file::get_file_id(file_path).unwrap();
+        let query = format!("SELECT summary FROM {} WHERE file_id = {};", table_name, file_id);
         let row = sqlx::query(&query)
             .bind(file_path)
             .fetch_one(&self.pool)
