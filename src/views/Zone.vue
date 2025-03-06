@@ -583,8 +583,8 @@ async function handleDrop(draggingNode, dropNode, dropType, ev) {
 
   // 新路徑
   const newPath =
-    destDirectoryPath === "/"
-      ? `/${fileName}`
+    destDirectoryPath === ""
+      ? `${fileName}`
       : `${destDirectoryPath}/${fileName}`;
 
   try {
@@ -640,6 +640,10 @@ function allowDrop(draggingNode, dropNode, type) {
  * Lifecycle
  */
 onMounted(async () => {
+  document.addEventListener("dragover", (event) => {
+    event.preventDefault();
+  });
+
   /**
    * 呼叫後端 API，根據 zonePath 取得檔案樹資料
    */
