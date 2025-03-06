@@ -64,9 +64,9 @@
             </el-checkbox>
           </el-col>
           <el-col :span="18">
-            <el-text v-show="isWarn" class="warning-text" type="danger"
-              >至少需要選擇 {{ MIN_REQUIRED }} 項規則！</el-text
-            >
+            <el-text v-show="isWarn" class="warning-text" type="danger">
+              至少需要選擇 {{ MIN_REQUIRED }} 項規則！
+            </el-text>
           </el-col>
         </el-row>
 
