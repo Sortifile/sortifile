@@ -314,7 +314,7 @@
 
         <!-- 儲存按鈕 -->
         <div style="display: flex; justify-content: flex-end; margin-top: 20px">
-          <el-button @click="handleReset">Reset</el-button>
+          <!-- <el-button @click="handleReset">Reset</el-button> -->
           <el-button type="primary" @click="handleSave">Save</el-button>
         </div>
       </el-form>
@@ -451,26 +451,32 @@ function handleResummarize() {
 
 async function loadFileSummary() {
   // 開始前先把 loading 狀態通知外層
-  emits("update:loading", true);
-
+  // emits("update:loading", true);
+  ElMessage.info("Loading file summary data...");
   try {
     // 把根路徑 + 檔案相對路徑串起來
     pathValue.value = await join(rootPath.value, props.path);
     console.log("FileDisplay mounted");
 
     // 用 tauri 或任何 API 取得檔案的摘要資料 (此為示範)
-    const data = await invoke("get_summary_of_one_file", {
+    invoke("get_summary_of_one_file", {
       zoneName: zoneName.value,
       filePath: props.path,
-    });
-
-    // 取回後更新 reactive 物件
-    Object.assign(summaryData, JSON.parse(data));
-  } catch (err) {
-    console.error("API call failed:", err);
+    })
+      .then(() => {
+        console.log("get_summary_of_one_file call success");
+        // 取回後更新 reactive 物件
+        Object.assign(summaryData, JSON.parse(data));
+        emits("update:loading", false);
+      })
+      .catch((err) => {
+        console.error("API call failed:", err);
+        ElMessage.error("Failed to get summary data");
+        emits("update:loading", false);
+      });
+  } catch (error) {
+    console.error("API call failed:", error);
     ElMessage.error("Failed to get summary data");
-  } finally {
-    // 總是要結束 loading
     emits("update:loading", false);
   }
 }

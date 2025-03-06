@@ -60,6 +60,7 @@
         <ZoneDisplay v-else-if="selectedPath === ''" />
         <FolderDisplay
           v-else-if="selectedNode && selectedNode.isDirectory"
+          :key="'FolderDisplay-' + selectedPath"
           :name="selectedTitle"
           :path="selectedPath"
           :ignore-switch="ignoreSwitch"
@@ -69,6 +70,7 @@
         />
         <FileDisplay
           v-else
+          :key="'FileDisplay-' + selectedPath"
           :name="selectedTitle"
           :path="selectedPath"
           :ignore-switch="ignoreSwitch"
@@ -556,6 +558,9 @@ async function toggleIgnore(path, shouldIgnore) {
 function handleNodeClick(node) {
   selectedPath.value = node.path;
   selectedTitle.value = node.name;
+  ElMessage.info(
+    "Selected: " + selectedPath.value + "RRR" + selectedNode.value.isDirectory,
+  );
 }
 
 // 拖曳/放下檔案或資料夾
