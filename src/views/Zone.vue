@@ -60,7 +60,7 @@
         <el-skeleton v-if="loading" :rows="5" animated />
         <ZoneDisplay v-else-if="selectedPath === ''" />
         <FolderDisplay
-          v-else-if="selectedNode && selectedNode.isDirectory"
+          v-else-if="selectedNode && selectedNode.is_directory"
           :key="'FolderDisplay-' + selectedPath"
           :name="selectedTitle"
           :path="selectedPath"
