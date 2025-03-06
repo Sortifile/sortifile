@@ -105,20 +105,25 @@ const submitForm = async () => {
       zonePath: zoneStore.rootPath,
       createFromStructure: false,
       formResponse: JSON.stringify(formResponse.value),
-    }).then((ruleJson) => {
-      // 存入 Pinia 的 ruleData
-      ruleStore.setRule(JSON.parse(ruleJson));
-      console.log("AI 生成的規則：", ruleStore.rule);
+    })
+      .then((ruleJson) => {
+        // 存入 Pinia 的 ruleData
+        ruleStore.setRule(JSON.parse(ruleJson));
+        console.log("AI 生成的規則：", ruleStore.rule);
 
-      // 顯示成功訊息並跳轉
-      ElMessage.success("AI 生成規則成功！");
-      navigateTo("zone-wizard/CheckRule");
-      loading.value = false;
-    });
+        // 顯示成功訊息並跳轉
+        ElMessage.success("AI 生成規則成功！");
+        navigateTo("zone-wizard/CheckRule");
+        loading.value = false;
+      })
+      .error((error) => {
+        console.error("API 調用失敗:", error);
+        ElMessage.error("生成規則時發生錯誤");
+        loading.value = false;
+      });
   } catch (error) {
     console.error("API 調用失敗:", error);
     ElMessage.error("生成規則時發生錯誤");
-  } finally {
     loading.value = false;
   }
 };
