@@ -116,7 +116,7 @@ const submitForm = async () => {
         navigateTo("zone-wizard/CheckRule");
         loading.value = false;
       })
-      .error((error) => {
+      .catch((error) => {
         console.error("API 調用失敗:", error);
         ElMessage.error("生成規則時發生錯誤");
         loading.value = false;
