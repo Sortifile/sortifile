@@ -52,24 +52,31 @@
     <!-- 自然語言規則 -->
     <h3>自然語言規則</h3>
     <el-form-item>
-      <el-checkbox
-        v-model="checkAll"
-        :indeterminate="isIndeterminate"
-        @change="handleCheckAllChange"
-      >
-        Select All
-      </el-checkbox>
-      <el-checkbox-group v-model="selectedRules" @change="handleRulesChange">
-        <el-checkbox
-          v-for="(rule, idx) in ruleData.natural_language_rules"
-          :key="idx"
-          :label="rule"
-        >
-          {{ rule }}
-        </el-checkbox>
-      </el-checkbox-group>
-      <div v-if="isWarn" class="warning-text">
-        至少需要選擇 {{ MIN_REQUIRED }} 項規則！
+      <div style="display: flex; flex-direction: column; width: 100%">
+        <el-row :gutter="20">
+          <el-col :span="6">
+            <el-checkbox
+              v-model="checkAll"
+              :indeterminate="isIndeterminate"
+              @change="handleCheckAllChange"
+            >
+              Select All
+            </el-checkbox>
+          </el-col>
+          <el-col :span="18">
+            <el-text v-show="isWarn" class="warning-text" type="danger"
+              >至少需要選擇 {{ MIN_REQUIRED }} 項規則！</el-text
+            >
+          </el-col>
+        </el-row>
+
+        <el-checkbox-group v-model="selectedRules" @change="handleRulesChange">
+          <el-row v-for="(rule, idx) in ruleData.natural_language_rules">
+            <el-checkbox :key="idx" :value="rule" :label="rule">
+              {{ rule }}
+            </el-checkbox>
+          </el-row>
+        </el-checkbox-group>
       </div>
     </el-form-item>
 
