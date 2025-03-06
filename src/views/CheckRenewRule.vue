@@ -91,7 +91,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { ArrowRight, ArrowLeft } from "@element-plus/icons-vue";
 import { useRouter } from "vue-router";
