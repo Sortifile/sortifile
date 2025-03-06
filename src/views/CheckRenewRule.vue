@@ -95,9 +95,9 @@ import { ref } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { ArrowRight, ArrowLeft } from "@element-plus/icons-vue";
 import { useRouter } from "vue-router";
-import { useZoneStore } from "../../store/zone";
-import { useRuleStore } from "../../store/rule";
-import { useFormStore } from "../../store/form";
+import { useZoneStore } from "../store/zone";
+import { useRuleStore } from "../store/rule";
+import { useFormStore } from "../store/form";
 import { storeToRefs } from "pinia";
 
 const router = useRouter();
