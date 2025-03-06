@@ -227,8 +227,24 @@ const handleSubmit = async () => {
   ruleStore.setRule(ruleData.value);
 
   // 2. 呼叫 Tauri API 更新 zone 規則
-  invoke("set_zone_rules", {
+  await invoke("get_project_file", {
     zonePath: rootPath.value,
+  })
+    .then((project_file_str) => {
+      const project_file_data = JSON.parse(project_file_str);
+      project_file_data["rules"] = ruleData.value;
+      invoke("set_project_file", {
+        zonePath: rootPath.value,
+        projectFile: JSON.stringify(project_file_data),
+      });
+    })
+    .catch((error) => {
+      console.error("API call failed:", error);
+      ElMessage.error("Failed to get project_file");
+    });
+
+  await invoke("set_zone_rules", {
+    zoneName: zoneName.value,
     rules: ruleData.value,
   })
     .then(() => {
