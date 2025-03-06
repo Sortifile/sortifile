@@ -231,6 +231,7 @@ async function handleSummarizeAll() {
 
 async function handleRenewRules() {
   console.log("Renew Rules");
+  let loadingInstance;
   ElMessageBox.confirm(
     "All old rules will be replaced. Continue?",
     "Are you sure to renew all rules?",
@@ -242,7 +243,6 @@ async function handleRenewRules() {
   )
     .then(async () => {
       // call API to renew all the rules
-      let loadingInstance;
       loadingInstance = ElLoading.service({
         lock: true,
         text: "Sorting...",
@@ -274,6 +274,7 @@ async function handleRenewRules() {
         type: "info",
         message: "renew canceled",
       });
+      if (loadingInstance) loadingInstance.close();
     });
 }
 
@@ -324,15 +325,15 @@ async function handleSortAll() {
         console.error("Unexpected API response:", result);
         throw new Error("Invalid response format from backend");
       }
+      if (loadingInstance) loadingInstance.close();
       isSortResultDialogVisible.value = true;
     } catch (error) {
       console.error("API call failed:", error);
+      if (loadingInstance) loadingInstance.close();
       ElMessage({
         type: "error",
         message: error?.toString() || "Sorting failed.",
       });
-    } finally {
-      if (loadingInstance) loadingInstance.close();
     }
   } catch {
     ElMessage({
