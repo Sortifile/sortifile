@@ -434,12 +434,20 @@ function handleResummarize() {
       invoke("ai_summarize_one_file", {
         zoneName: zoneName.value,
         path: props.path,
-      });
-
-      ElMessage({
-        type: "success",
-        message: "Resummarize completed",
-      });
+      })
+        .then((data) => {
+          console.log("get_summary_of_one_file call success");
+          // 取回後更新 reactive 物件
+          Object.assign(summaryData, JSON.parse(data));
+          ElMessage({
+            type: "success",
+            message: "Resummarize completed",
+          });
+        })
+        .catch((err) => {
+          console.error("API call failed:", err);
+          ElMessage.error("Failed to get summary data");
+        });
     })
     .catch(() => {
       ElMessage({
@@ -463,7 +471,7 @@ async function loadFileSummary() {
       zoneName: zoneName.value,
       filePath: props.path,
     })
-      .then(() => {
+      .then((data) => {
         console.log("get_summary_of_one_file call success");
         // 取回後更新 reactive 物件
         Object.assign(summaryData, JSON.parse(data));
