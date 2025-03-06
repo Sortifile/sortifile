@@ -1,11 +1,11 @@
 {
-  "file_types": ["作業", "報告", "簡報"],
-  "logic_habit": "B",
-  "sort_struct": ["學期", "科目", "用途"],
-  "folder_depth": 4,
+  "file_types": ["作業", "報告", "簡報", "其他文件", "圖片"],
+  "logic_habit": "A",
+  "sort_struct": ["topic", "source", "usage", "index"],
+  "folder_depth": 7,
   "capacity": 30,
-  "naming": ["name", "version", "date", "file_extension"],
+  "naming": ["id", "content", "source"],
   "date_format": "YYYYMMDD",
-  "filename_letter_rule": "allowSpace",
+  "filename_letter_rule": "allowChinese",
   "archival_tendency": "B"
 }

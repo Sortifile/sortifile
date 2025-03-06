@@ -136,7 +136,7 @@
         }
       ],
       "rule_mapping": "corresponds to the spec.naming_style field and determines the factors to consider when naming files.",
-      "design_purpose": "儲存使用者檔案命名會包含哪些項目，作為未來自動命名的參考依據。"
+      "design_purpose": "儲存使用者檔案命名會包含哪些項目，作為未來自動命名的參考依據。但只是命名時會考量哪些依據，不代表每個名字都要包含所有項目。"
     },
     {
       "question_id": "date_format",
