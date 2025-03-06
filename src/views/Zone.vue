@@ -16,7 +16,7 @@
           :allow-drop="allowDrop"
           @node-drop="handleDrop"
           @node-click="handleNodeClick"
-          class="force-fallback"
+          class="sortable-fallback"
         >
           <template #default="{ node, data }">
             <!-- 若 data.ignored 為 true，代表被忽略（無論 explicit or inherited） -->
@@ -60,7 +60,7 @@
         <el-skeleton v-if="loading" :rows="5" animated />
         <ZoneDisplay v-else-if="selectedPath === ''" />
         <FolderDisplay
-          v-else-if="selectedNode && selectedNode.isDirectory"
+          v-else-if="selectedNode && selectedNode.is_directory"
           :key="'FolderDisplay-' + selectedPath"
           :name="selectedTitle"
           :path="selectedPath"
@@ -148,31 +148,31 @@ const mockFileTree = [
   {
     name: "src",
     path: "src",
-    isDirectory: true,
+    is_directory: true,
     children: [
-      { name: "main.js", path: "src/main.js", isDirectory: false },
-      { name: "App.vue", path: "src/App.vue", isDirectory: false },
+      { name: "main.js", path: "src/main.js", is_directory: false },
+      { name: "App.vue", path: "src/App.vue", is_directory: false },
       {
         name: "components",
         path: "src/components",
-        isDirectory: true,
+        is_directory: true,
         children: [
           {
             name: "Header.vue",
             path: "src/components/Header.vue",
-            isDirectory: false,
+            is_directory: false,
           },
           {
             name: "Footer.vue",
             path: "src/components/Footer.vue",
-            isDirectory: false,
+            is_directory: false,
           },
         ],
       },
     ],
   },
-  { name: "package.json", path: "package.json", isDirectory: false },
-  { name: "README.md", path: "README.md", isDirectory: false },
+  { name: "package.json", path: "package.json", is_directory: false },
+  { name: "README.md", path: "README.md", is_directory: false },
 ];
 
 /**
@@ -468,8 +468,8 @@ function removeNodeByPath(treeData, path) {
 
 function sortChildren(array) {
   array.sort((a, b) => {
-    if (a.isDirectory && !b.isDirectory) return -1;
-    if (!a.isDirectory && b.isDirectory) return 1;
+    if (a.is_directory && !b.is_directory) return -1;
+    if (!a.is_directory && b.is_directory) return 1;
     return a.name.localeCompare(b.name);
   });
 }
@@ -566,7 +566,7 @@ function handleNodeClick(node) {
   selectedPath.value = node.path;
   selectedTitle.value = node.name;
   ElMessage.info(
-    "Selected: " + selectedPath.value + "RRR" + selectedNode.value.isDirectory,
+    "Selected: " + selectedPath.value + "RRR" + selectedNode.value.is_directory,
   );
 }
 
@@ -633,7 +633,7 @@ function allowDrop(draggingNode, dropNode, type) {
   // 只允許拖曳到資料夾或根目錄，並且是放入 (inner)
   return (
     type === "inner" &&
-    (dropNode.data.isDirectory || dropNode.data.path === "/")
+    (dropNode.data.is_directory || dropNode.data.path === "/")
   );
 }
 
@@ -662,7 +662,7 @@ onMounted(async () => {
         {
           name: zoneName,
           path: "",
-          isDirectory: true,
+          is_directory: true,
           children: mockFileTree,
         },
       ];
