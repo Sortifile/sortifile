@@ -62,7 +62,7 @@ pub async fn ai_renew_rules(
     )
     .unwrap();
     functions::system::write_to_temp_file(
-        format!("zone_{}_history_file_movement_tmp.json", zone_name),
+        format!("zone_{}_history_file_movements_tmp.json", zone_name),
         history_file_movement_str,
     )
     .unwrap();
@@ -101,8 +101,10 @@ pub async fn ai_renew_rules(
             }
         }
     });
+    task.await.map_err(|e| e.to_string())?;
     // read from move_steps file to string
-    let result = fs::read_to_string(format!("zone_{}_renewed_rules.json", zone_name)).unwrap();
+    let result = fs::read_to_string(system::wrap_tmp_dir(format!("zone_{}_renewed_rules.json", zone_name).as_str()).unwrap()).unwrap();
+    println!("renew result: {}", result);
     Ok(result)
 }
 

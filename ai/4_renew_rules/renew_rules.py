@@ -40,6 +40,7 @@ def renew_rules(
     # Match each summary with movements by "src_path"
     matched_data = []
     for summary in file_summary:
+        summary=json.loads(summary)
         src_path = summary["src_path"]
         matching_movement = next((movement for movement in file_movements if movement["new_path"] == src_path), None)
         if (matching_movement is None):
