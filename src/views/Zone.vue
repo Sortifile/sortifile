@@ -412,21 +412,27 @@ const handleConfirmedMoves = async (selectedMoves) => {
   console.log("Confirmed Moves:", selectedMoves);
   for (const move of selectedMoves) {
     console.log("Move:", move.src_path, "=>", move.new_path);
-    try {
-      await invoke("move_file", {
-        zonePath: rootPath.value,
-        srcPath: move.src_path,
-        newPath: move.new_path,
-        movedBy: move.moved_by,
-        reason: move.reason,
+    invoke("move_file", {
+      zonePath: rootPath.value,
+      srcPath: move.src_path,
+      newPath: move.new_path,
+      movedBy: move.moved_by,
+      reason: move.reason,
+    })
+      .then(() => {
+        console.log("Move Success");
+        ElMessage({
+          type: "success",
+          message: "Move Success",
+        });
+      })
+      .catch((error) => {
+        console.error("move_files failed:", error);
+        ElMessage({
+          type: "error",
+          message: error?.toString() || "Move failed.",
+        });
       });
-    } catch {
-      console.error("move_files failed:", err);
-      ElMessage({
-        type: "error",
-        message: error?.toString() || "Move failed.",
-      });
-    }
   }
   loading.value = false;
 };
