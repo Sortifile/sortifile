@@ -329,7 +329,7 @@ import { useZoneStore } from "../../store/zone";
 import { storeToRefs } from "pinia";
 import { join } from "@tauri-apps/api/path";
 import { emit } from "@tauri-apps/api/event";
-import { invoke } from "lodash";
+import { invoke } from "@tauri-apps/api/tauri";
 
 async function joinPaths(base, subpath) {
   return await join(base, subpath);

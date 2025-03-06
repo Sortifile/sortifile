@@ -25,7 +25,7 @@
 <script setup>
 import { defineProps, defineEmits, ref, onMounted } from "vue";
 import FileMoveItem from "./FileMoveItem.vue";
-import { invoke } from "lodash";
+import { invoke } from "@tauri-apps/api/core";
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
