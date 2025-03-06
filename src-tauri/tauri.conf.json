@@ -14,7 +14,8 @@
       {
         "title": "sortifile",
         "width": 960,
-        "height": 720
+        "height": 720,
+        "dragDropEnabled": false
       }
     ],
     "security": {
