@@ -78,8 +78,11 @@ generate the `rule.json` file in the specified format.
 2. **Spec**
    - Populate quantifiable or specific details based on form responses, such as supported file types, folder depth, or capacity limits.
 3. **Natural Language Rules**
-   - Include at least 5–10 rules.
+   - Include at least 8–15 rules.
    - Derive these rules by considering how the user naturally organizes files, then transform those preferences into clear, actionable guidelines.
+   - Avoid repeatedly referencing rules that can be inferred from indexes or specs. Instead, focus on describing the sort_struct and naming.
+   - 請不要直接使用 form response 陣列中的 Key，而是對照 form question 當中選項的 description，並用 description 當中的內容替換你要說明的規則。例如，你要建立一條規則是 "Organize files by topic, then by source, usage, and finally index."，請你將 topic usage 和 index 是什麼在同一條 rule 當中講清楚。
+   - 同一句話請簡單的在同一個規則當中講完，不要換行。
    - You may add rules for specific scenarios (e.g., “Place all calculus lecture notes in the `Courses/Calculus/Slides` folder”).
    - Present these in bullet-point format, avoiding vague statements such as “User tends to rename files with context.” Instead, give concrete, directive-style rules.
    - Incorporate user preferences and general best practices (e.g., consistency, clarity, searchability).
