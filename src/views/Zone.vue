@@ -16,6 +16,7 @@
           :allow-drop="allowDrop"
           @node-drop="handleDrop"
           @node-click="handleNodeClick"
+          class="force-fallback"
         >
           <template #default="{ node, data }">
             <!-- 若 data.ignored 為 true，代表被忽略（無論 explicit or inherited） -->
@@ -767,5 +768,9 @@ pre {
 .right-content {
   margin-top: 20px;
   width: 100%;
+}
+
+.sortable-fallback {
+  touch-action: none;
 }
 </style>
