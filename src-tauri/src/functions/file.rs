@@ -9,7 +9,7 @@ use sqlx::{
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
-use tauri::async_runtime;
+use tauri::{async_runtime, path};
 #[derive(Debug, Serialize, Deserialize)]
 struct move_history {
     src_path: String,
@@ -147,6 +147,8 @@ pub async fn move_file(
     //replace src and new from relative to absolute by adding zone_path
     let abs_src_path = format!("{}/{}", zone_path, src_path);
     let abs_new_path = format!("{}/{}", zone_path, new_path);
+    println!("abs_src_path: {}", abs_src_path);
+    println!("abs_new_path: {}", abs_new_path);
     // create directory if it doesn't exist
     let new_path_p = Path::new(abs_new_path.as_str());
     if let Some(parent) = new_path_p.parent() {
@@ -155,11 +157,12 @@ pub async fn move_file(
     fs::rename(&abs_src_path, &abs_new_path).unwrap();
     // replace quuoates with double quotes
     let reason = reason.replace("'", "''");
-    
+    let current_time = chrono::Local::now().to_string();
+    let file_id = get_file_id(&abs_new_path).unwrap();
     db.exec(
         format!(
-            "INSERT INTO move_history (zone_path, src_path, new_path, moved_by, reason) VALUES ('{}', '{}', '{}', '{}', '{}');",
-            zone_path, abs_src_path, abs_new_path, moved_by, reason
+            "INSERT INTO move_history (src_path, new_path, moved_by, reason, move_timestamp, fileID, event_type) VALUES ('{}', '{}', '{}', '{}', '{}', '{}', 'move');",
+            abs_src_path, abs_new_path, moved_by, reason, current_time, file_id
         )
         .as_str(),
     ).await.unwrap();
@@ -212,16 +215,16 @@ struct FileNode {
 }
 
 /// Recursively builds a `FileNode` for the given path.
-fn build_file_node(path: &Path) -> io::Result<FileNode> {
+fn build_file_node(path: &Path, root: &Path) -> io::Result<FileNode> {
     let metadata = fs::metadata(path)?;
     let is_directory = metadata.is_dir();
-    let name = path
-        .file_name()
-        .map(|os_str| os_str.to_string_lossy().into_owned())
-        // For the root path, use the whole path string.
-        .unwrap_or_else(|| path.to_string_lossy().into_owned());
-
     let path_str = path.to_string_lossy().into_owned();
+    let rel_path_str= path.strip_prefix(root).unwrap().to_string_lossy().into_owned();
+    let name=
+        path.file_name()
+            .map(|name| name.to_string_lossy().into_owned())
+            .unwrap_or_else(|| path_str.clone());
+
     println!("path_str: {}", path_str);
     let file_id: u64 = get_file_id(&path.to_string_lossy()).unwrap();
     let children = if is_directory {
@@ -230,7 +233,7 @@ fn build_file_node(path: &Path) -> io::Result<FileNode> {
         for entry in fs::read_dir(path)? {
             let entry = entry?;
             let child_path = entry.path();
-            nodes.push(build_file_node(&child_path)?);
+            nodes.push(build_file_node(&child_path, root)?);
         }
         Some(nodes)
     } else {
@@ -239,7 +242,7 @@ fn build_file_node(path: &Path) -> io::Result<FileNode> {
 
     Ok(FileNode {
         name,
-        path: path_str,
+        path: rel_path_str,
         file_id: file_id,
         is_directory,
         children,
@@ -250,7 +253,7 @@ fn gen_file_tree(root: &Path) -> io::Result<Vec<FileNode>> {
     let mut nodes = Vec::new();
     for entry in fs::read_dir(root)? {
         let entry = entry?;
-        nodes.push(build_file_node(&entry.path())?);
+        nodes.push(build_file_node(&entry.path(), root)?);
     }
     Ok(nodes)
 }

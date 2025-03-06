@@ -592,7 +592,7 @@ async function handleDrop(draggingNode, dropNode, dropType, ev) {
     await invoke("move_file", {
       zonePath: rootPath.value,
       srcPath: srcPath,
-      newPath: srcPath,
+      newPath: newPath,
       movedBy: "user",
       reason: "User moved file",
     });
@@ -632,14 +632,10 @@ function allowDrag(node) {
 function allowDrop(draggingNode, dropNode, type) {
   console.log("RRR", dropNode.data);
   // 只允許拖曳到資料夾或根目錄，並且是放入 (inner)
-  console.log((type==="inner")&&(dropNode.data.isDirectory||dropNode.data.path===""));
+  console.log((type==="inner")&&(dropNode.data.is_directory||dropNode.data.path===""));
   return (
     type === "inner" &&
-<<<<<<< HEAD
-    (dropNode.data.isDirectory || dropNode.data.path === "")
-=======
-    (dropNode.data.is_directory || dropNode.data.path === "/")
->>>>>>> d578797228ed151b0a98bc18a5131bc2ce1f1c93
+    (dropNode.data.is_directory || dropNode.data.path === "")
   );
 }
 
