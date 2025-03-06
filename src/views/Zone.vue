@@ -240,7 +240,7 @@ async function handleRenewRules() {
       type: "warning",
     },
   )
-    .then(() => {
+    .then(async () => {
       // call API to renew all the rules
       let loadingInstance;
       loadingInstance = ElLoading.service({
