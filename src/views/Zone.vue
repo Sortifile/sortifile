@@ -336,6 +336,15 @@ async function handleSortAll() {
         console.error("Unexpected API response:", result);
         throw new Error("Invalid response format from backend");
       }
+
+      // Normalize paths in the result
+      result.forEach((item) => {
+        item.src_path = item.src_path.replace(/\\/g, "/").replace(/\/\//g, "/");
+        item.src_path = item.src_path.replace(/\\/g, "/").replace(/\/\//g, "/");
+        item.new_path = item.new_path.replace(/\\/g, "/").replace(/\/\//g, "/");
+        item.new_path = item.new_path.replace(/\\/g, "/").replace(/\/\//g, "/");
+      });
+
       if (loadingInstance) loadingInstance.close();
       isSortResultDialogVisible.value = true;
     } catch (error) {
