@@ -209,6 +209,12 @@ async function handleSummarizeAll() {
     },
   )
     .then(async () => {
+      let loadingInstance = ElLoading.service({
+        lock: true,
+        text: "Summerizing files...",
+        background: "rgba(0, 0, 0, 0.7)",
+      });
+
       await invoke("ai_summarize_all_files", {
         zoneName: zoneName.value,
         zonePath: rootPath.value,
@@ -218,10 +224,12 @@ async function handleSummarizeAll() {
             type: "success",
             message: "summarize completed",
           });
+          loadingInstance.close();
         })
         .catch((error) => {
           console.error("API call failed:", error);
           ElMessage.error("Failed to summarize all files");
+          loadingInstance.close();
         });
     })
     .catch(() => {
@@ -248,7 +256,7 @@ async function handleRenewRules() {
       // call API to renew all the rules
       loadingInstance = ElLoading.service({
         lock: true,
-        text: "Sorting...",
+        text: "Renewing rules...",
         background: "rgba(0, 0, 0, 0.7)",
       });
 
@@ -632,7 +640,10 @@ function allowDrag(node) {
 function allowDrop(draggingNode, dropNode, type) {
   console.log("RRR", dropNode.data);
   // 只允許拖曳到資料夾或根目錄，並且是放入 (inner)
-  console.log((type==="inner")&&(dropNode.data.is_directory||dropNode.data.path===""));
+  console.log(
+    type === "inner" &&
+      (dropNode.data.is_directory || dropNode.data.path === ""),
+  );
   return (
     type === "inner" &&
     (dropNode.data.is_directory || dropNode.data.path === "")
