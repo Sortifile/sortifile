@@ -16,7 +16,7 @@
         <el-checkbox
           v-for="option in namingOptions"
           :key="option.key"
-          :value="option.key"
+          :value="option.name"
           :label="option.name"
         >
           <el-tooltip

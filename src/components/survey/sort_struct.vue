@@ -108,8 +108,9 @@ const removeStructure = (index) => {
 watch(
   userStructureOrder,
   (newValue) => {
+    console.log(newValue.map((item) => item.name));
     emit(
-      "update:structureFormat",
+      "update:modelValue",
       newValue.map((item) => item.name),
     );
   },

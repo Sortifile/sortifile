@@ -96,6 +96,7 @@ const submitForm = async () => {
   loading.value = true;
   try {
     // 1. 存入 Pinia 的 surveyData
+    console.log(formResponse.value);
     formStore.setFormResponse(formResponse.value);
     ruleStore.resetRule();
 
