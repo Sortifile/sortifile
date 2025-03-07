@@ -338,7 +338,7 @@ async function handleSortAll() {
       }
 
       // Normalize paths in the result
-      result.forEach((item) => {
+      result["file_movements"].forEach((item) => {
         item.src_path = item.src_path.replace(/\\/g, "/").replace(/\/\//g, "/");
         item.src_path = item.src_path.replace(/\\/g, "/").replace(/\/\//g, "/");
         item.new_path = item.new_path.replace(/\\/g, "/").replace(/\/\//g, "/");
