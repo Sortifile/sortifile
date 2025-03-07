@@ -436,7 +436,7 @@ const handleConfirmedMoves = async (selectedMoves) => {
         });
 
         // 前端即時更新檔案樹
-        await invoke("get_file_tree", {
+        invoke("get_file_tree", {
           zonePath: rootPath.value,
         })
           .then((treeData) => {

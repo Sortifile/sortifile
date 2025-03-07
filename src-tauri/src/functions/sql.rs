@@ -109,14 +109,44 @@ impl Database {
         file_path: &str,
     ) -> Result<String, Error> {
         let table_name = format!("zone_{}", zone_name);
-        let file_id=crate::functions::file::get_file_id(file_path).unwrap();
+        let file_id = crate::functions::file::get_file_id(file_path).unwrap();
         let query = format!("SELECT summary FROM {} WHERE file_id = {};", table_name, file_id);
+        
         let row = sqlx::query(&query)
             .bind(file_path)
-            .fetch_one(&self.pool)
+            .fetch_optional(&self.pool)
             .await?;
-        let summary: String = row.get(0);
-        Ok(summary)
+            
+        if let Some(row) = row {
+            let summary: String = row.get(0);
+            Ok(summary)
+        } else {
+            Ok("FFAAIILLEEDD".to_string())
+        }
+    }
+    pub async fn checkresum(&self, zone_name: &str, file_path: &str) -> Result<bool, Error> {
+        let table_name = format!("zone_{}", zone_name);
+        let file_id = crate::functions::file::get_file_id(file_path).unwrap();
+        // select last_modified_date, last_summary_date from zone_name where file_id = file_id
+        let query = format!("SELECT last_modified_date, last_summary_date FROM {} WHERE file_id = {};", table_name, file_id);
+        let row = sqlx::query(&query)
+            .bind(file_path)
+            .fetch_optional(&self.pool)
+            .await?;
+        // return true is no rows found
+
+        // return true if last_modified_date > last_summary_date
+        if let Some(row) = row {
+            let last_modified_date: String = row.get(0);
+            let last_summary_date: String = row.get(1);
+            if last_modified_date > last_summary_date {
+                return Ok(true);
+            }else{
+                return Ok(false);
+            }
+        }else {
+            return Ok(true);
+        }
     }
 
     pub async fn exec_select(&self, input: &str) -> Result<Vec<SqliteRow>, Error> {

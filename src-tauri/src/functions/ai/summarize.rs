@@ -152,9 +152,14 @@ pub async fn ai_summarize_one_file(
     let opp=functions::system::write_to_temp_file(
         format!("{}.json", file_path),
         "{}".to_string(),
-    )
-    .unwrap();
-println!("opp: {}", opp);
+    ).unwrap();
+    let db = sql::get_db().await;
+    // get the original summary if it exist
+    let chc = db.checkresum(zone_name, file_path).await.unwrap();   
+    if chc == false {
+        return Ok("good".to_string());
+    }
+    println!("opp: {}", opp);
     let summarize_command = app
         .shell()
         .sidecar("summarize_files")
