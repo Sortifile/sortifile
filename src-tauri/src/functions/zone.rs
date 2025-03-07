@@ -107,6 +107,9 @@ pub async fn set_zone_rules(zone_name: &str, rules: &str) -> Result<(), String> 
     // get project file
     
     let db = sql::get_db().await;
+    // replace quotation marks with double quotation marks
+    let rules = rules.replace("'", "''");
+    
     db.exec(
         format!(
             "UPDATE zone_list SET zone_rules='{}' WHERE zone_name='{}';",

@@ -150,12 +150,14 @@ impl Database {
     }
 
     pub async fn exec_select(&self, input: &str) -> Result<Vec<SqliteRow>, Error> {
+        // replace quotations with double quotations
         println!("Executing query: {}", input);
         let rows = sqlx::query(&input).fetch_all(&self.pool).await;
         Ok(rows.unwrap())
     }
 
     pub async fn exec(&self, input: &str) -> Result<SqliteQueryResult, Error> {
+        // replace quotations with double quotations
         println!("Executing query: {}", input);
         let changes = sqlx::query(&input).execute(&self.pool).await;
         Ok(changes.unwrap())

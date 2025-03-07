@@ -318,7 +318,7 @@ async function handleSortAll() {
         result = await invoke("ai_sort", {
           zoneName: zoneName.value,
           zonePath: rootPath.value,
-          pathToSort: ".",
+          pathToSort: rootPath.value,
         });
       } catch (error) {
         console.error("API call failed:", error);
