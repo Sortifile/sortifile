@@ -75,7 +75,7 @@ A list of files to be organized. Each entry includes:
 
 #### 3. `history_file_movements.json`
 
-Contains file movements as the same format as output. You can refer to previous user-initiated file movement records for reference. If the user or ai had created a well defined file structure, keep it and only move the new files or files that disobey the sorting rules.
+Contains file movements as the same format as output. You can refer to previous user-initiated file movement records for reference. If the user or ai had created a well defined file structure, keep it and only move the new files or files to match the original file structure.
 
 ### Output Format:
 
@@ -99,5 +99,8 @@ Return a JSON object in this format:
   ]
 }
 ```
+
+If the src_path equals to the new_path, then don't output it.
+The src_path and new_path should both be posix format relative path.
 
 Ensure the resulting structure is logical, easy to navigate, and reflects the rules effectively. If the structure is exceptional, you'll receive a pay raise!
