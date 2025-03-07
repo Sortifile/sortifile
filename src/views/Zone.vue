@@ -434,6 +434,18 @@ const handleConfirmedMoves = async (selectedMoves) => {
           type: "success",
           message: "Move Success",
         });
+
+        // 前端即時更新檔案樹
+        await invoke("get_file_tree", {
+          zonePath: rootPath.value,
+        })
+          .then((treeData) => {
+            fileTree.value = JSON.parse(treeData);
+          })
+          .catch((error) => {
+            console.error("API call failed:", error);
+            ElMessage.error("Failed to get renewed file tree");
+          });
       })
       .catch((error) => {
         console.error("move_files failed:", error);
