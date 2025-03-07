@@ -47,8 +47,7 @@ A JSON object containing organizational rules, structured as follows:
 
 - **spec**: Specifies detailed organizational rules, including:
 
-  - **file_types**: A list of recognized file categories.
-    - options: ["作業", "簡報", "報告", "其他文件", "圖片", "程式碼"];
+  - **file_types**: Types of content contained in files.
   - **folder_depth**: Maximum allowed folder hierarchy depth (e.g., 5).
   - **capacity**: Maximum number of files allowed per folder (e.g., 30).
   - **date_format**: The User's prefer format of date in their naming
@@ -100,7 +99,7 @@ Return a JSON object in this format:
 }
 ```
 
-If the src_path equals to the new_path, then don't output it.
+If the file doesn't need to move, then don't output it.
 The src_path and new_path should both be posix format relative path.
 
 Ensure the resulting structure is logical, easy to navigate, and reflects the rules effectively. If the structure is exceptional, you'll receive a pay raise!

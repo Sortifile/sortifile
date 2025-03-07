@@ -345,6 +345,10 @@ async function handleSortAll() {
         item.new_path = item.new_path.replace(/\\/g, "/").replace(/\/\//g, "/");
       });
 
+      result["file_movements"] = result["file_movements"].filter(
+        (item) => item.src_path !== new_path,
+      );
+
       if (loadingInstance) loadingInstance.close();
       isSortResultDialogVisible.value = true;
     } catch (error) {
