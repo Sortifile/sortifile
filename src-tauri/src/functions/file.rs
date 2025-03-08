@@ -19,10 +19,7 @@ struct move_history {
     reason: String,
 }
 #[tauri::command]
-pub async fn get_summary_of_one_file(
-    zone_name: &str,
-    file_path: &str,
-) -> Result<String, String> {
+pub async fn get_summary_of_one_file(zone_name: &str, file_path: &str) -> Result<String, String> {
     println!("zone_name: {}", zone_name);
     println!("file_path: {}", file_path);
     let db = sql::get_db().await;
@@ -176,7 +173,8 @@ pub fn get_ignore_list(zone_path: &str) -> Result<String, String> {
     match ignore_list {
         Ok(list) => {
             println!("ignore_list: {}", list);
-            Ok(list)},
+            Ok(list)
+        }
         Err(e) => Err(e.to_string()),
     }
 }
@@ -193,7 +191,8 @@ pub fn get_project_file(zone_path: &str) -> Result<String, String> {
     match project_file {
         Ok(file) => {
             println!("project_file: {}", file);
-            Ok(file)},
+            Ok(file)
+        }
         Err(e) => Err(e.to_string()),
     }
 }
@@ -219,11 +218,15 @@ fn build_file_node(path: &Path, root: &Path) -> io::Result<FileNode> {
     let metadata = fs::metadata(path)?;
     let is_directory = metadata.is_dir();
     let path_str = path.to_string_lossy().into_owned();
-    let rel_path_str= path.strip_prefix(root).unwrap().to_string_lossy().into_owned();
-    let name=
-        path.file_name()
-            .map(|name| name.to_string_lossy().into_owned())
-            .unwrap_or_else(|| path_str.clone());
+    let rel_path_str = path
+        .strip_prefix(root)
+        .unwrap()
+        .to_string_lossy()
+        .into_owned();
+    let name = path
+        .file_name()
+        .map(|name| name.to_string_lossy().into_owned())
+        .unwrap_or_else(|| path_str.clone());
 
     println!("path_str: {}", path_str);
     let file_id: u64 = get_file_id(&path.to_string_lossy()).unwrap();
@@ -268,8 +271,8 @@ pub fn get_file_tree(zone_path: String) -> Result<String, String> {
 }
 use std::fs::File;
 use std::os::windows::io::AsRawHandle;
-use winapi::um::fileapi::BY_HANDLE_FILE_INFORMATION;
 use winapi::um::fileapi::GetFileInformationByHandle;
+use winapi::um::fileapi::BY_HANDLE_FILE_INFORMATION;
 
 #[tauri::command]
 pub fn get_file_id(file_path: &str) -> Result<u64, String> {

@@ -2,8 +2,8 @@ use crate::functions;
 use crate::functions::ai::utils;
 use crate::functions::file;
 use crate::functions::sql;
-use crate::functions::system::get_appdata_dir;
 use crate::functions::system;
+use crate::functions::system::get_appdata_dir;
 use crate::functions::zone;
 use async_recursion::async_recursion;
 use chrono::{DateTime, Utc};
@@ -115,7 +115,7 @@ async fn process_path(
         for entry in fs::read_dir(path)? {
             let entry = entry?;
             let entry_path = entry.path();
-            let appc= app.clone();
+            let appc = app.clone();
             process_path(
                 appc,
                 &entry_path,
@@ -133,12 +133,13 @@ async fn process_path(
             zone_name,
             base.to_str().unwrap(),
             path.to_str().unwrap(),
-        ).await;
+        )
+        .await;
     }
     Ok(())
 }
 
-use chrono::{Local};
+use chrono::Local;
 
 #[tauri::command]
 pub async fn ai_summarize_one_file(
@@ -149,13 +150,12 @@ pub async fn ai_summarize_one_file(
 ) -> Result<String, String> {
     println!("ai_summarize_one: {} {}", root_path, file_path);
     // Create tmp file for file_summary
-    let opp=functions::system::write_to_temp_file(
-        format!("{}.json", file_path),
-        "{}".to_string(),
-    ).unwrap();
+    let opp =
+        functions::system::write_to_temp_file(format!("{}.json", file_path), "{}".to_string())
+            .unwrap();
     let db = sql::get_db().await;
     // get the original summary if it exist
-    let chc = db.checkresum(zone_name, file_path).await.unwrap();   
+    let chc = db.checkresum(zone_name, file_path).await.unwrap();
     if chc == false {
         return Ok("good".to_string());
     }
@@ -198,27 +198,26 @@ pub async fn ai_summarize_one_file(
     task.await.map_err(|e| e.to_string())?;
     println!("ai_sort sidecar finished");
     // Read summary output from tmp file
-    let result = fs::read_to_string(
-        system::wrap_tmp_dir(format!("{}.json", file_path).as_str()).unwrap()
-    ).unwrap();
+    let result =
+        fs::read_to_string(system::wrap_tmp_dir(format!("{}.json", file_path).as_str()).unwrap())
+            .unwrap();
 
     // Determine file's full path
     let full_file_path = format!("{}", file_path);
     println!("full_file_path: {}", full_file_path);
     // Get file's last modified date
-    let metadata = fs::metadata(&full_file_path)
-        .map_err(|e| e.to_string())?;
-    let modified_time = metadata.modified()
-        .map_err(|e| e.to_string())?;
+    let metadata = fs::metadata(&full_file_path).map_err(|e| e.to_string())?;
+    let modified_time = metadata.modified().map_err(|e| e.to_string())?;
     let last_modified_datetime: DateTime<Local> = modified_time.into();
-    let last_modified = last_modified_datetime.format("%Y-%m-%d %H:%M:%S").to_string();
+    let last_modified = last_modified_datetime
+        .format("%Y-%m-%d %H:%M:%S")
+        .to_string();
     println!("last_modified: {}", last_modified);
     // Set last summary date as today
     let today = Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
 
     // Get the file_id from your file system
-    let fileID: u64 = functions::file::get_file_id(&full_file_path)
-        .unwrap();
+    let fileID: u64 = functions::file::get_file_id(&full_file_path).unwrap();
 
     // Escape values to prevent SQL injection and syntax errors.
     let escaped_result = result.replace("'", "''");
@@ -226,7 +225,7 @@ pub async fn ai_summarize_one_file(
     println!("escaped_result: {}", escaped_result);
     // Get the database connection
     let db = sql::get_db().await;
-    
+
     // Perform an UPSERT (requires that file_id be unique)
     let sql_statement = format!(
         "INSERT INTO {} (file_path, file_id, summary, last_modified_date, last_summary_date) \
@@ -244,9 +243,7 @@ pub async fn ai_summarize_one_file(
         today
     );
     println!("sql_statement: {}", sql_statement);
-    db.exec(&sql_statement)
-        .await
-        .unwrap();
+    db.exec(&sql_statement).await.unwrap();
 
     Ok("good".to_string())
 }

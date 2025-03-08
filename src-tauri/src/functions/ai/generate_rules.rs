@@ -40,15 +40,18 @@ pub async fn ai_create_rule(
             format!("zone_{}_form_response_tmp.json", zone_name),
             form_response.to_string(),
         );
-        println!("{}",                 app.path()
-        .resolve(
-            "resources/1_generate_rules/system_prompt.md",
-            BaseDirectory::Resource,
-        )
-        .unwrap()
-        .as_os_str()
-        .to_str()
-        .unwrap());
+        println!(
+            "{}",
+            app.path()
+                .resolve(
+                    "resources/1_generate_rules/system_prompt.md",
+                    BaseDirectory::Resource,
+                )
+                .unwrap()
+                .as_os_str()
+                .to_str()
+                .unwrap()
+        );
         let generate_rules_command = app
             .shell()
             .sidecar("generate_rules")
@@ -56,27 +59,25 @@ pub async fn ai_create_rule(
             .env("GEMINI_API_KEY", system::get_api_key().unwrap())
             .args(&[
                 app.path()
-                    .resolve(
-                        "resources/1_system_prompt.md",
-                        BaseDirectory::Resource,
-                    )
+                    .resolve("resources/1_system_prompt.md", BaseDirectory::Resource)
                     .unwrap()
                     .as_os_str()
                     .to_str()
                     .unwrap(),
                 app.path()
-                    .resolve(
-                        "resources/form_question.json",
-                        BaseDirectory::Resource,
-                    )
+                    .resolve("resources/form_question.json", BaseDirectory::Resource)
                     .unwrap()
                     .as_os_str()
                     .to_str()
                     .unwrap(),
-                wrap_tmp_dir(format!("zone_{}_form_response_tmp.json", zone_name).as_str()).unwrap().as_str(),
-                wrap_tmp_dir(format!("zone_{}_rule_tmp.json", zone_name).as_str()).unwrap().as_str(),
+                wrap_tmp_dir(format!("zone_{}_form_response_tmp.json", zone_name).as_str())
+                    .unwrap()
+                    .as_str(),
+                wrap_tmp_dir(format!("zone_{}_rule_tmp.json", zone_name).as_str())
+                    .unwrap()
+                    .as_str(),
             ]);
-            println!("generate_rules_command: {:?}", generate_rules_command);
+        println!("generate_rules_command: {:?}", generate_rules_command);
         let (mut rx, _child) = generate_rules_command.spawn().map_err(|e| e.to_string())?;
         // Read sidecar stdout asynchronously.
         let task = tauri::async_runtime::spawn(async move {
@@ -90,6 +91,9 @@ pub async fn ai_create_rule(
         task.await.map_err(|e| e.to_string())?;
     }
     // read the output file
-    let rule_file = fs::read_to_string(wrap_tmp_dir(format!("zone_{}_rule_tmp.json", zone_name).as_str()).unwrap()).unwrap();
+    let rule_file = fs::read_to_string(
+        wrap_tmp_dir(format!("zone_{}_rule_tmp.json", zone_name).as_str()).unwrap(),
+    )
+    .unwrap();
     Ok(rule_file)
 }

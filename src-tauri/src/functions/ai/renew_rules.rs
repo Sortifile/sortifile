@@ -2,8 +2,8 @@ use crate::functions;
 use crate::functions::ai::utils;
 use crate::functions::file;
 use crate::functions::sql;
-use crate::functions::system::get_appdata_dir;
 use crate::functions::system;
+use crate::functions::system::get_appdata_dir;
 use crate::functions::zone;
 use async_recursion::async_recursion;
 use chrono::{DateTime, Utc};
@@ -74,24 +74,29 @@ pub async fn ai_renew_rules(
         .args(&[
             // system prompt for sort_files (from resource folder)
             app.path()
-                .resolve(
-                    "resources/4_system_prompt.md",
-                    BaseDirectory::Resource,
-                )
+                .resolve("resources/4_system_prompt.md", BaseDirectory::Resource)
                 .unwrap()
                 .as_os_str()
                 .to_str()
                 .unwrap(),
             // rule file
-            system::wrap_tmp_dir(format!("zone_{}_history_file_movements_tmp.json", zone_name).as_str()).unwrap().as_str(),
-            system::wrap_tmp_dir(format!("zone_{}_file_summary_tmp.json", zone_name).as_str()).unwrap().as_str(),
+            system::wrap_tmp_dir(
+                format!("zone_{}_history_file_movements_tmp.json", zone_name).as_str(),
+            )
+            .unwrap()
+            .as_str(),
+            system::wrap_tmp_dir(format!("zone_{}_file_summary_tmp.json", zone_name).as_str())
+                .unwrap()
+                .as_str(),
             format!("{}/.sortifile.conf", zone_path).as_str(),
             // file summary file (should be prepared by your logic)
             // history file movements file
             // output file where move steps are written
-            system::wrap_tmp_dir(format!("zone_{}_renewed_rules.json", zone_name).as_str()).unwrap().as_str(),
+            system::wrap_tmp_dir(format!("zone_{}_renewed_rules.json", zone_name).as_str())
+                .unwrap()
+                .as_str(),
         ]);
-        println!("sort_command: {:?}", sort_command);
+    println!("sort_command: {:?}", sort_command);
     let (mut rx, _child) = sort_command.spawn().map_err(|e| e.to_string())?;
     let task = tauri::async_runtime::spawn(async move {
         while let Some(event) = rx.recv().await {
@@ -103,7 +108,10 @@ pub async fn ai_renew_rules(
     });
     task.await.map_err(|e| e.to_string())?;
     // read from move_steps file to string
-    let result = fs::read_to_string(system::wrap_tmp_dir(format!("zone_{}_renewed_rules.json", zone_name).as_str()).unwrap()).unwrap();
+    let result = fs::read_to_string(
+        system::wrap_tmp_dir(format!("zone_{}_renewed_rules.json", zone_name).as_str()).unwrap(),
+    )
+    .unwrap();
     println!("renew result: {}", result);
     Ok(result)
 }

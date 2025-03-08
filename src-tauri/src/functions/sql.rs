@@ -110,13 +110,16 @@ impl Database {
     ) -> Result<String, Error> {
         let table_name = format!("zone_{}", zone_name);
         let file_id = crate::functions::file::get_file_id(file_path).unwrap();
-        let query = format!("SELECT summary FROM {} WHERE file_id = {};", table_name, file_id);
-        
+        let query = format!(
+            "SELECT summary FROM {} WHERE file_id = {};",
+            table_name, file_id
+        );
+
         let row = sqlx::query(&query)
             .bind(file_path)
             .fetch_optional(&self.pool)
             .await?;
-            
+
         if let Some(row) = row {
             let summary: String = row.get(0);
             Ok(summary)
@@ -128,7 +131,10 @@ impl Database {
         let table_name = format!("zone_{}", zone_name);
         let file_id = crate::functions::file::get_file_id(file_path).unwrap();
         // select last_modified_date, last_summary_date from zone_name where file_id = file_id
-        let query = format!("SELECT last_modified_date, last_summary_date FROM {} WHERE file_id = {};", table_name, file_id);
+        let query = format!(
+            "SELECT last_modified_date, last_summary_date FROM {} WHERE file_id = {};",
+            table_name, file_id
+        );
         let row = sqlx::query(&query)
             .bind(file_path)
             .fetch_optional(&self.pool)
@@ -141,10 +147,10 @@ impl Database {
             let last_summary_date: String = row.get(1);
             if last_modified_date > last_summary_date {
                 return Ok(true);
-            }else{
+            } else {
                 return Ok(false);
             }
-        }else {
+        } else {
             return Ok(true);
         }
     }

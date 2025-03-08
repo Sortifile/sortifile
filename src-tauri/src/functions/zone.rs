@@ -44,7 +44,9 @@ pub async fn create_zone(
     db.exec(
         format!(
             "INSERT INTO zone_list (zone_name, root_path, zone_rules) VALUES ('{}', '{}', '{}');",
-            zone_name, root_path, rules.replace("'", "''")
+            zone_name,
+            root_path,
+            rules.replace("'", "''")
         )
         .as_str(),
     )
@@ -105,11 +107,11 @@ pub async fn get_zone_rules(zone_name: &str) -> Result<String, String> {
 #[tauri::command]
 pub async fn set_zone_rules(zone_name: &str, rules: &str) -> Result<(), String> {
     // get project file
-    
+
     let db = sql::get_db().await;
     // replace quotation marks with double quotation marks
     let rules = rules.replace("'", "''");
-    
+
     db.exec(
         format!(
             "UPDATE zone_list SET zone_rules='{}' WHERE zone_name='{}';",

@@ -30,12 +30,12 @@ pub fn get_tmp_dir() -> Result<String, String> {
 }
 use std::path::Path;
 
-pub fn wrap_tmp_dir(rel: &str) -> Result<String, String>{
+pub fn wrap_tmp_dir(rel: &str) -> Result<String, String> {
     let path = Path::new(rel);
     let ptt = path
-    .file_name()                          // Option<&OsStr>
-    .and_then(|name| name.to_str())        // Option<&str>
-    .unwrap_or("default.txt");         
+        .file_name() // Option<&OsStr>
+        .and_then(|name| name.to_str()) // Option<&str>
+        .unwrap_or("default.txt");
     let mut temp_path = get_tmp_dir().unwrap();
     temp_path.push_str("sortifile\\");
 
@@ -44,16 +44,15 @@ pub fn wrap_tmp_dir(rel: &str) -> Result<String, String>{
     Ok(temp_path)
 }
 
-
 pub fn write_to_temp_file(file_name: String, data: String) -> Result<String, String> {
     // Get the temporary directory path
     let pt = Path::new(&file_name);
     let ptt = pt
-    .file_name()                          // Option<&OsStr>
-    .and_then(|name| name.to_str())        // Option<&str>
-    .unwrap_or("default.txt");             // fallback value if conversion fails
-    // Write text content into the file
-    let mut temp_path = get_tmp_dir().unwrap();    
+        .file_name() // Option<&OsStr>
+        .and_then(|name| name.to_str()) // Option<&str>
+        .unwrap_or("default.txt"); // fallback value if conversion fails
+                                   // Write text content into the file
+    let mut temp_path = get_tmp_dir().unwrap();
     // Append your desired file name
     temp_path.push_str("sortifile\\");
     temp_path.push_str(ptt);

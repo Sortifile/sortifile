@@ -2,9 +2,9 @@ use crate::functions;
 use crate::functions::ai::utils;
 use crate::functions::file;
 use crate::functions::sql;
+use crate::functions::system;
 use crate::functions::system::get_appdata_dir;
 use crate::functions::zone;
-use crate::functions::system;
 use async_recursion::async_recursion;
 use chrono::{DateTime, Utc};
 use glob::Pattern;
@@ -75,20 +75,14 @@ pub async fn ai_sort(
         .args(&[
             // system prompt for sort_files (from resource folder)
             app.path()
-                .resolve(
-                    "resources/3_system_prompt.md",
-                    BaseDirectory::Resource,
-                )
+                .resolve("resources/3_system_prompt.md", BaseDirectory::Resource)
                 .unwrap()
                 .as_os_str()
                 .to_str()
                 .unwrap(),
             // user prompt for sort_files
             app.path()
-                .resolve(
-                    "resources/3_user_prompt.txt",
-                    BaseDirectory::Resource,
-                )
+                .resolve("resources/3_user_prompt.txt", BaseDirectory::Resource)
                 .unwrap()
                 .as_os_str()
                 .to_str()
@@ -98,11 +92,19 @@ pub async fn ai_sort(
             // rule file
             format!("{}/.sortifile.conf", zone_path).as_str(),
             // file summary file (should be prepared by your logic)
-            system::wrap_tmp_dir(format!("zone_{}_file_summary_tmp.json", zone_name).as_str()).unwrap().as_str(),
+            system::wrap_tmp_dir(format!("zone_{}_file_summary_tmp.json", zone_name).as_str())
+                .unwrap()
+                .as_str(),
             // history file movements file
-            system::wrap_tmp_dir(format!("zone_{}_history_file_movements_tmp.json", zone_name).as_str()).unwrap().as_str(),
+            system::wrap_tmp_dir(
+                format!("zone_{}_history_file_movements_tmp.json", zone_name).as_str(),
+            )
+            .unwrap()
+            .as_str(),
             // output file where move steps are written
-            system::wrap_tmp_dir(format!("zone_{}_move_steps_tmp.json", zone_name).as_str()).unwrap().as_str(),
+            system::wrap_tmp_dir(format!("zone_{}_move_steps_tmp.json", zone_name).as_str())
+                .unwrap()
+                .as_str(),
         ]);
     println!("ai_sort command: {:?}", sort_command);
     let (mut rx, _child) = sort_command.spawn().map_err(|e| e.to_string())?;
@@ -117,7 +119,10 @@ pub async fn ai_sort(
     task.await.map_err(|e| e.to_string())?;
 
     // read from move_steps file to string
-    let result = fs::read_to_string(system::wrap_tmp_dir(format!("zone_{}_move_steps_tmp.json", zone_name).as_str()).unwrap()).unwrap();
+    let result = fs::read_to_string(
+        system::wrap_tmp_dir(format!("zone_{}_move_steps_tmp.json", zone_name).as_str()).unwrap(),
+    )
+    .unwrap();
     println!("ai_sort result: {}", result);
     Ok(result)
 }
@@ -235,9 +240,13 @@ async fn process_path(
         let fileID = functions::file::get_file_id(path.to_str().unwrap()).unwrap();
         // Append missing fields using the file path and the given sort path.
         let base_str = base.to_str().unwrap();
-        let updated_summary =
-            append_missing_fields_with_path(base_str, summary.as_str(), path.to_str().unwrap(), path_to_sort)
-                .unwrap();
+        let updated_summary = append_missing_fields_with_path(
+            base_str,
+            summary.as_str(),
+            path.to_str().unwrap(),
+            path_to_sort,
+        )
+        .unwrap();
         file_summary.push(updated_summary);
     }
     Ok(())
@@ -288,14 +297,13 @@ fn append_missing_fields_with_path(
     path: &str,
     path_to_sort: &str,
 ) -> Result<String, serde_json::Error> {
-
     // Parse the input JSON string.
     let mut data: Value = serde_json::from_str(json_str)?;
 
     // Determine the value for allow_move.
     let chc: bool = path.starts_with(path_to_sort);
 
-    // relative path and remove leading  backslash  
+    // relative path and remove leading  backslash
     let rel_path = path.strip_prefix(base).unwrap().trim_start_matches('\\');
 
     // Closure to update a single summary object.
