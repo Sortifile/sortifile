@@ -14,7 +14,8 @@
       {
         "title": "sortifile",
         "width": 960,
-        "height": 720
+        "height": 720,
+        "dragDropEnabled": false
       }
     ],
     "security": {
@@ -30,6 +31,22 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
+    ],
+    "resources": {
+      "resources/**/*": "resources/"
+    },
+    "externalBin": [
+      "resources/generate_rules",
+      "resources/summarize_files",
+      "resources/sort_files",
+      "resources/renew_rules"
     ]
+  },
+  "plugins": {
+    "sqlite": {
+      "defaultConfig": {
+        "file": "data.db"
+      }
+    }
   }
 }

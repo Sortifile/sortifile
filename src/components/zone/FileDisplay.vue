@@ -314,7 +314,7 @@
 
         <!-- 儲存按鈕 -->
         <div style="display: flex; justify-content: flex-end; margin-top: 20px">
-          <el-button @click="handleReset">Reset</el-button>
+          <!-- <el-button @click="handleReset">Reset</el-button> -->
           <el-button type="primary" @click="handleSave">Save</el-button>
         </div>
       </el-form>
@@ -323,11 +323,13 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, reactive, ref, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { useZoneStore } from "../../store/zone";
 import { storeToRefs } from "pinia";
 import { join } from "@tauri-apps/api/path";
+import { emit } from "@tauri-apps/api/event";
+import { invoke } from "@tauri-apps/api/core";
 
 async function joinPaths(base, subpath) {
   return await join(base, subpath);
@@ -352,7 +354,8 @@ const emits = defineEmits(["toggle-ignore", "update:loading"]);
 function onSwitchChange(val) {
   emits("toggle-ignore", props.path, val);
 }
-// TODO: Get initial data from API
+
+// Mock data
 const summaryData = reactive({
   title: "Project Report for Tauri Integration",
   version: "v1.0",
@@ -427,11 +430,24 @@ function handleResummarize() {
     },
   )
     .then(() => {
-      // TODO: call API to resummarize the file
-      ElMessage({
-        type: "success",
-        message: "Resummarize completed",
-      });
+      // call API to resummarize the file
+      invoke("ai_summarize_one_file", {
+        zoneName: zoneName.value,
+        path: props.path,
+      })
+        .then((data) => {
+          console.log("get_summary_of_one_file call success");
+          // 取回後更新 reactive 物件
+          Object.assign(summaryData, JSON.parse(data));
+          ElMessage({
+            type: "success",
+            message: "Resummarize completed",
+          });
+        })
+        .catch((err) => {
+          console.error("API call failed:", err);
+          ElMessage.error("Failed to get summary data");
+        });
     })
     .catch(() => {
       ElMessage({
@@ -441,12 +457,51 @@ function handleResummarize() {
     });
 }
 
-onMounted(async () => {
-  pathValue.value = await joinPaths(rootPath.value, props.path);
-  console.log("FileDisplay mounted");
-  // TODO: call api to get file summary
-  // TODO: handle loading state
+async function loadFileSummary() {
+  // 開始前先把 loading 狀態通知外層
+  // emits("update:loading", true);
+  ElMessage.info("Loading file summary data...");
+  try {
+    // 把根路徑 + 檔案相對路徑串起來
+    pathValue.value = await join(rootPath.value, props.path);
+    console.log("FileDisplay mounted");
+
+    // 用 tauri 或任何 API 取得檔案的摘要資料 (此為示範)
+    invoke("get_summary_of_one_file", {
+      zoneName: zoneName.value,
+      filePath: props.path,
+    })
+      .then((data) => {
+        console.log("get_summary_of_one_file call success");
+        console.log("data:",data);
+        Object.assign(summaryData, JSON.parse(data));
+        emits("update:loading", false);
+      })
+      .catch((err) => {
+        console.error("API call failed:", err);
+        ElMessage.error("Failed to get summary data");
+        emits("update:loading", false);
+      });
+  } catch (error) {
+    console.error("API call failed:", error);
+    ElMessage.error("Failed to get summary data");
+    emits("update:loading", false);
+  }
+}
+
+onMounted(() => {
+  loadFileSummary();
 });
+
+// 若需要在 path 改變時，再次抓取資料
+watch(
+  () => props.path,
+  () => {
+    if (props.path) {
+      loadFileSummary();
+    }
+  },
+);
 </script>
 
 <style scoped>

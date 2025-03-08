@@ -1,7 +1,6 @@
 import { defineStore } from "pinia";
-import { invoke } from "@tauri-apps/api/core";
 
-const initialRuleState = {
+const initialRuleState = () => ({
   index: {
     sorting_entropy: 8,
     naming_complexity: 6,
@@ -9,7 +8,6 @@ const initialRuleState = {
   },
   spec: {
     file_types: [],
-    sort_struct: ["學期", "科目", "用途"],
     folder_depth: 5,
     capacity: 30,
     naming_style: ["name", "version"],
@@ -24,21 +22,19 @@ const initialRuleState = {
     "blah blah blah blah blah",
     "blah blah blah blah blah blah",
   ],
-};
+});
 
 export const useRuleStore = defineStore("rule", {
   state: () => ({
-    rule: initialRuleState,
+    rule: initialRuleState(),
   }),
   actions: {
     setRule(new_rule) {
-      this.rule = new_rule;
-    },
-    async loadRule() {
-      // TODO: Implement this by invoking the Tauri API
+      Object.assign(this.rule, new_rule);
+      console.log(this.rule);
     },
     resetRule() {
-      this.rule = initialRuleState;
+      this.rule = initialRuleState();
     },
   },
 });

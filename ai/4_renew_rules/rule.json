@@ -1,21 +1,15 @@
 {
   "index": {
     "sorting_entropy": 8,
-    "naming_complexity": 2,
+    "naming_complexity": 6,
     "archival_tendency": 10
   },
   "spec": {
-    "file_types": {
-      "作業": true,
-      "報告": true,
-      "簡報": true,
-      "圖片": false,
-      "程式碼": false
-    },
-    "sort_struct": ["學期", "科目", "用途"],
+    "file_types": ["作業", "簡報", "報告", "其他文件", "圖片", "程式碼"],
     "folder_depth": 5,
     "capacity": 30,
-    "naming_style": ["name", "version"]
+    "date_format": "YYYYMMDD",
+    "filename_letter_rule": "none"
   },
   "natural_language_rules": [
     "Files should be primarily categorized by '學期', then by '科目', and finally by '用途'.",

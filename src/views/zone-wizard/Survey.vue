@@ -65,7 +65,7 @@ import folder_depth from "../../components/survey/folder_depth.vue";
 import capacity from "../../components/survey/capacity.vue";
 import naming_style from "../../components/survey/naming_style.vue";
 import archival_tendency from "../../components/survey/archival_tendency.vue";
-import { cloneDeep } from "lodash";
+import { cloneDeep, set } from "lodash";
 
 const router = useRouter();
 const formStore = useFormStore();
@@ -96,31 +96,35 @@ const submitForm = async () => {
   loading.value = true;
   try {
     // 1. 存入 Pinia 的 surveyData
+    console.log(formResponse.value);
     formStore.setFormResponse(formResponse.value);
     ruleStore.resetRule();
 
     // 2. 呼叫 Tauri API 生成 rule.json
-    // const ruleJson = await invoke("ai_create_rule", {
-    //   zone_name: zoneStore.zoneName,
-    //   zone_path: zoneStore.rootPath,
-    //   create_from_structure: false,
-    //   form_question: formStore.formQuestion,
-    //   form_response: formResponse.value,
-    // });
-    const ruleJson = ruleStore.rule; // TO BE REMOVED
+    invoke("ai_create_rule", {
+      zoneName: zoneStore.zoneName,
+      zonePath: zoneStore.rootPath,
+      createFromStructure: false,
+      formResponse: JSON.stringify(formResponse.value),
+    })
+      .then((ruleJson) => {
+        // 存入 Pinia 的 ruleData
+        ruleStore.setRule(JSON.parse(ruleJson));
+        console.log("AI 生成的規則：", ruleStore.rule);
 
-    // 存入 Pinia 的 ruleData
-    ruleStore.setRule(ruleJson);
-    ruleStore.resetRule();
-    console.log("AI 生成的規則：", ruleStore.rule);
-
-    // 顯示成功訊息並跳轉
-    ElMessage.success("AI 生成規則成功！");
-    router.push("/zone-wizard/CheckRule");
+        // 顯示成功訊息並跳轉
+        ElMessage.success("AI 生成規則成功！");
+        navigateTo("zone-wizard/CheckRule");
+        loading.value = false;
+      })
+      .catch((error) => {
+        console.error("API 調用失敗:", error);
+        ElMessage.error("生成規則時發生錯誤");
+        loading.value = false;
+      });
   } catch (error) {
     console.error("API 調用失敗:", error);
     ElMessage.error("生成規則時發生錯誤");
-  } finally {
     loading.value = false;
   }
 };

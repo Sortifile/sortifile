@@ -108,11 +108,13 @@ Use the newly observed file movements—especially those lacking an explicit `re
 
    - **Update `spec`**:
      - Populate quantifiable or specific details based on form responses, such as supported file types, folder depth, or capacity limits.
+
    - **Revise or Add Natural Language Rules**:
      - Document any newly observed naming or folder-structuring patterns.
      - Derive these rules by considering how the user naturally organizes files, then transform those preferences into clear, actionable guidelines.
      - Incorporate user preferences and general best practices (e.g., consistency, clarity, and searchability).
      - If the system’s classification was overridden, clarify how to avoid such missteps in the future (e.g., paying closer attention to topics or tags, using stricter date-based naming conventions).
+     - Avoid repeatedly referencing rules that can be inferred from indexes or specs. Instead, focus on describing the sort_struct and naming.
      - You may add rules for specific scenarios (e.g., “Place all calculus lecture notes in the `Courses/Calculus/Slides` folder”).
      - Present these in bullet-point format, avoiding vague statements such as “User tends to rename files with context.” Instead, give concrete, directive-style rules.
 

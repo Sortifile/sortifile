@@ -15,6 +15,7 @@
         class="drop-area"
         item-key="key"
         :component-data="{ tag: 'span' }"
+        :force-fallback="true"
       >
         <template #item="{ element, index }">
           <span>
@@ -68,8 +69,8 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
-import draggable from "vuedraggable";
+import { ref, watch, onMounted } from "vue";
+import draggable from "vuedraggable/src/vuedraggable";
 
 const props = defineProps({ modelValue: Array });
 const emit = defineEmits(["update:modelValue"]);
@@ -80,7 +81,7 @@ const structureOptions = [
   { key: "time", name: "時間", description: "依時間（學期、年份、日期或時間戳記）分類。ex: 分為 2025/2024/2023" },
   { key: "source", name: "來源", description: "檔案的來源，如某堂課程或特定資料庫。ex: 分爲 微積分/物理科/駕訓班" },
   { key: "usage", name: "用途",  description: "依據用途分類。ex:分為 程式/作業/專案/報告",},
-  { key: "topic", name: "檔案主題", description: "依據檔案的主題或內容分類。ex: Sortifile專案/上課程式/個人網頁" },
+  { key: "topic", name: "檔案主題", description: "依據檔案的主題或內容分類。ex: YTP專案/學校教材/個人網頁" },
   { key: "version_order", name: "版本/次序", description: "不同版本的管理。ex: 分爲 v1.0/v2.0" },
   { key: "tags", name: "關鍵字標籤", description: "透過個人化的標籤進行分類。ex: 分為 重要/草稿/私人" },
   { key: "file_format", name: "檔案格式類型", description: "按照檔案格式分類。ex: 分為 PDF/Word/Excel" },
@@ -107,13 +108,20 @@ const removeStructure = (index) => {
 watch(
   userStructureOrder,
   (newValue) => {
+    console.log(newValue.map((item) => item.name));
     emit(
-      "update:structureFormat",
+      "update:modelValue",
       newValue.map((item) => item.name),
     );
   },
   { deep: true },
 );
+
+onMounted(() => {
+  document.addEventListener("dragover", (event) => {
+    event.preventDefault();
+  });
+});
 </script>
 
 <style scoped>

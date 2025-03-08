@@ -5,7 +5,9 @@
         <h1>Confirming Zone Rules</h1>
       </el-col>
       <el-col :span="4">
-        <el-button type="warning" @click=""> Regenerate Rules </el-button>
+        <el-button type="warning" @click="handleRegenerate">
+          Regenerate Rules
+        </el-button>
       </el-col>
       <el-col :span="2">
         <el-button plain @click="handleReset"> Reset </el-button>
@@ -90,7 +92,11 @@
           </el-button>
         </el-col>
         <el-col :span="3">
-          <el-button type="primary" @click="handleSubmit">
+          <el-button
+            type="primary"
+            @click="handleSubmit"
+            v-loading.fullscreen.lock="loading"
+          >
             Confirm
             <el-icon class="el-icon--right"><ArrowRight /></el-icon>
           </el-button>
@@ -101,7 +107,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { ElMessage } from "element-plus";
 import { ArrowRight, ArrowLeft } from "@element-plus/icons-vue";
 import { useRouter } from "vue-router";
@@ -123,14 +129,34 @@ function navigateTo(page) {
 const { zoneName, rootPath } = storeToRefs(zoneStore);
 const { formResponse, formQuestion } = storeToRefs(formStore);
 import { cloneDeep } from "lodash";
-const ruleData = ref(cloneDeep(ruleStore.rule));
+import { invoke } from "@tauri-apps/api/core";
+const { rule } = storeToRefs(ruleStore);
+
+const ruleData = ref({
+  index: {
+    sorting_entropy: 8,
+    naming_complexity: 6,
+    archival_tendency: 10,
+  },
+  spec: {
+    file_types: [],
+    sort_struct: ["學期", "科目", "用途"],
+    folder_depth: 5,
+    capacity: 30,
+    naming_style: ["name", "version"],
+    date_format: "YYYYMMDD",
+    filename_letter_rule: "none",
+  },
+  natural_language_rules: [],
+});
 
 // 全選和部分選邏輯
-const selectedRules = ref([...ruleData.value.natural_language_rules]);
+const selectedRules = ref([]);
 const checkAll = ref(true);
 const isIndeterminate = ref(false);
 const isWarn = ref(false);
 const MIN_REQUIRED = 4;
+const loading = ref(false);
 
 // 全選 / 全不選
 const handleCheckAllChange = (val) => {
@@ -149,47 +175,114 @@ const handleRulesChange = (value) => {
 };
 
 const handleRegenerate = () => {
-  // TODO: call API to regenerate rules
-  // TODO: store new rules to ruleStore
-  // TODO: update ruleData
-  console.log("Regenerate rules");
+  loading.value = true;
+  invoke("ai_create_rule", {
+    zone_name: zoneStore.zoneName,
+    zone_path: zoneStore.rootPath,
+    create_from_structure: false,
+    form_response: formResponse.value,
+  })
+    .then((ruleJson) => {
+      ruleStore.setRule(JSON.parse(ruleJson));
+      console.log("AI 生成的規則：", ruleStore.rule);
+
+      // 顯示成功訊息並跳轉
+      ElMessage.success("AI 生成規則成功！");
+      loading.value = false;
+    })
+    .catch((error) => {
+      ElMessage.error("AI 生成規則失敗！");
+      console.error("AI 生成規則失敗：", error);
+      loading.value = false;
+    });
 };
 
+// 提交邏輯
+const handleSubmit = async () => {
+  if (selectedRules.value.length < MIN_REQUIRED) {
+    ElMessage.error(`至少需要選擇 ${MIN_REQUIRED} 項規則！`);
+    return;
+  }
+  loading.value = true;
+  console.log("Index 部分:", ruleData.value.index);
+  console.log("選擇的規則:", selectedRules.value);
+  ruleData.value.natural_language_rules = selectedRules.value;
+
+  ruleStore.setRule(ruleData.value);
+
+  try {
+    // call API to save and create zone
+    let config = {
+      name: zoneName.value,
+      form_question: formQuestion.value,
+      form_response: formResponse.value,
+      rules: ruleData.value,
+      create_from_structure: false,
+    };
+
+    await invoke("create_zone", {
+      zoneName: zoneName.value,
+      rootPath: rootPath.value,
+      config: JSON.stringify(config),
+      ignore: "",
+      rules: JSON.stringify(ruleData.value),
+    })
+      .then((res) => {
+        console.log("API response:", res);
+        ElMessage.success("Created rules successfully!");
+        navigateTo("zone");
+        loading.value = false;
+      })
+      .catch((error) => {
+        console.error("API error:", error);
+        ElMessage.error("Error when submitting");
+        loading.value = false;
+      });
+  } catch (error) {
+    ElMessage.error("Error when submitting zone rules", error);
+    loading.value = false;
+  }
+};
+
+// 確保 `ruleStore.rule` 載入後更新 `ruleData`
+watch(
+  rule,
+  (newRule) => {
+    if (newRule && Object.keys(newRule).length > 0) {
+      ruleData.value = cloneDeep(newRule);
+      selectedRules.value = [...ruleData.value.natural_language_rules];
+      console.log("Updated ruleData:", ruleData.value);
+    }
+  },
+  { immediate: true },
+);
+
+// `handleReset` 使用正確的 `rule`
 const handleReset = () => {
-  ruleData.value = cloneDeep(ruleStore.rule);
+  ruleData.value = cloneDeep(rule.value);
   selectedRules.value = [...ruleData.value.natural_language_rules];
   checkAll.value = true;
   isIndeterminate.value = false;
   isWarn.value = false;
 };
 
-// 提交邏輯
-const handleSubmit = () => {
-  if (selectedRules.value.length < MIN_REQUIRED) {
-    ElMessage.error(`至少需要選擇 ${MIN_REQUIRED} 項規則！`);
-    return;
+// `onMounted` 初始化
+onMounted(() => {
+  if (!ruleStore.rule) {
+    console.warn("ruleStore.rule is undefined, fallback to default.");
+    ruleStore.resetRule();
   }
-  console.log("Index 部分:", ruleData.value.index);
-  console.log("選擇的規則:", selectedRules.value);
 
-  // 自行處理 ruleJson 的 spec 區塊
-  ruleData.value.spec = {
-    // TODO: 這裡 file_types 格式要改，目前是陣列，應該要是物件
-    file_types: formResponse.value.file_types,
-    sort_struct: formResponse.value.sort_struct,
-    folder_depth: formResponse.value.folder_depth,
-    capacity: formResponse.value.capacity,
-    naming_style: formResponse.value.naming,
-  };
-  ruleStore.setRule(ruleData.value);
+  ruleData.value = cloneDeep(rule.value);
 
-  try {
-    // TODO: call API to save and create zone
-    navigateTo("zone");
-  } catch (error) {
-    ElMessage.error("Error when submitting zone rules", error);
+  if (ruleData.value.natural_language_rules) {
+    selectedRules.value = [...ruleData.value.natural_language_rules];
+  } else {
+    selectedRules.value = []; // 避免 undefined 錯誤
   }
-};
+
+  console.log("Rule Data on mounted:", ruleData.value);
+});
 </script>
 
 <style scoped>

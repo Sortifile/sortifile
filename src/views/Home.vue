@@ -1,6 +1,7 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { ElButton } from "element-plus";
+import { invoke } from "@tauri-apps/api/core";
 import { onMounted } from "vue";
 import { useZoneStore } from "../store/zone";
 import { useRuleStore } from "../store/rule";
@@ -46,8 +47,15 @@ onMounted(() => {
       <el-button class="button" type="primary" @click="navigateTo('settings')">
         Settings
       </el-button>
-      <el-button class="button" type="primary" @click="goToGithub">
+      <!-- <el-button class="button" type="primary" @click="goToGithub">
         Docs
+      </el-button> -->
+      <el-button
+        class="button"
+        type="primary"
+        @click="navigateTo('invoketesting')"
+      >
+        invoke
       </el-button>
     </div>
   </main>

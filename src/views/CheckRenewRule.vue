@@ -52,24 +52,31 @@
     <!-- 自然語言規則 -->
     <h3>自然語言規則</h3>
     <el-form-item>
-      <el-checkbox
-        v-model="checkAll"
-        :indeterminate="isIndeterminate"
-        @change="handleCheckAllChange"
-      >
-        Select All
-      </el-checkbox>
-      <el-checkbox-group v-model="selectedRules" @change="handleRulesChange">
-        <el-checkbox
-          v-for="(rule, idx) in ruleData.natural_language_rules"
-          :key="idx"
-          :label="rule"
-        >
-          {{ rule }}
-        </el-checkbox>
-      </el-checkbox-group>
-      <div v-if="isWarn" class="warning-text">
-        至少需要選擇 {{ MIN_REQUIRED }} 項規則！
+      <div style="display: flex; flex-direction: column; width: 100%">
+        <el-row :gutter="20">
+          <el-col :span="6">
+            <el-checkbox
+              v-model="checkAll"
+              :indeterminate="isIndeterminate"
+              @change="handleCheckAllChange"
+            >
+              Select All
+            </el-checkbox>
+          </el-col>
+          <el-col :span="18">
+            <el-text v-show="isWarn" class="warning-text" type="danger">
+              至少需要選擇 {{ MIN_REQUIRED }} 項規則！
+            </el-text>
+          </el-col>
+        </el-row>
+
+        <el-checkbox-group v-model="selectedRules" @change="handleRulesChange">
+          <el-row v-for="(rule, idx) in ruleData.natural_language_rules">
+            <el-checkbox :key="idx" :value="rule" :label="rule">
+              {{ rule }}
+            </el-checkbox>
+          </el-row>
+        </el-checkbox-group>
       </div>
     </el-form-item>
 
@@ -91,13 +98,13 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { ArrowRight, ArrowLeft } from "@element-plus/icons-vue";
 import { useRouter } from "vue-router";
-import { useZoneStore } from "../../store/zone";
-import { useRuleStore } from "../../store/rule";
-import { useFormStore } from "../../store/form";
+import { useZoneStore } from "../store/zone";
+import { useRuleStore } from "../store/rule";
+import { useFormStore } from "../store/form";
 import { storeToRefs } from "pinia";
 
 const router = useRouter();
@@ -113,10 +120,29 @@ function navigateTo(page) {
 const { zoneName, rootPath } = storeToRefs(zoneStore);
 const { formResponse, formQuestion } = storeToRefs(formStore);
 import { cloneDeep } from "lodash";
-const ruleData = ref(cloneDeep(ruleStore.rule));
+import { invoke } from "@tauri-apps/api/core";
+const { rule } = storeToRefs(ruleStore);
+
+const ruleData = ref({
+  index: {
+    sorting_entropy: 8,
+    naming_complexity: 6,
+    archival_tendency: 10,
+  },
+  spec: {
+    file_types: [],
+    sort_struct: ["學期", "科目", "用途"],
+    folder_depth: 5,
+    capacity: 30,
+    naming_style: ["name", "version"],
+    date_format: "YYYYMMDD",
+    filename_letter_rule: "none",
+  },
+  natural_language_rules: [],
+});
 
 // 全選和部分選邏輯
-const selectedRules = ref([...ruleData.value.natural_language_rules]);
+const selectedRules = ref([]);
 const checkAll = ref(true);
 const isIndeterminate = ref(false);
 const isWarn = ref(false);
@@ -150,22 +176,69 @@ const handleCancel = () => {
 };
 
 const handleReset = () => {
-  ruleData.value = cloneDeep(ruleStore.rule);
+  ruleData.value = cloneDeep(rule.value);
   selectedRules.value = [...ruleData.value.natural_language_rules];
   checkAll.value = true;
   isWarn.value = false;
   isIndeterminate.value = false;
 };
 
+// 確保 `ruleStore.rule` 載入後更新 `ruleData`
+watch(
+  rule,
+  (newRule) => {
+    if (newRule && Object.keys(newRule).length > 0) {
+      ruleData.value = cloneDeep(newRule);
+      selectedRules.value = [...ruleData.value.natural_language_rules];
+      console.log("Updated ruleData:", ruleData.value);
+    }
+  },
+  { immediate: true },
+);
+
+// `onMounted` 初始化
+onMounted(() => {
+  if (!ruleStore.rule) {
+    console.warn("ruleStore.rule is undefined, fallback to default.");
+    ruleStore.resetRule();
+  }
+
+  ruleData.value = cloneDeep(rule.value);
+
+  if (ruleData.value.natural_language_rules) {
+    selectedRules.value = [...ruleData.value.natural_language_rules];
+  } else {
+    selectedRules.value = []; // 避免 undefined 錯誤
+  }
+
+  console.log("Rule Data on mounted:", ruleData.value);
+});
 // 提交邏輯
-const handleSubmit = () => {
+const handleSubmit = async () => {
   if (selectedRules.value.length < MIN_REQUIRED) {
     ElMessage.error(`至少需要選擇 ${MIN_REQUIRED} 項規則！`);
     return;
   }
   console.log("Index 部分:", ruleData.value.index);
   console.log("選擇的規則:", selectedRules.value);
-  navigateTo("zone");
+  ruleData.value.natural_language_rules = selectedRules.value;
+
+  // 1. 存入 Pinia 的 ruleData
+  ruleStore.setRule(ruleData.value);
+
+  // 2. 呼叫 Tauri API 更新 zone 規則
+  invoke("set_zone_rules", {
+    zoneName: zoneName.value,
+    rules: JSON.stringify(ruleData.value),
+  })
+    .then(() => {
+      ElMessage.success("Zone 規則已更新！");
+      navigateTo("zone");
+    })
+    .catch((error) => {
+      console.error("API 調用失敗:", error);
+      ElMessage.error("更新規則時發生錯誤");
+    });
 };
 </script>
 

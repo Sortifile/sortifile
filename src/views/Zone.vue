@@ -16,6 +16,7 @@
           :allow-drop="allowDrop"
           @node-drop="handleDrop"
           @node-click="handleNodeClick"
+          class="sortable-fallback"
         >
           <template #default="{ node, data }">
             <!-- 若 data.ignored 為 true，代表被忽略（無論 explicit or inherited） -->
@@ -42,7 +43,7 @@
         style="max-width: 100%"
       >
         <el-col :span="14" style="display: flex">
-          <el-button type="warning">
+          <el-button type="warning" @click="handleDeleteZone">
             <el-icon><DeleteFilled /></el-icon>
           </el-button>
           <el-button @click="handleShowHistory">Show History</el-button>
@@ -59,7 +60,8 @@
         <el-skeleton v-if="loading" :rows="5" animated />
         <ZoneDisplay v-else-if="selectedPath === ''" />
         <FolderDisplay
-          v-else-if="selectedNode && selectedNode.isDirectory"
+          v-else-if="selectedNode && selectedNode.is_directory"
+          :key="'FolderDisplay-' + selectedPath"
           :name="selectedTitle"
           :path="selectedPath"
           :ignore-switch="ignoreSwitch"
@@ -69,6 +71,7 @@
         />
         <FileDisplay
           v-else
+          :key="'FileDisplay-' + selectedPath"
           :name="selectedTitle"
           :path="selectedPath"
           :ignore-switch="ignoreSwitch"
@@ -92,7 +95,7 @@ import { ref, computed, onMounted } from "vue";
 import { DeleteFilled } from "@element-plus/icons-vue";
 import { ElMessageBox, ElMessage, ElLoading } from "element-plus";
 import { useRouter } from "vue-router";
-// import { invoke } from "@tauri-apps/api"; // 若需呼叫後端 API，可解除註解
+import { invoke } from "@tauri-apps/api/core";
 
 // 右側區塊大元件
 import ZoneDisplay from "../components/zone/ZoneDisplay.vue";
@@ -145,43 +148,55 @@ const mockFileTree = [
   {
     name: "src",
     path: "src",
-    isDirectory: true,
+    is_directory: true,
     children: [
-      { name: "main.js", path: "src/main.js", isDirectory: false },
-      { name: "App.vue", path: "src/App.vue", isDirectory: false },
+      { name: "main.js", path: "src/main.js", is_directory: false },
+      { name: "App.vue", path: "src/App.vue", is_directory: false },
       {
         name: "components",
         path: "src/components",
-        isDirectory: true,
+        is_directory: true,
         children: [
           {
             name: "Header.vue",
             path: "src/components/Header.vue",
-            isDirectory: false,
+            is_directory: false,
           },
           {
             name: "Footer.vue",
             path: "src/components/Footer.vue",
-            isDirectory: false,
+            is_directory: false,
           },
         ],
       },
     ],
   },
-  { name: "package.json", path: "package.json", isDirectory: false },
-  { name: "README.md", path: "README.md", isDirectory: false },
+  { name: "package.json", path: "package.json", is_directory: false },
+  { name: "README.md", path: "README.md", is_directory: false },
 ];
 
 /**
  * 右上方按鈕
  */
+async function handleDeleteZone() {
+  try {
+    await invoke("delete_zone", {
+      zoneName: zoneName.value,
+    });
+    navigateTo("/home");
+  } catch (error) {
+    console.error("API call failed:", error);
+    ElMessage.error("Failed to delete zone");
+  }
+}
+
 const isHistoryDialogVisible = ref(false);
 function handleShowHistory() {
   console.log("Show History");
   isHistoryDialogVisible.value = true;
 }
 
-function handleSummarizeAll() {
+async function handleSummarizeAll() {
   console.log("Summarize All");
 
   ElMessageBox.confirm(
@@ -193,12 +208,29 @@ function handleSummarizeAll() {
       type: "warning",
     },
   )
-    .then(() => {
-      // TODO: call API to resummarize all the files
-      ElMessage({
-        type: "success",
-        message: "summarize completed",
+    .then(async () => {
+      let loadingInstance = ElLoading.service({
+        lock: true,
+        text: "Summerizing files...",
+        background: "rgba(0, 0, 0, 0.7)",
       });
+
+      await invoke("ai_summarize_all_files", {
+        zoneName: zoneName.value,
+        zonePath: rootPath.value,
+      })
+        .then(() => {
+          ElMessage({
+            type: "success",
+            message: "summarize completed",
+          });
+          loadingInstance.close();
+        })
+        .catch((error) => {
+          console.error("API call failed:", error);
+          ElMessage.error("Failed to summarize all files");
+          loadingInstance.close();
+        });
     })
     .catch(() => {
       ElMessage({
@@ -208,8 +240,9 @@ function handleSummarizeAll() {
     });
 }
 
-function handleRenewRules() {
+async function handleRenewRules() {
   console.log("Renew Rules");
+  let loadingInstance;
   ElMessageBox.confirm(
     "All old rules will be replaced. Continue?",
     "Are you sure to renew all rules?",
@@ -219,17 +252,40 @@ function handleRenewRules() {
       type: "warning",
     },
   )
-    .then(() => {
-      // TODO: call API to renew all the rules
-      // TODO: save the new rules to store
-      // 重新導向至規則檢視頁面
-      navigateTo("/checkRenewRule");
+    .then(async () => {
+      // call API to renew all the rules
+      loadingInstance = ElLoading.service({
+        lock: true,
+        text: "Renewing rules...",
+        background: "rgba(0, 0, 0, 0.7)",
+      });
+
+      // TODO: 這裡如果出事我明天再處理
+      await invoke("ai_renew_rules", {
+        zoneName: zoneName.value,
+        zonePath: rootPath.value,
+      })
+        .then((result) => {
+          if (loadingInstance) loadingInstance.close();
+          // save the new rules to store
+          const renewed_rules = JSON.parse(result);
+          ruleStore.setRule(renewed_rules);
+
+          // 重新導向至規則檢視頁面
+          navigateTo("/checkRenewRule");
+        })
+        .catch((error) => {
+          loadingInstance.close();
+          console.error("API call failed:", error);
+          ElMessage.error("Failed to renew rules");
+        });
     })
     .catch(() => {
       ElMessage({
         type: "info",
         message: "renew canceled",
       });
+      if (loadingInstance) loadingInstance.close();
     });
 }
 
@@ -256,39 +312,52 @@ async function handleSortAll() {
       });
 
       // 呼叫 Rust API
-      const result = {
-        file_movements: [
-          {
-            src_path: "報告_改.pdf",
-            new_path: "113-1/國文/報告/聊齋.pdf",
-            moved_by: "system",
-            reason: "blablabla",
-          },
-          {
-            src_path: "ffffff報告_改.pdf",
-            new_path:
-              "113-1/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/aaaaaaa.pdf",
-            moved_by: "system",
-            reason: "blablabla",
-          },
-        ],
-      }; // TODO: await invoke("sort_all");
-
-      if (typeof result === "object" && result !== null) {
+      // TODO: 這裡如果出事我明天再處理
+      let result;
+      try {
+        result = await invoke("ai_sort", {
+          zoneName: zoneName.value,
+          zonePath: rootPath.value,
+          pathToSort: rootPath.value,
+        });
+      } catch (error) {
+        console.error("API call failed:", error);
+        ElMessage({
+          type: "error",
+          message: error?.toString() || "Sorting failed.",
+        });
+        return;
+      }
+      // convert result to object
+      result = JSON.parse(result);
+      if (result !== null) {
         sortResult.value = result; // 確保 Vue 直接接收物件
       } else {
         console.error("Unexpected API response:", result);
         throw new Error("Invalid response format from backend");
       }
+
+      // Normalize paths in the result
+      result["file_movements"].forEach((item) => {
+        item.src_path = item.src_path.replace(/\\/g, "/").replace(/\/\//g, "/");
+        item.src_path = item.src_path.replace(/\\/g, "/").replace(/\/\//g, "/");
+        item.new_path = item.new_path.replace(/\\/g, "/").replace(/\/\//g, "/");
+        item.new_path = item.new_path.replace(/\\/g, "/").replace(/\/\//g, "/");
+      });
+
+      result["file_movements"] = result["file_movements"].filter(
+        (item) => item.src_path !== new_path,
+      );
+
+      if (loadingInstance) loadingInstance.close();
       isSortResultDialogVisible.value = true;
     } catch (error) {
       console.error("API call failed:", error);
+      if (loadingInstance) loadingInstance.close();
       ElMessage({
         type: "error",
         message: error?.toString() || "Sorting failed.",
       });
-    } finally {
-      if (loadingInstance) loadingInstance.close();
     }
   } catch {
     ElMessage({
@@ -319,23 +388,22 @@ async function handleSortFolder(folderPath, folderName) {
       });
 
       // 呼叫 Rust API
-      const result = {
-        file_movements: [
-          {
-            src_path: "報告_改.pdf",
-            new_path: "113-1/國文/報告/聊齋.pdf",
-            moved_by: "system",
-            reason: "blablabla",
-          },
-          {
-            src_path: "ffffff報告_改.pdf",
-            new_path:
-              "113-1/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/aaaaaaa.pdf",
-            moved_by: "system",
-            reason: "blablabla",
-          },
-        ],
-      }; // TODO: await invoke("sort_folder", { folderPath });
+      // TODO: 這裡如果出事我明天再處理
+      let result;
+      try {
+        result = await invoke("ai_sort", {
+          zoneName: zoneName.value,
+          zonePath: rootPath.value,
+          pathToSort: folderPath,
+        });
+      } catch (error) {
+        console.error("API call failed:", error);
+        ElMessage({
+          type: "error",
+          message: error?.toString() || "Sorting failed.",
+        });
+        return;
+      }
 
       if (typeof result === "object" && result !== null) {
         sortResult.value = result; // 確保 Vue 直接接收物件
@@ -361,18 +429,46 @@ async function handleSortFolder(folderPath, folderName) {
   }
 }
 
-const handleConfirmedMoves = (selectedMoves) => {
+const handleConfirmedMoves = async (selectedMoves) => {
+  loading.value = true;
   console.log("Confirmed Moves:", selectedMoves);
-  // TODO: call API to move the files
-  // invoke("move_files", { moves: selectedMoves })
-  //   .then(() => {
-  //     ElMessage.success("Files moved successfully.");
-  //     // TODO: refresh the file tree
-  //   })
-  //   .catch((err) => {
-  //     console.error("move_files failed:", err);
-  //     ElMessage.error("Error occurred while moving files.");
-  //   });
+  for (const move of selectedMoves) {
+    console.log("Move:", move.src_path, "=>", move.new_path);
+    invoke("move_file", {
+      zonePath: rootPath.value,
+      srcPath: move.src_path,
+      newPath: move.new_path,
+      movedBy: move.moved_by,
+      reason: move.reason,
+    })
+      .then(() => {
+        console.log("Move Success");
+        ElMessage({
+          type: "success",
+          message: "Move Success",
+        });
+
+        // 前端即時更新檔案樹
+        invoke("get_file_tree", {
+          zonePath: rootPath.value,
+        })
+          .then((treeData) => {
+            fileTree.value = JSON.parse(treeData);
+          })
+          .catch((error) => {
+            console.error("API call failed:", error);
+            ElMessage.error("Failed to get renewed file tree");
+          });
+      })
+      .catch((error) => {
+        console.error("move_files failed:", error);
+        ElMessage({
+          type: "error",
+          message: error?.toString() || "Move failed.",
+        });
+      });
+  }
+  loading.value = false;
 };
 
 /**
@@ -405,8 +501,8 @@ function removeNodeByPath(treeData, path) {
 
 function sortChildren(array) {
   array.sort((a, b) => {
-    if (a.isDirectory && !b.isDirectory) return -1;
-    if (!a.isDirectory && b.isDirectory) return 1;
+    if (a.is_directory && !b.is_directory) return -1;
+    if (!a.is_directory && b.is_directory) return 1;
     return a.name.localeCompare(b.name);
   });
 }
@@ -464,7 +560,7 @@ const ignoreSwitch = computed({
 });
 
 // 切換某個 path 是否要被「顯式忽略」
-function toggleIgnore(path, shouldIgnore) {
+async function toggleIgnore(path, shouldIgnore) {
   // 暫存舊的 ignoredPaths，用於發生錯誤時回復
   const oldIgnoredPaths = [...ignoredPaths.value];
 
@@ -484,24 +580,27 @@ function toggleIgnore(path, shouldIgnore) {
   // 重新套用 ignore 狀態
   applyIgnoreStatusToTree(fileTree.value);
 
-  // TODO: 呼叫後端 API 更新後端 ignore 狀態
-  /*
-  invoke("update_ignore_list", {
-    zone: zonePath.value,
-    ignoredPaths: ignoredPaths.value,
+  // 呼叫後端 API 更新後端 ignore 狀態
+  const formattedOutput = ignoredPaths.value.join("\n");
+
+  invoke("set_ignore_list", {
+    zonePath: rootPath.value,
+    ignoredList: formattedOutput,
   }).catch((err) => {
     console.error("Ignore 更新失敗", err);
     // 回復舊狀態
     ignoredPaths.value = oldIgnoredPaths;
     applyIgnoreStatusToTree(fileTree.value);
   });
-  */
 }
 
 // 點擊樹狀節點
 function handleNodeClick(node) {
   selectedPath.value = node.path;
   selectedTitle.value = node.name;
+  ElMessage.info(
+    "Selected: " + selectedPath.value + "RRR" + selectedNode.value.is_directory,
+  );
 }
 
 // 拖曳/放下檔案或資料夾
@@ -518,25 +617,22 @@ async function handleDrop(draggingNode, dropNode, dropType, ev) {
 
   // 新路徑
   const newPath =
-    destDirectoryPath === "/"
-      ? `/${fileName}`
+    destDirectoryPath === ""
+      ? `${fileName}`
       : `${destDirectoryPath}/${fileName}`;
 
-  // -------------------------------------------------------------
-  // TODO: 呼叫後端 API 進行檔案移動
-  /*
   try {
-    const result = await invoke("move_file", {
-      zone: zonePath.value,
-      src: srcPath,
-      dest: newPath,
+    await invoke("move_file", {
+      zonePath: rootPath.value,
+      srcPath: srcPath,
+      newPath: newPath,
+      movedBy: "user",
+      reason: "User moved file",
     });
   } catch (error) {
     console.error("move_file failed:", error);
     return;
   }
-  */
-  // -------------------------------------------------------------
 
   console.log("模擬移動檔案成功:", srcPath, "=>", newPath);
 
@@ -567,10 +663,15 @@ function allowDrag(node) {
 }
 
 function allowDrop(draggingNode, dropNode, type) {
+  console.log("RRR", dropNode.data);
   // 只允許拖曳到資料夾或根目錄，並且是放入 (inner)
+  console.log(
+    type === "inner" &&
+      (dropNode.data.is_directory || dropNode.data.path === ""),
+  );
   return (
     type === "inner" &&
-    (dropNode.data.isDirectory || dropNode.data.path === "/")
+    (dropNode.data.is_directory || dropNode.data.path === "")
   );
 }
 
@@ -578,44 +679,78 @@ function allowDrop(draggingNode, dropNode, type) {
  * Lifecycle
  */
 onMounted(async () => {
-  /**
-   * 1. 從 store 取得 zonePath
-   */
-  zoneStore.setZone("Example Zone", "/Users/exampleZone");
-  /**
-   * 2. 呼叫後端 API，根據 zonePath 取得檔案樹資料
-   */
-  // TODO:
-  // const treeData = await invoke("get_file_tree", { zone: zonePath.value });
-  // fileTree.value = treeData;
-  fileTree.value = [
-    {
-      name: zoneName,
-      path: "",
-      isDirectory: true,
-      children: mockFileTree,
-    },
-  ];
+  document.addEventListener("dragover", (event) => {
+    event.preventDefault();
+  });
 
   /**
-   * 3. 呼叫後端 API，取得 rules 和 form data，並存到 store
+   * 呼叫後端 API，根據 zonePath 取得檔案樹資料
    */
-  // TODO:
-  // const rules = await invoke("get_rules", { zone: zonePath.value });
-  // const formData = await invoke("get_form_data", { zone: zonePath.value });
-  // ruleStore.setRules(rules);
-  // formStore.setFormResponse(formData);
+
+  await invoke("get_file_tree", {
+    zonePath: rootPath.value,
+  })
+    .then((treeData) => {
+      fileTree.value = JSON.parse(treeData);
+    })
+    .catch((error) => {
+      console.error("API call failed:", error);
+      ElMessage.error("Failed to get file tree data");
+      fileTree.value = [
+        {
+          name: zoneName,
+          path: "",
+          is_directory: true,
+          children: mockFileTree,
+        },
+      ];
+    });
 
   /**
-   * 4. 呼叫後端 API，取得該 zone 下的 ignore 清單
-   *    （暫時用靜態範例）
+   * 呼叫後端 API，取得 rules 和 form data，並存到 store
    */
-  // TODO:
-  // const ignoreList = await invoke("get_ignore_list", { zone: zonePath.value });
-  // ignoredPaths.value = ignoreList;
-  ignoredPaths.value = ["src/components", "README.md"];
+  await invoke("get_zone_rules", {
+    zoneName: zoneName.value,
+  })
+    .then((rules_str) => {
+      const rules = JSON.parse(rules_str);
+      ruleStore.setRule(rules);
+    })
+    .catch((error) => {
+      console.error("API call failed:", error);
+      ElMessage.error("Failed to get rules or form data");
+    });
 
-  // 5. 將 ignore 狀態套用到檔案樹
+  await invoke("get_project_file", {
+    zonePath: rootPath.value,
+  })
+    .then((project_file_str) => {
+      const project_file_data = JSON.parse(project_file_str);
+      formStore.setFormResponse(project_file_data["form_response"]);
+    })
+    .catch((error) => {
+      console.error("API call failed:", error);
+      ElMessage.error("Failed to get project_file");
+    });
+
+  /**
+   * 呼叫後端 API，取得該 zone 下的 ignore 清單
+   */
+  await invoke("get_ignore_list", {
+    zonePath: rootPath.value,
+  })
+    .then((ignoreListStr) => {
+      const ignoreList = ignoreListStr.split("\n").filter((x) => x);
+      ignoredPaths.value = ignoreList;
+    })
+    .catch((error) => {
+      console.error("API call failed:", error);
+      ElMessage.error("Failed to get ignore list");
+      ignoredPaths.value = ["src/components", "README.md"];
+    });
+
+
+  // 將 ignore 狀態套用到檔案樹
   applyIgnoreStatusToTree(fileTree.value);
 });
 </script>
@@ -672,5 +807,9 @@ pre {
 .right-content {
   margin-top: 20px;
   width: 100%;
+}
+
+.sortable-fallback {
+  touch-action: none;
 }
 </style>

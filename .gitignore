@@ -6,12 +6,10 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-
 node_modules
 dist
 dist-ssr
 *.local
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -22,7 +20,15 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
 .env
 ai/*/respond.json
 src/views/Test.vue
+watcher/*.o
+watcher/*.exe
+watcher/*.db
+watcher/test/*
+*.exe
+src-tauri/resources/1_generate_rules/generate_rules-aarch64-apple-darwin
+src-tauri/resources/2_summarize_files/summarize_files-aarch64-apple-darwin
+src-tauri/resources/3_sort_files/sort_files-aarch64-apple-darwin
+src-tauri/resources/4_renew_rules/renew_rules-aarch64-apple-darwin

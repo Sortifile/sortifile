@@ -25,6 +25,8 @@
 <script setup>
 import { defineProps, defineEmits, ref, onMounted } from "vue";
 import FileMoveItem from "./FileMoveItem.vue";
+import { invoke } from "@tauri-apps/api/core";
+import { ElMessage } from "element-plus";
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -39,22 +41,30 @@ const updateVisible = (value) => {
 };
 
 onMounted(() => {
-  // TODO: fetch history moves from backend
-  // invoke ...
-  historyMoves.value = [
-    {
-      src_path: "報告_改.pdf",
-      new_path: "113-1/國文/報告/",
-      moved_by: "system",
-      reason: "blablabla",
-    },
-    {
-      src_path: "報告_改.pdf",
-      new_path: "113-1/國文/報告/",
-      moved_by: "system",
-      reason: "blablabla",
-    },
-  ];
+  // fetch history moves from backend
+  invoke("get_move_history", { num: 30 })
+    .then((result) => {
+      historyMoves.value = JSON.parse(result);
+      ElMessage.success("History moves fetched successfully");
+    })
+    .catch((error) => {
+      console.error(error);
+      ElMessage.error("Failed to fetch history moves");
+      historyMoves.value = [
+        {
+          src_path: "報告_改.pdf",
+          new_path: "113-1/國文/報告/",
+          moved_by: "system",
+          reason: "blablabla",
+        },
+        {
+          src_path: "報告_改.pdf",
+          new_path: "113-1/國文/報告/",
+          moved_by: "system",
+          reason: "blablabla",
+        },
+      ];
+    });
 });
 </script>
 

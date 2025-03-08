@@ -10,7 +10,6 @@
         v-model="apiKey"
         style="width: 200px"
         placeholder="Enter your API key"
-        show-password
       />
     </div>
 
@@ -23,45 +22,76 @@
         <el-radio label="dark">Dark</el-radio>
       </el-radio-group>
     </div> -->
+
+    <!-- Buttons -->
+    <div class="button-group">
+      <el-button type="primary" @click="saveSettings">Save</el-button>
+      <el-button type="danger" @click="resetSettings">Reset</el-button>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from "vue";
+import { invoke } from "@tauri-apps/api/core";
+import { ElMessage } from "element-plus";
+import { ref, onMounted } from "vue";
 
 const apiKey = ref("");
+// const themeMode = ref("system");
 
-// 預設值 (可從 localStorage 或其它地方載入)
-const themeMode = ref("system"); // system | light | dark
-
-// 在元件載入時，若 themeMode = 'system'，可初始化一次
-onMounted(() => {
-  applyTheme(themeMode.value);
+// 在元件載入時載入設定
+onMounted(async () => {
+  invoke("get_api_key")
+    .then((key) => {
+      apiKey.value = key;
+    })
+    .catch((error) => {
+      console.error(error);
+      ElMessage.error("Failed to get API key");
+    });
+  // themeMode.value = localStorage.getItem("themeMode") || "system";
+  // applyTheme(themeMode.value);
 });
 
-// 監聽 themeMode 變化
-watch(themeMode, (newMode) => {
-  applyTheme(newMode);
-  // 若需要儲存使用者選擇，可用 localStorage.setItem('themeMode', newMode)
-});
-
-// 根據當前選擇套用主題
-function applyTheme(mode) {
-  // 先移除任何可能殘留的 dark class
-  document.documentElement.classList.remove("dark");
-
-  if (mode === "dark") {
-    document.documentElement.classList.add("dark");
-  } else if (mode === "system") {
-    // 自動偵測系統偏好
-    const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)",
-    ).matches;
-    if (prefersDark) {
-      document.documentElement.classList.add("dark");
-    }
-  }
+// 儲存設定
+async function saveSettings() {
+  invoke("set_api_key", { apiKey: apiKey.value })
+    .then(() => {
+      ElMessage.success("API key saved successfully");
+    })
+    .catch((error) => {
+      console.error(error);
+      ElMessage.error("Failed to save API key");
+    });
+  // localStorage.setItem("themeMode", themeMode.value);
+  // applyTheme(themeMode.value);
 }
+
+// 重置設定
+async function resetSettings() {
+  invoke("get_api_key")
+    .then((key) => {
+      apiKey.value = key;
+    })
+    .catch((error) => {
+      console.error(error);
+      ElMessage.error("Failed to get API key");
+    });
+  saveSettings();
+}
+
+// 根據選擇的主題模式應用樣式
+// function applyTheme(mode) {
+//   document.documentElement.classList.remove("dark");
+//   if (mode === "dark") {
+//     document.documentElement.classList.add("dark");
+//   } else if (mode === "system") {
+//     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+//     if (prefersDark) {
+//       document.documentElement.classList.add("dark");
+//     }
+//   }
+// }
 </script>
 
 <style scoped>
@@ -74,5 +104,11 @@ function applyTheme(mode) {
 .setting-item label {
   margin-right: 10px;
   font-weight: bold;
+}
+
+.button-group {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
 }
 </style>
