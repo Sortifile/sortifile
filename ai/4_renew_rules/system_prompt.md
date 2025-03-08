@@ -107,6 +107,7 @@ Use the newly observed file movements—especially those lacking an explicit `re
       - 10: Fully adopt a strict archiving methodology to ensure maximum preservation.
 
    - **Update `spec`**:
+
      - Populate quantifiable or specific details based on form responses, such as supported file types, folder depth, or capacity limits.
 
    - **Revise or Add Natural Language Rules**:

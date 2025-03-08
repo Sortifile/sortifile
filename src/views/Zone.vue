@@ -749,7 +749,6 @@ onMounted(async () => {
       ignoredPaths.value = ["src/components", "README.md"];
     });
 
-
   // 將 ignore 狀態套用到檔案樹
   applyIgnoreStatusToTree(fileTree.value);
 });
