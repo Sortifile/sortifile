@@ -39,7 +39,7 @@ python-dotenv==1.0.1
 python-pptx==1.0.2
 requests==2.32.3
 rsa==4.9
-setuptools==75.8.0
+setuptools==78.1.1
 tqdm==4.67.1
 typing_extensions==4.12.2
 uritemplate==4.1.1
